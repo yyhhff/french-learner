@@ -538,7 +538,7 @@ async function toggleMic(){
     mediaRecorder.onstart = ()=>{
       recording = true;
       btn.classList.add('rec');
-      setMicStatus('🎙 在听，请说法语…说完再点一次麦克风，或等 2 秒自动结束');
+      setMicStatus('🎙 在听，请说法语…说完自动结束，最长 15 秒');
     };
     mediaRecorder.onstop = async ()=>{
       recording = false;
@@ -561,18 +561,42 @@ async function transcribeAudio(blob){
   setMicStatus('正在识别你说的话…');
   const ext = (blob.type.includes('mp4')?'.m4a':blob.type.includes('ogg')?'.ogg':'.webm');
   const available = await checkAsr();
+  let data = null;
   if(available){
     try{
       const fd = new FormData();
       fd.append('file', blob, 'voice'+ext);
       fd.append('language', 'fr');
       const resp = await fetch('/api/asr/transcribe', {method:'POST', body:fd});
-      const data = await resp.json();
+      data = await resp.json();
+    }catch(e){
+      // 真正的网络异常（连接失败 / 响应非 JSON）才落到浏览器兜底
+      data = null;
+    }
+    if(data){
+      // 业务错误：服务端已给出明确 message（如"没听清"），如实展示后直接返回。
+      // 绝不走浏览器兜底，否则会显示"本地语音服务未启动"这类误导文案。
+      if(typeof data.code==='number' && data.code!==0){
+        setMicStatus(data.message || '识别没成功，再试一次或直接打字～');
+        document.getElementById('userInput').focus();
+        return;
+      }
       if(data.code===0 && data.data && data.data.text){
         const text = String(data.data.text).trim();
         const rawText = data.data.raw_text==null ? '' : String(data.data.raw_text).trim();
         const corrected = !!data.data.corrected;
+        // 解析置信度；low_confidence 是权威标志，缺失时以极低 confidence 兜底
+        const confidence = Number(data.data.confidence);
+        const flagMissing = data.data.low_confidence==null;
+        const lowConfidence = !!data.data.low_confidence
+          || (flagMissing && Number.isFinite(confidence) && confidence>0 && confidence<0.5);
         document.getElementById('userInput').value = text;
+        if(lowConfidence){
+          // 低置信：只把识别文本放进输入框，温和提示，聚焦输入框，绝不自动提交
+          setMicStatus('没太听清，改一下或再录一次都行～');
+          document.getElementById('userInput').focus();
+          return;
+        }
         // ASR 明确标记已修正且原声与结果不同：温和小字提示，不打红叉、不弹错误
         if(corrected && rawText && rawText!==text){
           setMicStatus('已按法语发音把识别结果修正为：'+text);
@@ -583,7 +607,7 @@ async function transcribeAudio(blob){
         }
         return;
       }
-    }catch(e){ /* 落到浏览器识别或打字 */ }
+    }
   }
   // 降级：浏览器自带识别（多数国内网络不可用，但保留兜底）
   await browserRecognizeFallback();

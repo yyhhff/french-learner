@@ -331,11 +331,18 @@ async def asr_transcribe(request: Request):
     text = (result.get("text") or "").strip()
     if not text:
         raise ApiError(40001, 400, "没听清，请再说一次或直接打字")
+    # 置信度字段由 ASR 服务提供：默认 0.0 / False，容错外部字段类型
+    try:
+        confidence = float(result.get("confidence", 0.0) or 0.0)
+    except (TypeError, ValueError):
+        confidence = 0.0
     return ok({
         "text": text,
         "language": result.get("language"),
         "raw_text": result.get("raw_text"),
         "corrected": bool(result.get("corrected")),
+        "confidence": confidence,
+        "low_confidence": bool(result.get("low_confidence", False)),
     })
 
 

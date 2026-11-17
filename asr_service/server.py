@@ -250,6 +250,9 @@ async def transcribe(request: Request):
             )
         lang_m = re.search(r'name="language"\r\n\r\n([^\r\n]+)', body.decode("latin-1", "ignore"))
         language = (lang_m.group(1).strip() if lang_m else "fr") or "fr"
+        # 上下文热词（含法语重音，按 UTF-8 解码）：让解码器偏向用户上文出现过的词
+        hints_m = re.search(r'name="hints"\r\n\r\n([^\r\n]*)', body.decode("utf-8", "ignore"))
+        hotwords = (hints_m.group(1).strip()[:1000] if hints_m else "") or None
 
         # faster-whisper 通过 PyAV 解码；写临时文件更稳
         suffix = Path(filename).suffix or ".webm"
@@ -268,6 +271,7 @@ async def transcribe(request: Request):
                 vad_filter=True,         # 过滤静音，减少幻觉
                 condition_on_previous_text=False,
                 initial_prompt=INITIAL_PROMPT or None,  # 法语场景热词偏置
+                hotwords=hotwords,                        # 本次对话上下文词偏置（可覆盖近音误识）
                 temperature=0,                            # 贪心解码，结果确定可复现
                 no_speech_threshold=NO_SPEECH_THRESHOLD,
                 compression_ratio_threshold=COMPRESSION_RATIO_THRESHOLD,

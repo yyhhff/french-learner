@@ -557,6 +557,15 @@ async function toggleMic(){
   }
 }
 
+// 从最近对话与生词卡取法语词作 ASR 热词；只留字母、限量，避免长提示稀释偏置
+function buildAsrHints(){
+  const seen = new Set();
+  const add = s => String(s||'').replace(/['’]/g,' ').split(/[^\p{L}]+/u)
+    .forEach(w=>{ if(w.length>1) seen.add(w.toLowerCase()); });
+  state.chatLog.slice(-6).forEach(m=>add(m.fr));
+  state.cards.slice(0,40).forEach(c=>add(c && c.word));
+  return [...seen].slice(0,40).join(' ');
+}
 async function transcribeAudio(blob){
   setMicStatus('正在识别你说的话…');
   const ext = (blob.type.includes('mp4')?'.m4a':blob.type.includes('ogg')?'.ogg':'.webm');
@@ -567,6 +576,7 @@ async function transcribeAudio(blob){
       const fd = new FormData();
       fd.append('file', blob, 'voice'+ext);
       fd.append('language', 'fr');
+      fd.append('hints', buildAsrHints());
       const resp = await fetch('/api/asr/transcribe', {method:'POST', body:fd});
       data = await resp.json();
     }catch(e){

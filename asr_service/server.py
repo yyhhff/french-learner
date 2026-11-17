@@ -12,6 +12,7 @@
 """
 from __future__ import annotations
 
+import io
 import logging
 import os
 import re
@@ -24,7 +25,7 @@ from pathlib import Path
 import numpy as np
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("yaya.asr")
@@ -165,6 +166,57 @@ async def transcribe(request: Request):
             status_code=500,
             content={"ok": False, "error": f"转写失败：{exc}"},
         )
+
+
+# ---------------------------------------------------------------- 本地 TTS 合成
+# 用 edge-tts（微软神经网络语音）生成高质量法语朗读，避免浏览器 TTS 把
+# le/la/les 等功能词读成单独字母。edge-tts 需联网（连微软），失败时前端回退浏览器 TTS。
+TTS_VOICE = os.environ.get("YAYA_TTS_VOICE", "fr-FR-DeniseNeural")
+_tts_cache: dict[tuple[str, str], bytes] = {}
+
+
+@app.get("/tts")
+async def tts(text: str = ""):
+    """把法语文本合成为 mp3 音频流。相同文本+语音缓存，减少重复在线请求。"""
+    text = (text or "").strip()
+    if not text:
+        return JSONResponse(status_code=400, content={"ok": False, "error": "空文本"})
+    if len(text) > 500:
+        return JSONResponse(status_code=400, content={"ok": False, "error": "文本过长"})
+    key = (text, TTS_VOICE)
+    audio = _tts_cache.get(key)
+    if audio is None:
+        try:
+            import edge_tts
+
+            t0 = time.time()
+            communicate = edge_tts.Communicate(text, TTS_VOICE)
+            buf = io.BytesIO()
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    buf.write(chunk["data"])
+            audio = buf.getvalue()
+            if not audio:
+                raise RuntimeError("edge-tts 返回空音频")
+            _tts_cache[key] = audio
+            logger.info("TTS 完成：%.1fs %d bytes text=%r", time.time() - t0, len(audio), text[:40])
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("TTS 合成失败")
+            return JSONResponse(
+                status_code=500,
+                content={"ok": False, "error": f"TTS 合成失败：{exc}"},
+            )
+    return Response(
+        content=audio,
+        media_type="audio/mpeg",
+        headers={"Cache-Control": "public, max-age=604800"},
+    )
+
+
+@app.get("/tts/status")
+async def tts_status():
+    """探测 TTS 能力（voice + 缓存条目数）。"""
+    return {"ok": True, "voice": TTS_VOICE, "cached": len(_tts_cache)}
 
 
 if __name__ == "__main__":

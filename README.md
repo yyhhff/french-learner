@@ -65,8 +65,9 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000
 | GET | /api/health | 健康检查 |
 | GET | /api/asr/status | 本地语音服务是否可用（前端探测） |
 | POST | /api/asr/transcribe | 上传音频转写法语（转发到本地 Whisper） |
+| GET | /api/tts?text=... | 文本转高质量法语朗读 mp3（转发到 edge-tts，失败前端回退浏览器） |
 
-统一响应包裹 `{code, data, message}`，成功 `code=0`。
+统一响应包裹 `{code, data, message}`，成功 `code=0`。`/api/tts` 例外：直接返回音频流 `audio/mpeg`。
 
 ### 语音交互（本地 Whisper，离线可用）
 
@@ -76,7 +77,7 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000
 ```bash
 cd tools/french-learner
 python -m venv .venv-asr
-.venv-asr/Scripts/python.exe -m pip install faster-whisper fastapi uvicorn -i https://mirrors.aliyun.com/pypi/simple
+.venv-asr/Scripts/python.exe -m pip install faster-whisper fastapi uvicorn edge-tts -i https://mirrors.aliyun.com/pypi/simple
 ```
 > 需系统装有 `ffmpeg`（本机已有）。首次启动会下载 Whisper tiny 模型（约 75MB），之后离线可用。
 > **兼容性说明**：本机 Python 3.13 只能用 PyAV 19，而 faster-whisper 1.2.1 与 PyAV 19 的 `metadata_errors` 参数不兼容。本项目已绕开——`asr_service/server.py` 用 ffmpeg 将音频转 16kHz 单声道 PCM、以 numpy ndarray 传给 Whisper，完全不走 PyAV 解码路径，无需降级任何包。
@@ -94,7 +95,7 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 **三级降级**：① 本地 ASR 服务可用 → 用它；② 未启动且浏览器识别碰巧可用 → 浏览器兜底；③ 都不行 → 清晰提示打字，输入框自动聚焦，对话主流程不受影响。
 
-**发音朗读**：点气泡旁发音按钮，用浏览器 SpeechSynthesis 朗读（`fr-FR`，走系统语音，与识别无关）。
+**发音朗读（本地神经语音，优先）**：点气泡旁发音按钮，走 `GET /api/tts?text=...` → 8010 语音服务用 **edge-tts**（微软神经网络语音 `fr-FR-DeniseNeural`）合成 mp3 播放。相比浏览器自带 TTS，它能把 `le/la/les` 等功能词自然连读（浏览器缺法语 voice 时会用英语引擎把 `le` 读成字母 L/E）。合成结果按「文本+语音」内存缓存，重复点同一句秒回。需联网连微软（国内可访问、免费）；语音服务未启动或合成失败时，自动回退浏览器 SpeechSynthesis 并尽量选法语 voice——离线仍可用。可用 `YAYA_TTS_VOICE` 换音色（如 `fr-FR-HenriNeural` 男声）。
 
 ### AI 重述与降级
 
@@ -115,6 +116,12 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 - 主后端代理链路实测：`POST /api/asr/transcribe` → 200/code=0，经代理转写 0.7s
 - 完整闭环实测：说"Je veux un thé"（错误句）→ 转写 → `POST /api/chat` → `recast_of="Je veux un thé"`、`ai_text="Je voudrais un thé"`，温柔重述触发成功
 - 兼容性：Python 3.13 + PyAV 19 用 ffmpeg→ndarray 方案绕开，无需降包；faster-whisper 1.2.1 实测可用
+
+**发音修复验收（2026-11-17，针对 `le` 读成字母）**：
+- 根因：浏览器 SpeechSynthesis 缺法语 voice 时用英语引擎硬读，`le`→字母 L/E（非法语错误）
+- 方案：新增 `GET /api/tts`（8000 代理）→ `/tts`（8010，edge-tts 神经语音）→ 前端优先播放合成 mp3，失败回退浏览器 TTS
+- 实测：`Très bien ! Vous le voulez chaud ou froid ?` 经主后端合成返回 200/audio-mpeg/23184 bytes（1.5s），缓存命中 0s
+- 发音验证：慢速回听清楚识别 `Vous le voulez`（`le` 读成单词 /lə/ 而非字母）；全速时 tiny 把 `le` 听成 `ne` 属 tiny 连读识别局限，非发音问题
 
 ## 后续规划（路线图）
 

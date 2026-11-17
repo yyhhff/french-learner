@@ -390,13 +390,37 @@ function tryIt(i){
 }
 
 /* ---------- 语音：ASR + TTS ---------- */
+let _ttsAudio = null;
 function speak(btn){
   const text = btn.getAttribute('data-text')||'';
+  if(!text) return;
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  if(_ttsAudio){ try{ _ttsAudio.pause(); }catch(e){} _ttsAudio=null; }
+  // 优先用本地神经语音合成（le/la/les 等功能词连读准确，不会读成字母）
+  fetch('/api/tts?text='+encodeURIComponent(text))
+    .then(r=>{ if(!r.ok) throw new Error('tts '+r.status); return r.blob(); })
+    .then(blob=>{
+      const url = URL.createObjectURL(blob);
+      const a = new Audio(url);
+      _ttsAudio = a;
+      a.onended = ()=>URL.revokeObjectURL(url);
+      a.onerror = ()=>{ URL.revokeObjectURL(url); fallbackSpeak(text); };
+      return a.play();
+    })
+    .catch(()=>fallbackSpeak(text));
+}
+function fallbackSpeak(text){
   if(!('speechSynthesis' in window)){ notify('当前浏览器不支持语音朗读'); return; }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'fr-FR';
   u.rate = 0.95;
+  // 尽量挑一个真正的法语 voice，减少英语引擎硬读法语
+  try{
+    const fr = (window.speechSynthesis.getVoices()||[])
+      .find(v=>/^fr/i.test(v.lang));
+    if(fr) u.voice = fr;
+  }catch(e){}
   window.speechSynthesis.speak(u);
 }
 

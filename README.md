@@ -128,11 +128,15 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 **三级降级**：① 本地 ASR 服务可用 → 用它；② 未启动且浏览器识别碰巧可用 → 浏览器兜底；③ 都不行 → 清晰提示打字，输入框自动聚焦，对话主流程不受影响。
 
+**法语误识别修正**：tiny 模型在法语近音词上偶发听成英文（`chaud`→`Show !`、`un thé`→`Chef Onti`）。现默认 `beam_size=5` + 法语场景 `initial_prompt` 偏置，并加保守白名单纠正（`Show !`→`Chaud !`、`Chef Onti`→`Un thé`，正常法语句子不误伤）。`/transcribe` 同时返回 `raw_text`/`corrected`，前端会显示「🎧 原声识别：… → 已按法语修正」的温和小字。可用 `YAYA_ASR_BEAM_SIZE`、`YAYA_ASR_INITIAL_PROMPT` 调整（置空关闭偏置）。
+
 **发音朗读（本地神经语音，优先）**：点气泡旁发音按钮，走 `GET /api/tts?text=...` → 8010 语音服务用 **edge-tts**（微软神经网络语音 `fr-FR-DeniseNeural`）合成 mp3 播放。相比浏览器自带 TTS，它能把 `le/la/les` 等功能词自然连读（浏览器缺法语 voice 时会用英语引擎把 `le` 读成字母 L/E）。合成结果按「文本+语音」内存缓存，重复点同一句秒回。需联网连微软（国内可访问、免费）；语音服务未启动或合成失败时，自动回退浏览器 SpeechSynthesis 并尽量选法语 voice——离线仍可用。可用 `YAYA_TTS_VOICE` 换音色（如 `fr-FR-HenriNeural` 男声）。
 
 ### AI 重述与降级
 
 环境变量按 `ZHIPU_API_KEY`（最高）→ `GLM_API_KEY` → `LLM_API_KEY` 取 key，端点/模型默认智谱 `https://open.bigmodel.cn/api/paas/v4` + `glm-4-flash`（也可用 `GLM_BASE_URL` / `GLM_MODEL` 覆盖）。未设置 key 或调用失败时，自动降级为本地规则式重述（覆盖 `je veux→Je voudrais`、`je suis aller→Je suis allé`、`le gare→la gare`、`au tête→à la tête`），保证离线也能演示且永不因纠错返回 500。2026-11-17 已用本机 `ZHIPU_API_KEY` 真实调用智谱端点冒烟通过。
+
+**讲解必为中文**：提示词已硬约束 `explanation` 只能是简体中文一句话；万一 GLM 偶发吐法语/英语，入口层会自动翻译或退化为温和中文占位，绝不把用户看不懂的外语展示出来（中文讲解零额外请求）。详见 `docs/QA_FIX_REPORT.md`（24 用例全 PASS）。
 
 ## 验收记录（2026-11-17）
 

@@ -12,6 +12,18 @@ venv/
 *.log
 .DS_Store
 
+# 真实密钥/本地环境配置：绝不入库（.env.example 是空值模板，保留跟踪）
+.env
+.env.*
+!/.env.example
+!/backend/.env.example
+
+# Python 测试/覆盖率产物
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
 # 临时下载的 wheel 与测试音频
 .wheelhouse/
 *.mp3

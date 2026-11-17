@@ -80,6 +80,8 @@
   .row.user .cn{color:#FBE0D3}
   .spk-btn{border:none;background:none;cursor:pointer;font-size:13px;opacity:.55;padding:0 0 0 8px;vertical-align:middle;transition:.15s}
   .spk-btn:hover{opacity:1;transform:scale(1.12)}
+  .spk-btn.speaking{opacity:1;animation:spkPulse .8s ease-in-out infinite}
+  @keyframes spkPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.28)}}
 
   /* recast bubble —— 灵魂：说错不是错，没有红叉、没有扣分 */
   .recast{margin-left:38px;max-width:80%;animation:pop .35s ease both}

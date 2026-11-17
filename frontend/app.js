@@ -391,11 +391,29 @@ function tryIt(i){
 
 /* ---------- 语音：ASR + TTS ---------- */
 let _ttsAudio = null;
+// Chrome 自动播放策略：音频必须由用户手势"解锁"后才允许出声。
+// 首次任意点击时用一段静音 audio 解锁，之后 fetch 回调里的 play() 才不会被拒。
+let _audioUnlocked = false;
+function unlockAudio(){
+  if(_audioUnlocked) return;
+  _audioUnlocked = true;
+  try{
+    const a = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=');
+    const p = a.play();
+    if(p && p.then) p.then(()=>a.pause()).catch(()=>{});
+  }catch(e){}
+}
+document.addEventListener('pointerdown', unlockAudio, {once:false});
+document.addEventListener('keydown', unlockAudio, {once:false});
+
 function speak(btn){
   const text = btn.getAttribute('data-text')||'';
   if(!text) return;
+  unlockAudio();
   if(window.speechSynthesis) window.speechSynthesis.cancel();
   if(_ttsAudio){ try{ _ttsAudio.pause(); }catch(e){} _ttsAudio=null; }
+  btn.classList.add('speaking');
+  const clear = ()=>btn.classList.remove('speaking');
   // 优先用本地神经语音合成（le/la/les 等功能词连读准确，不会读成字母）
   fetch('/api/tts?text='+encodeURIComponent(text))
     .then(r=>{ if(!r.ok) throw new Error('tts '+r.status); return r.blob(); })
@@ -403,11 +421,12 @@ function speak(btn){
       const url = URL.createObjectURL(blob);
       const a = new Audio(url);
       _ttsAudio = a;
-      a.onended = ()=>URL.revokeObjectURL(url);
-      a.onerror = ()=>{ URL.revokeObjectURL(url); fallbackSpeak(text); };
+      a.onended = ()=>{ URL.revokeObjectURL(url); clear(); };
+      a.onerror = ()=>{ URL.revokeObjectURL(url); clear(); fallbackSpeak(text); };
       return a.play();
     })
-    .catch(()=>fallbackSpeak(text));
+    .then(()=>{})
+    .catch(()=>{ clear(); fallbackSpeak(text); });
 }
 function fallbackSpeak(text){
   if(!('speechSynthesis' in window)){ notify('当前浏览器不支持语音朗读'); return; }

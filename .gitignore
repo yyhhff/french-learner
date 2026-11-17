@@ -1,0 +1,12 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 运行时数据库（seed 可在启动时自动重建）
+backend/data/
+
+# 本地环境
+.venv/
+venv/
+*.log
+.DS_Store

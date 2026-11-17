@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <div class="logo">呀</div>
+      <div>
+        <h1>呀呀法语 <span class="brand-en">YaYa French</span></h1>
+        <p>像婴儿一样，自然地学会法语</p>
+      </div>
+      <span id="offlineBadge" class="offline-badge hidden">离线演示模式</span>
+    </div>
+    <div class="top-right">
+      <div class="level-pill">
+        <span>当前 <b id="lvNow">A2</b> → 目标 <b id="lvTarget">B2</b></span>
+        <div class="bar"><i id="lvBar"></i></div>
+        <span class="vocab-count">词汇 <b id="vocabCount">0</b> / 6,500</span>
+      </div>
+      <div class="streak-pill">🔥 连续 <b id="topStreak">0</b> 天</div>
+      <div class="avatar" id="avatar">YU</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- left -->
+    <aside class="card side">
+      <div class="card-h"><h2>今日场景</h2><span id="scnCount">4 个</span></div>
+      <div id="scenarios"></div>
+      <div class="tip">
+        <b>🌱 呀呀小提醒</b>
+        这里没有红叉，也没有扣分。说错了没关系——我会顺着你的话自然接下去，悄悄把对的讲法"重述"给你听。
+      </div>
+    </aside>
+
+    <!-- center -->
+    <main class="card chat-card">
+      <div class="chat-h">
+        <span class="flag" id="scnFlag">☕</span>
+        <div><b id="scnTitle">加载中…</b><p id="scnDesc">—</p></div>
+        <div class="live"><span class="dot"></span>AI 陪练在线</div>
+      </div>
+
+      <div class="chat" id="chat"></div>
+
+      <div class="composer">
+        <div class="try-row" id="tryRow"><small>试试点击：</small></div>
+        <div class="input-line">
+          <button class="mic" id="micBtn" title="点击说话（浏览器语音识别）" onclick="toggleMic()">🎤</button>
+          <input id="userInput" class="fake-input" placeholder="点麦克风说法语，或直接输入后回车…"
+                 onkeydown="if(event.key==='Enter')sendTyped()">
+          <button class="send-btn" onclick="sendTyped()">发送</button>
+        </div>
+        <div id="micStatus">提示：语音识别用浏览器自带能力，需允许麦克风权限；建议用 Chrome / Edge。也可以直接打字。</div>
+      </div>
+    </main>
+
+    <!-- right -->
+    <aside>
+      <div class="card panel">
+        <div class="card-h"><h2 id="vocabTitle">本场景生词</h2><span id="vocabSub">自动收卡</span></div>
+        <div class="body"><div class="vocab" id="vocab"></div></div>
+      </div>
+      <div class="card panel">
+        <div class="card-h"><h2>记忆小账本</h2><span>SM-2 智能调度</span></div>
+        <div class="body">
+          <div class="ring"><div class="num" id="dueNum">0</div><div class="lab">今日待复习卡片</div>
+            <span class="badge" id="streakBadge">连续学习 0 天 🔥</span></div>
+          <div class="stat"><span>本周新词</span><b id="weekNew">+0</b></div>
+          <div class="stat"><span>已掌握</span><b class="up" id="mastered">0</b></div>
+          <div class="stat"><span>今日正确率</span><b id="accuracy">0%</b></div>
+          <button class="review-entry" onclick="openReview()">📝 复习今日卡片</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <div class="foot">
+    呀呀法语 YaYa · 让每一次开口，都变成温柔的进步
+    <button class="reset" onclick="resetChat()">重置对话</button>
+  </div>
+</div>
+
+<!-- 复习浮层 -->
+<div id="reviewOverlay" class="overlay hidden" onclick="if(event.target===this)closeReview()">
+  <div class="review-box">
+    <button class="review-close" onclick="closeReview()" title="关闭">×</button>
+    <div id="reviewContent"></div>
+  </div>
+</div>
+
+<!-- 温和提示条 -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js" defer></script>
+</body>
+</html>

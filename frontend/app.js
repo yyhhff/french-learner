@@ -429,10 +429,23 @@ function toggleMic(){
     }
   };
   recognizer.onerror = (e)=>{
-    let msg = '识别出错：'+e.error;
-    if(e.error==='not-allowed') msg = '麦克风权限被拒绝，请在浏览器地址栏允许麦克风，或直接打字。';
-    else if(e.error==='no-speech') msg = '没听到声音，再试一次，也可以直接打字。';
+    let msg = '';
+    switch(e.error){
+      case 'not-allowed':
+      case 'service-not-allowed':
+        msg = '麦克风权限被拒绝。请点浏览器地址栏左侧的锁图标允许麦克风，或直接在下方打字。'; break;
+      case 'no-speech':
+        msg = '没听到声音，再点一次麦克风试试，也可以直接打字。'; break;
+      case 'network':
+        msg = '语音服务连不上啦：浏览器自带的法语识别依赖境外服务，国内网络通常无法访问。请暂时用打字，输入框已经为你准备好了。'; break;
+      case 'aborted':
+        msg = '识别已取消。'; break;
+      default:
+        msg = '识别出错（'+e.error+'），请直接打字重试。';
+    }
     setMicStatus(msg);
+    const input = document.getElementById('userInput');
+    if(input) input.focus();
   };
   recognizer.onend = ()=>{
     recording = false;

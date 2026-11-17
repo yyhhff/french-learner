@@ -1,9 +1,13 @@
-"""重述引擎：OpenAI 兼容 LLM（可选）+ 本地规则降级，统一入口 recast()。
+"""重述引擎：智谱 GLM 主适配（OpenAI 兼容端点）+ 本地规则降级，统一入口 recast()。
 
-对外仅暴露 recast(scene_id, user_text, history) -> ChatResult。
-- 环境变量：LLM_API_KEY / LLM_BASE_URL(默认 https://api.openai.com/v1) / LLM_MODEL(默认 gpt-3.5-turbo)
-- key 未设置 → 不发网络请求，直接用 LocalRecaster；
-- key 存在但调用失败（网络/超时/额度/格式）→ 记录日志并回退本地规则，绝不向前端抛 500。
+契约 ARCHITECTURE_V2.md §3：
+- 环境变量优先级：GLM_* 为主，LLM_* 为兼容别名；两者 key 都为空 → 零网络请求走本地规则。
+- 网络调用只用标准库 urllib.request / json / re / time / socket，零新依赖。
+- 严格 JSON 模式：content 非合法 JSON 对象或 ai_text 非非空字符串 → 降级。
+- 降级判定表 9 条逐条覆盖；除入参非法外，永不向前端抛 500。
+
+对外仅暴露 recast(scene_id, user_text, history) -> ChatResult，
+签名与 ChatResult.to_dict() 的 4 字段与 v1 完全一致。
 """
 from __future__ import annotations
 
@@ -11,8 +15,11 @@ import json
 import logging
 import os
 import re
+import socket
+import time
+import urllib.error
 import urllib.request
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from typing import Optional
 
 import db
@@ -20,29 +27,80 @@ import seed as seed_data
 
 logger = logging.getLogger("yaya.ai")
 
-LLM_API_KEY = os.environ.get("LLM_API_KEY", "").strip()
-LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-3.5-turbo")
+# ---------------------------------------------------------------- §3.1 环境变量与优先级
+# 每个参数独立按 GLM_* -> LLM_* -> 默认 取第一个非空值（or 的空串语义）。
+
+GLM_API_KEY = (
+    os.environ.get("GLM_API_KEY", "").strip()
+    or os.environ.get("LLM_API_KEY", "").strip()
+)
+GLM_BASE_URL = (
+    os.environ.get("GLM_BASE_URL", "").strip()
+    or os.environ.get("LLM_BASE_URL", "").strip()
+    or "https://open.bigmodel.cn/api/paas/v4"
+).rstrip("/")
+GLM_MODEL = (
+    os.environ.get("GLM_MODEL", "").strip()
+    or os.environ.get("LLM_MODEL", "").strip()
+    or "glm-4-flash"
+)
+
+# §3.6 模块级固定常量（不是环境变量，不写入 .env.example）。
+GLM_TIMEOUT_SECONDS = 8
+MAX_ATTEMPTS = 2
+RETRY_INTERVAL_SECONDS = 0.3
 
 DEFAULT_USER_ID = db.DEFAULT_USER_ID
+
+# ---------------------------------------------------------------- §3.7 SYSTEM_PROMPT（逐字）
+
+SYSTEM_PROMPT = """你是「呀呀（YaYa）」，一位温柔、耐心的法语口语陪练。你的说话对象是一位正在学习法语的中文母语者。
+
+核心任务：
+1. 顺着用户上一句话自然接话，让对话像真人聊天一样继续下去。回应要简短、口语化，可以是一句陈述或一句追问。
+2. 如果用户说的法语有语法、用词或搭配错误，绝对不要说「你错了」，不要打红叉，不要罗列语法规则，不要给出冷冰冰的批改。
+   正确做法是「自然重述（recast）」：先用一句自然的回应接住对方的意思，再把正确的说法自然地嵌进你的法语回应里，让用户在理解上下文时顺便吸收正确形式。
+   例如用户说「Je veux un thé.」，你可以回应「Bien sûr ! Je vous apporte un thé tout de suite. Vous le voulez chaud ?」——在自然服务对话里示范了礼貌表达，而不是纠错。
+3. 法语输出要控制在对方水平可理解的范围内：多用常用词、句子宜短。
+
+输出要求（最重要，必须严格遵守）：
+- 只输出一个 JSON 对象，不要输出任何解释文字，不要使用 markdown 代码围栏。
+- JSON 必须且只能包含以下四个键：
+  {
+    "ai_text": "string，你用法语说的回应；若发生纠错，正确说法要自然嵌在这里",
+    "recast_of": "string 或 null，被纠错的『用户原句』；未纠错时必须为 null",
+    "explanation": "string 或 null，面向中文用户的温和一句讲解；未纠错时必须为 null",
+    "new_words": "array，你在回应中用到的、用户可能不认识的法语词，0~5 个"
+  }
+- new_words 数组每个元素形如：
+  {"word": "法语词或短语", "meaning": "中文释义", "pos": "词性缩写", "cefr_level": "A2"}
+  其中 pos 可用 n.m./n.f./adj./adv./loc./v./cond. 等；cefr_level 取 A1/A2/B1/B2/C1/C2，不确定时为 null。
+- 如果用户的表达没有错误，recast_of 与 explanation 都必须为 null，不要为了纠错而纠错。
+- explanation 要温和、简短（一句话），例如「想礼貌点单，法国人更常说 voudrais，不过你这样说也完全能懂」。
+- 确保输出是合法 JSON：字符串内的引号要正确转义。"""
 
 
 @dataclass
 class ChatResult:
-    """契约 4.4：{ai_text, recast_of, explanation, new_words}。"""
+    """契约 4.4 / v2 §3.8：仅 4 字段进 JSON；llm_new_words 为内部字段。"""
 
     ai_text: str
     recast_of: Optional[str] = None
     explanation: Optional[str] = None
     new_words: list = field(default_factory=list)
+    llm_new_words: list = field(default_factory=list)  # 内部：LLM 建议候选词，不进 to_dict
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        return {
+            "ai_text": self.ai_text,
+            "recast_of": self.recast_of,
+            "explanation": self.explanation,
+            "new_words": self.new_words,
+        }
 
 
-# ---------------------------------------------------------------- 本地规则表（契约 7.1）
+# ---------------------------------------------------------------- 本地规则表（沿用 v1）
 
-# (小写触发片段列表, 修正输出, 中文讲解)；顺序即优先级。
 RULES = [
     (["je veux"], "Je voudrais", "礼貌点单用条件式 voudrais 更自然（你也完全能被懂）。"),
     (
@@ -60,7 +118,6 @@ RULES = [
 
 GENERIC_REPLY = "Ah, je vois ! Raconte-moi encore un peu."
 
-# 场景接话池轮转游标（每个场景独立）
 _reply_cursor: dict[str, int] = {}
 
 
@@ -81,7 +138,6 @@ def recast_local(scene_id: str, user_text: str) -> ChatResult:
     for triggers, fixed, explanation in RULES:
         for trigger in triggers:
             if trigger in lower:
-                # 在原文上做一次大小写不敏感替换，保留句子的其余部分
                 ai_text = re.sub(
                     re.escape(trigger),
                     lambda _m: fixed,
@@ -97,119 +153,244 @@ def recast_local(scene_id: str, user_text: str) -> ChatResult:
     return ChatResult(ai_text=_next_reply(scene_id), recast_of=None, explanation=None)
 
 
-# ---------------------------------------------------------------- LLM 分支
+# ---------------------------------------------------------------- §3.3 LLM 请求体
 
 def _build_llm_messages(scene_id: str, user_text: str, history: list) -> list:
     scene = seed_data.get_scene_seed(scene_id) or {}
+    profile = db.get_profile() or {}
     context = {
         "scene": {
             "id": scene_id,
             "title": scene.get("title"),
             "cefr_level": scene.get("cefr_level"),
         },
-        "recent_history": history[-10:],
+        "learner": {
+            "cefr_level": profile.get("cefr_level"),
+            "target_level": profile.get("target_level"),
+        },
+        "recent_history": [
+            {"role": t.get("role"), "fr": t.get("fr")} for t in history[-10:]
+            if isinstance(t, dict)
+        ],
         "user_text": user_text,
     }
-    system = (
-        "你是温柔的法语陪练「呀呀」。请顺着用户的话自然接话，"
-        "如果用户说法有错，不要打红叉、不要解释语法规则，"
-        "直接把正确说法自然地嵌在一句法语回应里。"
-        "只输出 JSON：{\"ai_text\": 法语回应, \"recast_of\": 被纠正的原句或null, "
-        "\"explanation\": 中文温和讲解或null}。未纠错时 recast_of 与 explanation 均为 null。"
-    )
     return [
-        {"role": "system", "content": system},
+        {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": json.dumps(context, ensure_ascii=False)},
     ]
 
 
+# ---------------------------------------------------------------- §3.4 严格 JSON 解析
+
 def _parse_llm_content(content: str) -> ChatResult:
-    """解析 LLM 文本：优先 JSON；非 JSON 时整段当作 ai_text（视为未纠错）。"""
+    """严格模式：非合法 JSON 对象 / ai_text 非非空字符串 → 抛 ValueError 降级。"""
     text = content.strip()
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text).strip()
     try:
         obj = json.loads(text)
-    except (ValueError, TypeError):
-        obj = None
-    if isinstance(obj, dict):
-        ai_text = obj.get("ai_text")
-        if isinstance(ai_text, str) and ai_text.strip():
-            return ChatResult(
-                ai_text=ai_text.strip(),
-                recast_of=obj.get("recast_of") or None,
-                explanation=obj.get("explanation") or None,
-            )
-    if text:
-        return ChatResult(ai_text=text, recast_of=None, explanation=None)
-    raise ValueError("LLM 返回空内容")
+    except (ValueError, TypeError) as exc:
+        raise ValueError("LLM 返回格式异常") from exc
+    if not isinstance(obj, dict):
+        raise ValueError("LLM 返回格式异常")
 
+    ai_text = obj.get("ai_text")
+    if not (isinstance(ai_text, str) and ai_text.strip()):
+        raise ValueError("LLM 返回格式异常")
+
+    recast_of = obj.get("recast_of")
+    recast_of = (
+        recast_of.strip()
+        if isinstance(recast_of, str) and recast_of.strip()
+        else None
+    )
+    explanation = obj.get("explanation")
+    explanation = (
+        explanation.strip()
+        if isinstance(explanation, str) and explanation.strip()
+        else None
+    )
+
+    # 仅保留含非空字符串 word 的 dict 元素；字段缺失/非 list → []（§3.4 步骤 5）。
+    llm_new_words: list = []
+    raw_words = obj.get("new_words")
+    if isinstance(raw_words, list):
+        for item in raw_words:
+            if (
+                isinstance(item, dict)
+                and isinstance(item.get("word"), str)
+                and item["word"].strip()
+            ):
+                llm_new_words.append(
+                    {
+                        "word": item["word"].strip(),
+                        "meaning": item.get("meaning"),
+                        "pos": item.get("pos"),
+                        "cefr_level": item.get("cefr_level"),
+                    }
+                )
+
+    return ChatResult(
+        ai_text=ai_text.strip(),
+        recast_of=recast_of,
+        explanation=explanation,
+        llm_new_words=llm_new_words,
+    )
+
+
+# ---------------------------------------------------------------- §3.5 / §3.6 LLM 调用 + 重试
 
 def recast_llm(scene_id: str, user_text: str, history: list) -> ChatResult:
-    """调用 OpenAI 兼容 /chat/completions；任何异常由 recast() 统一降级。"""
-    url = f"{LLM_BASE_URL}/chat/completions"
+    """调用智谱 OpenAI 兼容 /chat/completions；可重试异常仅 #2/#3/#4。"""
+    url = GLM_BASE_URL + "/chat/completions"
     payload = {
-        "model": LLM_MODEL,
+        "model": GLM_MODEL,
         "messages": _build_llm_messages(scene_id, user_text, history),
         "temperature": 0.7,
+        "max_tokens": 512,
     }
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {LLM_API_KEY}",
-        },
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        body = json.loads(resp.read().decode("utf-8"))
-    content = body["choices"][0]["message"]["content"]
-    return _parse_llm_content(content)
+    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+    for attempt in range(MAX_ATTEMPTS):
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {GLM_API_KEY}",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=GLM_TIMEOUT_SECONDS) as resp:
+                raw = resp.read().decode("utf-8")
+            body = json.loads(raw)
+            content = body["choices"][0]["message"]["content"]
+            return _parse_llm_content(content)
+        except urllib.error.HTTPError as exc:
+            # #4 429/5xx 可重试；#5 401/403/其他 4xx 立即降级。
+            retryable = exc.code == 429 or 500 <= exc.code < 600
+            if retryable and attempt < MAX_ATTEMPTS - 1:
+                time.sleep(RETRY_INTERVAL_SECONDS)
+                continue
+            raise
+        except (urllib.error.URLError, socket.timeout, TimeoutError) as exc:
+            # #2 DNS/连接/网络不可达、#3 超时 → 可重试 1 次。
+            if attempt < MAX_ATTEMPTS - 1:
+                time.sleep(RETRY_INTERVAL_SECONDS)
+                continue
+            raise
+        # #6/#7 格式异常、#9 其他异常都不在此捕获，交由 recast() 兜底降级。
+
+    raise RuntimeError("LLM 调用失败")  # 逻辑不可达，防御性兜底
 
 
-# ---------------------------------------------------------------- 新词卡抽取
+# ---------------------------------------------------------------- §3.8 收词合并去重
 
-def _extract_new_words(scene_id: str, ai_text: str) -> list:
-    """用场景词表（seed 生词 + 扩展词）匹配 ai_text，命中且未建过则建卡。"""
-    scene = seed_data.get_scene_seed(scene_id)
-    if not scene:
-        return []
-    vocab = list(scene.get("vocab", [])) + list(scene.get("extra_vocab", []))
+def _extract_new_words(
+    scene_id: str, ai_text: str, llm_new_words: list | None
+) -> list:
+    """来源 A（LLM 建议）+ 来源 B（本地场景词表）合并按 word 去重后建卡。"""
     lower = ai_text.lower()
-    created = []
-    for v in vocab:
-        word = v["word"]
-        if word.lower() in lower and not db.card_exists(DEFAULT_USER_ID, word):
-            created.append(
-                db.create_card(
-                    user_id=DEFAULT_USER_ID,
-                    word=word,
-                    meaning=v.get("meaning"),
-                    pos=v.get("pos"),
-                    example=v.get("example"),
-                    pronunciation=v.get("pronunciation"),
-                    cefr_level=v.get("cefr_level"),
-                    source_scene_id=scene_id,
-                )
+    seen: set[str] = set()
+    candidates: list[dict] = []
+
+    def add(word, meaning, pos, example, pronunciation, cefr_level) -> None:
+        if not (isinstance(word, str) and word.strip()):
+            return
+        word = word.strip()
+        key = word.lower()
+        if key in seen:
+            return
+        seen.add(key)
+        candidates.append(
+            {
+                "word": word,
+                "meaning": meaning,
+                "pos": pos,
+                "example": example,
+                "pronunciation": pronunciation,
+                "cefr_level": cefr_level,
+            }
+        )
+
+    # 来源 A：LLM 建议，仅当 word + meaning 齐全且 word 命中 ai_text。
+    for item in llm_new_words or []:
+        if not isinstance(item, dict):
+            continue
+        word = item.get("word")
+        meaning = item.get("meaning")
+        if not (
+            isinstance(word, str)
+            and word.strip()
+            and isinstance(meaning, str)
+            and meaning.strip()
+        ):
+            continue
+        if word.strip().lower() in lower:
+            add(
+                word.strip(),
+                meaning.strip(),
+                item.get("pos"),
+                None,
+                None,
+                item.get("cefr_level"),
             )
+
+    # 来源 B：本地场景词表（v1 逻辑）。
+    scene = seed_data.get_scene_seed(scene_id)
+    if scene:
+        vocab = list(scene.get("vocab", [])) + list(scene.get("extra_vocab", []))
+        for v in vocab:
+            if not isinstance(v, dict):
+                continue
+            word = v.get("word")
+            if isinstance(word, str) and word.strip() and word.strip().lower() in lower:
+                add(
+                    word,
+                    v.get("meaning"),
+                    v.get("pos"),
+                    v.get("example"),
+                    v.get("pronunciation"),
+                    v.get("cefr_level"),
+                )
+
+    created = []
+    for c in candidates:
+        # create_card 内部按 (user_id, word) 查重；重复词/重复调用都天然幂等。
+        created.append(
+            db.create_card(
+                user_id=DEFAULT_USER_ID,
+                word=c["word"],
+                meaning=c["meaning"],
+                pos=c["pos"],
+                example=c["example"],
+                pronunciation=c["pronunciation"],
+                cefr_level=c["cefr_level"],
+                source_scene_id=scene_id,
+            )
+        )
     return created
 
 
 # ---------------------------------------------------------------- 统一入口
 
 def recast(scene_id: str, user_text: str, history: list) -> ChatResult:
-    """契约唯一对外入口。history 内部只取最后 10 轮。"""
+    """契约唯一对外入口。无 key 或任何 LLM 失败都降级本地规则，不抛 500。"""
     history = history[-10:] if isinstance(history, list) else []
 
-    if LLM_API_KEY:
+    llm_new_words: list = []
+    if GLM_API_KEY:
         try:
             result = recast_llm(scene_id, user_text, history)
-        except Exception as exc:  # 网络/超时/额度/格式错一律降级，不抛 500
+            llm_new_words = result.llm_new_words
+        except Exception as exc:  # 网络/超时/额度/格式/其他任意异常 → 降级（#1~#9）
             logger.warning("LLM 重述失败，回退本地规则：%s", exc)
             result = recast_local(scene_id, user_text)
     else:
+        # #1 无 key：零网络请求，直接本地规则。
         result = recast_local(scene_id, user_text)
 
-    result.new_words = _extract_new_words(scene_id, result.ai_text)
+    result.llm_new_words = llm_new_words
+    result.new_words = _extract_new_words(scene_id, result.ai_text, llm_new_words)
     return result

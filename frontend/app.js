@@ -16,7 +16,7 @@ const FALLBACK_SCENES = [
   { id:'doctor', title:'看医生',       description:'生活办事 · B1 难度', emoji:'🩺', color:'#FBF1DC', cefr_level:'B1', sort_order:4 }
 ];
 
-// 起始对话：demo 的 me→user、bot→assistant；其余字段按契约补 null/false
+// 起始对话：字段按契约补 null/false，role 严格用 user / assistant
 const FALLBACK_DETAILS = {
   cafe: [
     { role:'assistant', fr:"Bonjour ! Qu'est-ce que vous voulez ?", cn:'你好！您想要点什么？' },
@@ -109,7 +109,18 @@ const state = {
   cards:[],
   profile:null,
   currentSceneId:null,
-  chatLog:[]
+  chatLog:[],
+  // 输入流（分级阅读）独立状态：端点失败只降级阅读区，不动 state.online，不拖垮对话
+  read:{
+    levels:[],          // LevelInfo[]
+    level:null,         // 当前筛选等级
+    texts:[],           // InputTextSummary[]
+    current:null,       // 当前 InputTextDetail
+    currentId:null,
+    readIds:[],         // 已读 id 集合，供 recommend exclude_ids
+    available:true,
+    loaded:false
+  }
 };
 let toastTimer = null;
 
@@ -617,6 +628,290 @@ async function doReview(rating){
   renderReviewCard();
 }
 
+/* ============================================================
+   输入流：分级阅读（i+1）—— 5 个 /api/input/* 端点
+   原则：端点失败只给阅读区低调提示，不进入全局离线态、不弹红叉、不影响对话主流程
+   ============================================================ */
+function readOfflineNote(msg){
+  state.read.available = false;
+  const body = document.getElementById('readBody');
+  const note = document.getElementById('readNote');
+  if(note) note.innerHTML = '';
+  if(body) body.innerHTML = `<div class="read-offline-note">📖 ${esc(msg||'阅读功能需要后端服务，稍后再来看看吧～')}<br>对话陪练不受影响，可以继续聊天 🌱</div>`;
+  const lv = document.getElementById('levelRow');
+  const tl = document.getElementById('textList');
+  if(lv) lv.innerHTML = '';
+  if(tl) tl.innerHTML = '';
+}
+
+function updateReadVocabBadge(){
+  const b = document.getElementById('readVocabBadge');
+  if(b) b.textContent = '词库 '+state.cards.length+' 词';
+}
+
+function switchView(name){
+  const isRead = name==='read';
+  document.getElementById('viewChat').classList.toggle('hidden', isRead);
+  document.getElementById('viewRead').classList.toggle('hidden', !isRead);
+  document.getElementById('tabChat').classList.toggle('on', !isRead);
+  document.getElementById('tabRead').classList.toggle('on', isRead);
+  // 首次进入阅读视图才拉端点，避免启动多打请求；失败也只是这里降级
+  if(isRead && !state.read.loaded){
+    state.read.loaded = true;
+    loadReadLevels();
+  }
+}
+
+// 11) GET /api/input/levels
+async function loadReadLevels(){
+  try{
+    const levels = await apiRequest('/api/input/levels');
+    if(levels==null) return;
+    state.read.available = true;
+    state.read.levels = Array.isArray(levels) ? levels : [];
+    renderReadLevels();
+    if(state.read.levels.length){
+      selectReadLevel(state.read.levels[0].level);
+    }else{
+      const tl = document.getElementById('textList');
+      if(tl) tl.innerHTML = '<div class="read-empty">还没有语料，先去对话里练练吧 🌱</div>';
+    }
+  }catch(e){
+    readOfflineNote();
+  }
+}
+
+function renderReadLevels(){
+  const row = document.getElementById('levelRow');
+  if(!row) return;
+  const sub = document.getElementById('readLevelSub');
+  if(sub) sub.textContent = state.read.levels.length+' 个等级';
+  row.innerHTML = state.read.levels.map(l=>
+    `<button class="lv-chip ${l.level===state.read.level?'on':''}" onclick="selectReadLevel('${esc(l.level)}')">${esc(l.level)}<small>${Number(l.count||0)}篇</small></button>`
+  ).join('');
+}
+
+// 12) GET /api/input/texts?level=&limit=&offset=
+async function selectReadLevel(level){
+  state.read.level = level;
+  renderReadLevels();
+  const tl = document.getElementById('textList');
+  if(tl) tl.innerHTML = '<div class="read-empty">正在整理短文…</div>';
+  try{
+    const res = await apiRequest('/api/input/texts?level='+encodeURIComponent(level)+'&limit=50&offset=0');
+    if(res==null) return;
+    state.read.texts = (res && Array.isArray(res.items)) ? res.items : [];
+    renderReadTexts();
+  }catch(e){
+    readOfflineNote();
+  }
+}
+
+function renderReadTexts(){
+  const tl = document.getElementById('textList');
+  if(!tl) return;
+  if(!state.read.texts.length){
+    tl.innerHTML = '<div class="read-empty">这一级还没有短文，换个等级看看～</div>';
+    return;
+  }
+  tl.innerHTML = state.read.texts.map(t=>`
+    <div class="txt-item ${t.id===state.read.currentId?'on':''}" onclick="openReadText('${esc(t.id)}')">
+      <div class="tflag">${t.format==='dialogue'?'💬':'📄'}</div>
+      <div class="tmeta"><b>${esc(t.title)}</b><small>${esc(t.topic||'')} · ${esc(t.cefr_level||'')} · ${Number(t.word_count||0)} 词</small></div>
+    </div>`).join('');
+}
+
+// 13) GET /api/input/texts/{id}
+async function openReadText(id){
+  try{
+    const detail = await apiRequest('/api/input/texts/'+encodeURIComponent(id));
+    if(detail==null) return;
+    showReadDetail(detail);
+  }catch(e){
+    readOfflineNote();
+  }
+}
+
+function showReadDetail(detail){
+  if(!detail) return;
+  state.read.current = detail;
+  state.read.currentId = detail.id;
+  if(detail.id && state.read.readIds.indexOf(detail.id)<0) state.read.readIds.push(detail.id);
+  document.getElementById('readFlag').textContent = detail.format==='dialogue'?'💬':'📄';
+  document.getElementById('readTitle').textContent = detail.title||'短文';
+  document.getElementById('readMeta').textContent =
+    [detail.cefr_level, detail.topic, (Number(detail.word_count||0)+' 词')].filter(Boolean).join(' · ');
+  const ab = document.getElementById('readAudioBtn');
+  if(ab){
+    ab.setAttribute('data-text', detail.audio_text || detail.body_fr || '');
+    ab.classList.remove('speaking');
+  }
+  const note = document.getElementById('readNote');
+  if(note) note.innerHTML = '';
+  renderReadLines(detail);
+  renderReadWords(detail);
+  renderReadTexts();
+}
+
+function renderReadLines(detail){
+  const body = document.getElementById('readBody');
+  if(!body) return;
+  const lines = Array.isArray(detail.lines) ? detail.lines : [];
+  const isDia = detail.format==='dialogue';
+  let html = `<div class="read-section-title">${isDia?'逐句对话':'逐段阅读'}</div>`;
+  lines.forEach(l=>{
+    const speaker = isDia ? (l.speaker==='B'?'B':'A') : null;
+    const cls = isDia ? (speaker==='B'?'dialogue b':'dialogue a') : 'mono';
+    const who = isDia ? (speaker==='B'?'呀':'我') : '📄';
+    html += `<div class="rline ${cls}">
+      <div class="rspk">${who}</div>
+      <div class="rbubble">
+        <span class="fr">${esc(l.fr)}<button class="rplay" onclick="speak(this)" data-text="${esc(l.fr)}" title="听这句">🔊</button></span>
+        ${l.cn?`<span class="cn">${esc(l.cn)}</span>`:''}
+      </div>
+    </div>`;
+  });
+  html += `<div class="whole-fr"><h4>整篇法语原文</h4><p>${esc(detail.body_fr||'')}</p></div>`;
+  html += `<div class="whole-fr"><h4>整篇中文译文</h4><p class="cn">${esc(detail.body_cn||'')}</p></div>`;
+  body.innerHTML = html;
+  body.scrollTop = 0;
+}
+
+function renderReadWords(detail){
+  const box = document.getElementById('readWords');
+  if(!box) return;
+  const words = Array.isArray(detail.words) ? detail.words : [];
+  const sub = document.getElementById('readWordSub');
+  if(sub) sub.textContent = words.length ? ('共 '+words.length+' 个') : '本篇无生词';
+  const btn = document.getElementById('collectAllBtn');
+  if(btn) btn.style.display = words.length ? '' : 'none';
+  if(!words.length){
+    box.innerHTML = '<div class="vocab-empty">这篇没有生词标注，专心读故事吧～</div>';
+    return;
+  }
+  box.innerHTML = words.map((w,i)=>{
+    const done = w.word_card_id!=null;
+    return `<div class="rw">
+      <div class="rw-top">
+        <span class="rw-word">${esc(w.word)}</span>
+        ${w.pos?`<span class="rw-pos">${esc(w.pos)}</span>`:''}
+        ${w.cefr_level?`<span class="rw-lv">${esc(w.cefr_level)}</span>`:''}
+      </div>
+      <div class="rw-mean">${esc(w.meaning)}</div>
+      ${w.example?`<div class="rw-ex">例：${esc(w.example)}</div>`:''}
+      <div class="rw-actions">
+        <button class="rw-say" onclick="speak(this)" data-text="${esc(w.word)}" title="听发音">🔊 听</button>
+        ${done
+          ? '<span class="rw-done">✓ 已在词库</span>'
+          : `<button class="rw-collect" onclick="collectReadWord(${i})">+ 收入词库</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 音频：audio_url 非空走 <audio>（复用 unlockAudio），否则 speak()/fallbackSpeak() 读 audio_text||body_fr
+function playCurrentAudio(){
+  const t = state.read.current;
+  if(!t) return;
+  unlockAudio();
+  const btn = document.getElementById('readAudioBtn');
+  if(!btn) return;
+  if(_ttsAudio){ try{ _ttsAudio.pause(); }catch(e){} _ttsAudio=null; }
+  if(t.audio_url){
+    btn.classList.add('speaking');
+    try{
+      const a = new Audio(t.audio_url);
+      _ttsAudio = a;
+      a.onended = ()=>btn.classList.remove('speaking');
+      const fb = ()=>{ btn.classList.remove('speaking'); fallbackSpeak(t.audio_text || t.body_fr || ''); };
+      a.onerror = fb;
+      a.play().catch(fb);
+      return;
+    }catch(e){ /* 落到 TTS 兜底 */ }
+  }
+  speak(btn); // data-text 已在 showReadDetail 设为 audio_text || body_fr
+}
+
+// 14) POST /api/input/texts/{id}/collect —— 单收传 words，收全部省略 words
+async function collectReadWord(index){
+  const detail = state.read.current;
+  if(!detail) return;
+  const w = (detail.words||[])[index];
+  if(!w || w.word_card_id!=null) return;
+  await postCollect(detail.id, [w.word]);
+}
+
+async function collectAllWords(){
+  const detail = state.read.current;
+  if(!detail) return;
+  await postCollect(detail.id, null);
+}
+
+async function postCollect(textId, words){
+  try{
+    const res = await apiRequest('/api/input/texts/'+encodeURIComponent(textId)+'/collect', {
+      method:'POST', body: words ? { words:words } : undefined
+    });
+    if(res==null) return;
+    applyCollectResult(res);
+  }catch(e){
+    notify('收词暂时没成功，稍后再试一下～');
+  }
+}
+
+function applyCollectResult(res){
+  const collected = Array.isArray(res.collected) ? res.collected : [];
+  const existed = Array.isArray(res.already_existed) ? res.already_existed : [];
+  const skipped = Array.isArray(res.skipped) ? res.skipped : [];
+  // 新卡并入全局词库（按 word 去重），复习浮层与词库徽标同步受益
+  collected.forEach(c=>{
+    if(c && c.word && !state.cards.some(x=>x.word===c.word)) state.cards.unshift(c);
+  });
+  const detail = state.read.current;
+  if(detail && Array.isArray(detail.words)){
+    detail.words.forEach(w=>{
+      const c = collected.find(x=>x && x.word===w.word);
+      if(c && w.word_card_id==null) w.word_card_id = c.id;
+    });
+  }
+  const parts = [];
+  if(collected.length) parts.push('已收入 '+collected.length+' 个生词');
+  if(existed.length) parts.push(existed.length+' 个本来就在词库');
+  if(skipped.length) parts.push(skipped.length+' 个暂时跳过');
+  notify(parts.length ? (parts.join('，')+' 🌱') : '这些词都已经收好啦 🌱');
+  if(detail) renderReadWords(detail);
+  updateReadVocabBadge();
+}
+
+function gentleReadNote(msg){
+  const note = document.getElementById('readNote');
+  if(note) note.innerHTML = '<span class="gentle">'+esc(msg)+'</span>';
+}
+
+// 15) GET /api/input/recommend?exclude_ids=&limit=1
+async function recommendNext(){
+  const note = document.getElementById('readNote');
+  if(note) note.innerHTML = '';
+  let url = '/api/input/recommend?limit=1';
+  if(state.read.readIds.length) url += '&exclude_ids='+encodeURIComponent(state.read.readIds.join(','));
+  try{
+    const res = await apiRequest(url);
+    if(res==null) return;
+    if(res.reason==='no_candidate' || !res.text){
+      gentleReadNote('这一级都读完啦，去对话里练练吧 🌱');
+      return;
+    }
+    showReadDetail(res.text); // text 即完整 InputTextDetail，直接渲染
+    if(res.reason==='level_only_fallback'){
+      gentleReadNote('先读这篇熟悉一下主题，慢慢来～');
+    }else{
+      gentleReadNote('为你挑了一篇难度刚刚好的短文，目标 '+(res.target_level||'下一级')+' ✨');
+    }
+  }catch(e){
+    readOfflineNote();
+  }
+}
+
 /* ---------- 降级切换 ---------- */
 function setOffline(){
   if(!state.online) return;
@@ -666,6 +961,7 @@ async function init(){
   renderScenes();
   renderVocab();
   renderLedger();
+  updateReadVocabBadge();
   const firstId = state.scenes[0].id;
   await selectScene(firstId);
 }

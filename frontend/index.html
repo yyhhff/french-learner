@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 <div class="wrap">
@@ -29,6 +29,14 @@
     </div>
   </div>
 
+  <!-- 视图切换：对话 / 阅读 -->
+  <div class="view-tabs" role="tablist">
+    <button class="view-tab on" id="tabChat" onclick="switchView('chat')">💬 对话陪练</button>
+    <button class="view-tab" id="tabRead" onclick="switchView('read')">📖 分级阅读</button>
+    <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
+  </div>
+
+  <div id="viewChat" class="view">
   <div class="grid">
 
     <!-- left -->
@@ -83,6 +91,47 @@
     </aside>
 
   </div>
+  </div><!-- /#viewChat -->
+
+  <!-- 输入流：分级阅读 -->
+  <div id="viewRead" class="view hidden">
+    <div class="read-grid">
+      <aside class="card side read-side">
+        <div class="card-h"><h2>分级浏览</h2><span id="readLevelSub">—</span></div>
+        <div class="level-row" id="levelRow"></div>
+        <div class="text-list" id="textList"><div class="read-empty">点上方等级，看看有哪些短文～</div></div>
+      </aside>
+
+      <main class="card read-card">
+        <div class="read-h">
+          <div class="read-h-title"><span class="read-h-emoji" id="readFlag">📖</span>
+            <div><b id="readTitle">选一篇，开始慢慢读</b><p id="readMeta">—</p></div></div>
+          <div class="read-actions">
+            <button class="read-audio-btn" id="readAudioBtn" onclick="playCurrentAudio()" title="听整篇">🔊 听整篇</button>
+            <button class="rec-btn" onclick="recommendNext()">✨ 推荐下一篇</button>
+          </div>
+        </div>
+        <div class="read-body" id="readBody">
+          <div class="read-placeholder">从左侧选一篇。读不懂的地方，有中文小字陪着你 🌱</div>
+        </div>
+        <div class="read-note" id="readNote"></div>
+      </main>
+
+      <aside>
+        <div class="card panel">
+          <div class="card-h"><h2>本篇生词</h2><span id="readWordSub">读后自动标注</span></div>
+          <div class="body">
+            <div class="read-words" id="readWords"><div class="vocab-empty">选中文章后，这里会列出生词～</div></div>
+            <button class="collect-all" id="collectAllBtn" onclick="collectAllWords()">📥 收藏全部生词</button>
+          </div>
+        </div>
+        <div class="card panel">
+          <div class="card-h"><h2>呀呀小提醒</h2><span>🌱</span></div>
+          <div class="body"><div class="tip" style="margin:0">这里没有红叉，也没有扣分。读不懂很正常，点小喇叭听一听，慢慢来～</div></div>
+        </div>
+      </aside>
+    </div>
+  </div>
 
   <div class="foot">
     呀呀法语 YaYa · 让每一次开口，都变成温柔的进步
@@ -101,6 +150,6 @@
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=3" defer></script>
+<script src="app.js?v=4" defer></script>
 </body>
 </html>

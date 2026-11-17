@@ -113,6 +113,52 @@ CREATE TABLE IF NOT EXISTS review_logs (
 CREATE INDEX IF NOT EXISTS idx_dialogue_scene ON dialogue_turns (scene_id, id);
 CREATE INDEX IF NOT EXISTS idx_cards_user ON word_cards (user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_review_card ON review_logs (card_id);
+
+-- ===== v2 增量：输入流三表（旧 5 表结构一字不改）=====
+CREATE TABLE IF NOT EXISTS input_texts (
+    id          TEXT PRIMARY KEY,
+    title       TEXT NOT NULL,
+    format      TEXT NOT NULL,
+    cefr_level  TEXT NOT NULL,
+    topic       TEXT NOT NULL,
+    body_fr     TEXT NOT NULL,
+    body_cn     TEXT NOT NULL,
+    audio_url   TEXT,
+    audio_text  TEXT,
+    word_count  INTEGER NOT NULL,
+    sort_order  INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS input_lines (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    text_id    TEXT NOT NULL,
+    seq        INTEGER NOT NULL,
+    speaker    TEXT,
+    fr         TEXT NOT NULL,
+    cn         TEXT NOT NULL,
+    audio_url  TEXT,
+    UNIQUE (text_id, seq)
+);
+
+CREATE TABLE IF NOT EXISTS input_words (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    text_id        TEXT NOT NULL,
+    line_seq       INTEGER,
+    word           TEXT NOT NULL,
+    meaning        TEXT NOT NULL,
+    pos            TEXT,
+    cefr_level     TEXT,
+    example        TEXT,
+    pronunciation  TEXT,
+    word_card_id   INTEGER,
+    UNIQUE (text_id, word)
+);
+
+CREATE INDEX IF NOT EXISTS idx_input_texts_level ON input_texts (cefr_level, sort_order);
+CREATE INDEX IF NOT EXISTS idx_input_lines_text ON input_lines (text_id, seq);
+CREATE INDEX IF NOT EXISTS idx_input_words_text ON input_words (text_id);
 """
 
 
@@ -493,3 +539,273 @@ def update_review(
         conn.commit()
     finally:
         conn.close()
+
+
+# ================================================================ v2 输入流数据访问
+# 三张新表 + 复用 word_cards / create_card；所有出参严格对齐 §5.2 Schema。
+
+CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
+INPUT_LEVELS = ("A2", "B1", "B2")
+
+
+def _cefr_index(level) -> int:
+    return CEFR_ORDER.index(level) if level in CEFR_ORDER else 0
+
+
+def _row_to_input_text_summary(row: sqlite3.Row) -> dict:
+    return {
+        "id": row["id"],
+        "title": row["title"],
+        "format": row["format"],
+        "cefr_level": row["cefr_level"],
+        "topic": row["topic"],
+        "word_count": row["word_count"],
+        "audio_url": row["audio_url"],
+        "sort_order": row["sort_order"],
+    }
+
+
+def _row_to_input_text(row: sqlite3.Row) -> dict:
+    """input_texts 全部 13 字段。"""
+    return {
+        "id": row["id"],
+        "title": row["title"],
+        "format": row["format"],
+        "cefr_level": row["cefr_level"],
+        "topic": row["topic"],
+        "body_fr": row["body_fr"],
+        "body_cn": row["body_cn"],
+        "audio_url": row["audio_url"],
+        "audio_text": row["audio_text"],
+        "word_count": row["word_count"],
+        "sort_order": row["sort_order"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def _row_to_input_line(row: sqlite3.Row) -> dict:
+    return {
+        "seq": row["seq"],
+        "speaker": row["speaker"],
+        "fr": row["fr"],
+        "cn": row["cn"],
+        "audio_url": row["audio_url"],
+    }
+
+
+def _row_to_input_word(row: sqlite3.Row) -> dict:
+    return {
+        "word": row["word"],
+        "meaning": row["meaning"],
+        "pos": row["pos"],
+        "cefr_level": row["cefr_level"],
+        "example": row["example"],
+        "pronunciation": row["pronunciation"],
+        "line_seq": row["line_seq"],
+        "word_card_id": row["word_card_id"],
+    }
+
+
+_WORD_ORDER_SQL = "ORDER BY (line_seq IS NULL) ASC, line_seq ASC, word ASC"
+
+
+def list_input_levels() -> list:
+    """LevelInfo[]，只返回有语料的 A2/B1/B2，按 CEFR 顺序。"""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT cefr_level, COUNT(*) AS n FROM input_texts GROUP BY cefr_level"
+        ).fetchall()
+        counts = {r["cefr_level"]: r["n"] for r in rows}
+        return [
+            {"level": level, "count": counts[level]}
+            for level in CEFR_ORDER
+            if level in INPUT_LEVELS and counts.get(level, 0) > 0
+        ]
+    finally:
+        conn.close()
+
+
+def list_input_texts(level: str | None = None, limit: int = 20, offset: int = 0) -> dict:
+    """TextListResult：CEFR 顺序 + sort_order 升序，再分页。"""
+    conn = get_conn()
+    try:
+        if level:
+            rows = conn.execute(
+                "SELECT * FROM input_texts WHERE cefr_level = ?", (level,)
+            ).fetchall()
+        else:
+            rows = conn.execute("SELECT * FROM input_texts").fetchall()
+        rows = sorted(
+            rows,
+            key=lambda r: (_cefr_index(r["cefr_level"]), r["sort_order"], r["id"]),
+        )
+        return {
+            "items": [
+                _row_to_input_text_summary(r) for r in rows[offset : offset + limit]
+            ],
+            "total": len(rows),
+            "level": level,
+        }
+    finally:
+        conn.close()
+
+
+def get_input_text_detail(text_id: str) -> dict | None:
+    """InputTextDetail（含 lines / words）；不存在返回 None。"""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT * FROM input_texts WHERE id = ?", (text_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        detail = _row_to_input_text(row)
+        detail["lines"] = [
+            _row_to_input_line(r)
+            for r in conn.execute(
+                "SELECT * FROM input_lines WHERE text_id = ? ORDER BY seq ASC",
+                (text_id,),
+            ).fetchall()
+        ]
+        detail["words"] = [
+            _row_to_input_word(r)
+            for r in conn.execute(
+                f"SELECT * FROM input_words WHERE text_id = ? {_WORD_ORDER_SQL}",
+                (text_id,),
+            ).fetchall()
+        ]
+        return detail
+    finally:
+        conn.close()
+
+
+def get_input_text_row(text_id: str) -> dict | None:
+    """轻量取 input_texts 单行的全部字段，不存在返回 None（供推荐打分用）。"""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT * FROM input_texts WHERE id = ?", (text_id,)
+        ).fetchone()
+        return _row_to_input_text(row) if row else None
+    finally:
+        conn.close()
+
+
+def get_all_input_texts() -> list:
+    conn = get_conn()
+    try:
+        rows = conn.execute("SELECT * FROM input_texts").fetchall()
+        return [_row_to_input_text(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_input_words(text_id: str) -> list:
+    conn = get_conn()
+    try:
+        return [
+            _row_to_input_word(r)
+            for r in conn.execute(
+                f"SELECT * FROM input_words WHERE text_id = ? {_WORD_ORDER_SQL}",
+                (text_id,),
+            ).fetchall()
+        ]
+    finally:
+        conn.close()
+
+
+def get_mastered_words(user_id: int = DEFAULT_USER_ID) -> set:
+    """掌握度口径：review_logs.repetitions >= 5 的 word 集合（§4.3 / §6）。"""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT c.word FROM word_cards c "
+            "JOIN review_logs r ON r.card_id = c.id "
+            "WHERE c.user_id = ? AND r.repetitions >= 5",
+            (user_id,),
+        ).fetchall()
+        return {r["word"] for r in rows}
+    finally:
+        conn.close()
+
+
+def collect_input_words(
+    text_id: str, words: list | None = None, user_id: int = DEFAULT_USER_ID
+) -> dict | None:
+    """收词入库：复用 create_card（含查重 + 初始 review_logs），回填 word_card_id。
+
+    words 为 None / 空列表 → 收该文本全部生词；否则只收存在于 input_words 的词。
+    文本不存在返回 None（由 API 层转 404）。幂等：重复调用不重复建卡。
+    """
+    # 第一段：单连接读取目标生词，随即关闭，避免与 create_card 的独立连接争抢写锁。
+    conn = get_conn()
+    try:
+        if (
+            conn.execute(
+                "SELECT 1 FROM input_texts WHERE id = ?", (text_id,)
+            ).fetchone()
+            is None
+        ):
+            return None
+        rows = [
+            dict(r)
+            for r in conn.execute(
+                f"SELECT * FROM input_words WHERE text_id = ? {_WORD_ORDER_SQL}",
+                (text_id,),
+            ).fetchall()
+        ]
+    finally:
+        conn.close()
+
+    if words:
+        wanted = set(words)
+        rows = [r for r in rows if r["word"] in wanted]
+
+    collected: list = []
+    already_existed: list = []
+    skipped: list = []
+    backfill: list = []
+    for r in rows:
+        word, meaning = r.get("word"), r.get("meaning")
+        if not (
+            isinstance(word, str)
+            and word.strip()
+            and isinstance(meaning, str)
+            and meaning.strip()
+        ):
+            skipped.append(word if isinstance(word, str) else str(word))
+            continue
+        existed = card_exists(user_id, word)
+        card = create_card(
+            user_id=user_id,
+            word=word,
+            meaning=meaning,
+            pos=r.get("pos"),
+            example=r.get("example"),
+            pronunciation=r.get("pronunciation"),
+            cefr_level=r.get("cefr_level"),
+            source_scene_id=None,  # 输入流来源语义存 input_words.word_card_id，不污染场景字段
+        )
+        collected.append(card)
+        if existed:
+            already_existed.append(word)
+        backfill.append((card["id"], r["id"]))
+
+    if backfill:
+        conn = get_conn()
+        try:
+            conn.executemany(
+                "UPDATE input_words SET word_card_id = ? WHERE id = ?", backfill
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    return {
+        "text_id": text_id,
+        "collected": collected,
+        "already_existed": already_existed,
+        "skipped": skipped,
+    }

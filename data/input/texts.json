@@ -1,0 +1,603 @@
+{
+  "version": 1,
+  "texts": [
+    {
+      "id": "inp_a2_001",
+      "title": "在面包店",
+      "format": "dialogue",
+      "cefr_level": "A2",
+      "topic": "日常",
+      "body_fr": "Bonjour ! Je voudrais une baguette, s'il vous plaît.\nBien sûr ! Vous la voulez chaude ?\nOui, chaude, s'il vous plaît. Et un croissant aussi.\nD'accord. Ça fait quatre euros cinquante.\nVoilà. Vous acceptez la carte ?\nOui, sans problème. Merci et bonne journée !",
+      "body_cn": "你好！我想要一根法棍，谢谢。\n当然！您要热的吗？\n是的，要热的。再来一个牛角包。\n好的。一共四欧元五十。\n给您。您接受刷卡吗？\n是的，没问题。谢谢，祝您愉快！",
+      "audio_url": null,
+      "sort_order": 1,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour ! Je voudrais une baguette, s'il vous plaît.", "cn": "你好！我想要一根法棍，谢谢。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Bien sûr ! Vous la voulez chaude ?", "cn": "当然！您要热的吗？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Oui, chaude, s'il vous plaît. Et un croissant aussi.", "cn": "是的，要热的。再来一个牛角包。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "D'accord. Ça fait quatre euros cinquante.", "cn": "好的。一共四欧元五十。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Voilà. Vous acceptez la carte ?", "cn": "给您。您接受刷卡吗？", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Oui, sans problème. Merci et bonne journée !", "cn": "是的，没问题。谢谢，祝您愉快！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "une baguette", "meaning": "一根法棍", "pos": "n.f.", "cefr_level": "A2", "example": "Je voudrais une baguette, s'il vous plaît.", "pronunciation": "yn ba.ɡɛt", "line_seq": 1 },
+        { "word": "s'il vous plaît", "meaning": "请，拜托", "pos": "loc.", "cefr_level": "A1", "example": "Je voudrais une baguette, s'il vous plaît.", "pronunciation": "sil vu plɛ", "line_seq": 1 },
+        { "word": "chaude", "meaning": "热的", "pos": "adj.", "cefr_level": "A2", "example": "Vous la voulez chaude ?", "pronunciation": "ʃod", "line_seq": 2 },
+        { "word": "un croissant", "meaning": "一个牛角包", "pos": "n.m.", "cefr_level": "A2", "example": "Et un croissant aussi.", "pronunciation": "œ̃ kʁwa.sɑ̃", "line_seq": 3 },
+        { "word": "euros", "meaning": "欧元", "pos": "n.m.", "cefr_level": "A2", "example": "Ça fait quatre euros cinquante.", "pronunciation": "ø.ʁo", "line_seq": 4 },
+        { "word": "la carte", "meaning": "银行卡，卡", "pos": "n.f.", "cefr_level": "A2", "example": "Vous acceptez la carte ?", "pronunciation": "la kaʁt", "line_seq": 5 },
+        { "word": "bonne journée", "meaning": "祝你有美好的一天", "pos": "loc.", "cefr_level": "A2", "example": "Merci et bonne journée !", "pronunciation": "bɔn ʒuʁ.ne", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_a2_002",
+      "title": "问路",
+      "format": "dialogue",
+      "cefr_level": "A2",
+      "topic": "出行",
+      "body_fr": "Excusez-moi, où est la gare, s'il vous plaît ?\nLa gare ? C'est tout droit, puis à gauche.\nC'est loin d'ici ?\nNon, à peu près cinq minutes à pied.\nMerci beaucoup, monsieur.\nDe rien. Bon chemin !",
+      "body_cn": "打扰一下，请问火车站在哪里？\n火车站？一直往前走，然后左转。\n离这里远吗？\n不远，大约步行五分钟。\n非常感谢，先生。\n不客气。一路顺风！",
+      "audio_url": null,
+      "sort_order": 2,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Excusez-moi, où est la gare, s'il vous plaît ?", "cn": "打扰一下，请问火车站在哪里？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "La gare ? C'est tout droit, puis à gauche.", "cn": "火车站？一直往前走，然后左转。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "C'est loin d'ici ?", "cn": "离这里远吗？", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Non, à peu près cinq minutes à pied.", "cn": "不远，大约步行五分钟。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Merci beaucoup, monsieur.", "cn": "非常感谢，先生。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "De rien. Bon chemin !", "cn": "不客气。一路顺风！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "la gare", "meaning": "火车站", "pos": "n.f.", "cefr_level": "A2", "example": "Où est la gare, s'il vous plaît ?", "pronunciation": "la ɡaʁ", "line_seq": 1 },
+        { "word": "tout droit", "meaning": "一直往前", "pos": "loc.", "cefr_level": "A2", "example": "C'est tout droit, puis à gauche.", "pronunciation": "tu dʁwa", "line_seq": 2 },
+        { "word": "à gauche", "meaning": "向左", "pos": "loc.", "cefr_level": "A1", "example": "C'est tout droit, puis à gauche.", "pronunciation": "a ɡoʃ", "line_seq": 2 },
+        { "word": "loin", "meaning": "远", "pos": "adv.", "cefr_level": "A2", "example": "C'est loin d'ici ?", "pronunciation": "lwɛ̃", "line_seq": 3 },
+        { "word": "à pied", "meaning": "步行", "pos": "loc.", "cefr_level": "A2", "example": "À peu près cinq minutes à pied.", "pronunciation": "a pje", "line_seq": 4 },
+        { "word": "Bon chemin", "meaning": "一路顺风", "pos": "loc.", "cefr_level": "A2", "example": "De rien. Bon chemin !", "pronunciation": "bɔ̃ ʃə.mɛ̃", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_a2_003",
+      "title": "在餐厅点餐",
+      "format": "dialogue",
+      "cefr_level": "A2",
+      "topic": "日常",
+      "body_fr": "Bonsoir, une table pour deux, s'il vous plaît.\nBonsoir ! Suivez-moi, s'il vous plaît.\nJe vais prendre un steak frites et une salade.\nTrès bien. Et comme boisson ?\nUn verre d'eau, s'il vous plaît.\nD'accord, je vous apporte ça tout de suite.",
+      "body_cn": "晚上好，两人位，谢谢。\n晚上好！请跟我来。\n我要一份牛排薯条和一份沙拉。\n好的。喝点什么？\n一杯水，谢谢。\n好的，我马上给您端上来。",
+      "audio_url": null,
+      "sort_order": 3,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonsoir, une table pour deux, s'il vous plaît.", "cn": "晚上好，两人位，谢谢。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Bonsoir ! Suivez-moi, s'il vous plaît.", "cn": "晚上好！请跟我来。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je vais prendre un steak frites et une salade.", "cn": "我要一份牛排薯条和一份沙拉。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Très bien. Et comme boisson ?", "cn": "好的。喝点什么？", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Un verre d'eau, s'il vous plaît.", "cn": "一杯水，谢谢。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "D'accord, je vous apporte ça tout de suite.", "cn": "好的，我马上给您端上来。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "une table", "meaning": "一张桌子", "pos": "n.f.", "cefr_level": "A1", "example": "Une table pour deux, s'il vous plaît.", "pronunciation": "yn tabl", "line_seq": 1 },
+        { "word": "Suivez-moi", "meaning": "跟我来", "pos": "v.", "cefr_level": "A2", "example": "Suivez-moi, s'il vous plaît.", "pronunciation": "sɥi.ve mwa", "line_seq": 2 },
+        { "word": "un steak frites", "meaning": "一份牛排薯条", "pos": "n.m.", "cefr_level": "A2", "example": "Je vais prendre un steak frites et une salade.", "pronunciation": "œ̃ stɛk fʁit", "line_seq": 3 },
+        { "word": "une salade", "meaning": "一份沙拉", "pos": "n.f.", "cefr_level": "A1", "example": "Et une salade.", "pronunciation": "yn sa.lad", "line_seq": 3 },
+        { "word": "boisson", "meaning": "饮料", "pos": "n.f.", "cefr_level": "A2", "example": "Et comme boisson ?", "pronunciation": "bwa.sɔ̃", "line_seq": 4 },
+        { "word": "verre", "meaning": "杯子", "pos": "n.m.", "cefr_level": "A2", "example": "Un verre d'eau, s'il vous plaît.", "pronunciation": "vɛʁ", "line_seq": 5 },
+        { "word": "tout de suite", "meaning": "马上", "pos": "loc.", "cefr_level": "A2", "example": "Je vous apporte ça tout de suite.", "pronunciation": "tu də sɥit", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_a2_004",
+      "title": "自我介绍",
+      "format": "monologue",
+      "cefr_level": "A2",
+      "topic": "日常",
+      "body_fr": "Je m'appelle Marie et j'ai vingt-cinq ans.\nJe viens de Chine, mais j'habite à Paris maintenant.\nJe travaille dans un petit bureau près de la gare.\nJ'aime lire, cuisiner et faire du sport.\nJe parle chinois et un peu de français.\nRavi de vous rencontrer !",
+      "body_cn": "我叫玛丽，今年二十五岁。\n我来自中国，但现在住在巴黎。\n我在火车站附近的一个小办公室工作。\n我喜欢读书、做饭和运动。\n我说中文和一点法语。\n很高兴认识您！",
+      "audio_url": null,
+      "sort_order": 4,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je m'appelle Marie et j'ai vingt-cinq ans.", "cn": "我叫玛丽，今年二十五岁。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je viens de Chine, mais j'habite à Paris maintenant.", "cn": "我来自中国，但现在住在巴黎。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Je travaille dans un petit bureau près de la gare.", "cn": "我在火车站附近的一个小办公室工作。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "J'aime lire, cuisiner et faire du sport.", "cn": "我喜欢读书、做饭和运动。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Je parle chinois et un peu de français.", "cn": "我说中文和一点法语。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "Ravi de vous rencontrer !", "cn": "很高兴认识您！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "m'appelle", "meaning": "名叫（se appeler 的自反形式）", "pos": "v.", "cefr_level": "A1", "example": "Je m'appelle Marie.", "pronunciation": "ma.pɛl", "line_seq": 1 },
+        { "word": "ans", "meaning": "岁，年", "pos": "n.m.", "cefr_level": "A1", "example": "J'ai vingt-cinq ans.", "pronunciation": "ɑ̃", "line_seq": 1 },
+        { "word": "j'habite", "meaning": "我居住", "pos": "v.", "cefr_level": "A2", "example": "J'habite à Paris maintenant.", "pronunciation": "ʒa.bit", "line_seq": 2 },
+        { "word": "maintenant", "meaning": "现在", "pos": "adv.", "cefr_level": "A1", "example": "J'habite à Paris maintenant.", "pronunciation": "mɛ̃t.nɑ̃", "line_seq": 2 },
+        { "word": "travaille", "meaning": "工作", "pos": "v.", "cefr_level": "A1", "example": "Je travaille dans un petit bureau.", "pronunciation": "tʁa.vaj", "line_seq": 3 },
+        { "word": "cuisiner", "meaning": "做饭，烹饪", "pos": "v.", "cefr_level": "A2", "example": "J'aime lire, cuisiner et faire du sport.", "pronunciation": "kɥi.zi.ne", "line_seq": 4 },
+        { "word": "faire du sport", "meaning": "做运动", "pos": "loc.", "cefr_level": "A2", "example": "J'aime faire du sport.", "pronunciation": "fɛʁ dy spɔʁ", "line_seq": 4 }
+      ]
+    },
+    {
+      "id": "inp_a2_005",
+      "title": "天气",
+      "format": "monologue",
+      "cefr_level": "A2",
+      "topic": "日常",
+      "body_fr": "Aujourd'hui, il fait beau à Paris.\nLe ciel est bleu et il y a du soleil.\nMais il fait un peu froid ce matin.\nJe porte un manteau et une écharpe.\nDemain, il va pleuvoir, je crois.\nAlors, je vais prendre mon parapluie.",
+      "body_cn": "今天巴黎天气很好。\n天空是蓝色的，阳光明媚。\n但是今天早上有点冷。\n我穿着外套和围巾。\n我想明天要下雨。\n所以我会带上我的雨伞。",
+      "audio_url": null,
+      "sort_order": 5,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Aujourd'hui, il fait beau à Paris.", "cn": "今天巴黎天气很好。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Le ciel est bleu et il y a du soleil.", "cn": "天空是蓝色的，阳光明媚。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Mais il fait un peu froid ce matin.", "cn": "但是今天早上有点冷。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Je porte un manteau et une écharpe.", "cn": "我穿着外套和围巾。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Demain, il va pleuvoir, je crois.", "cn": "我想明天要下雨。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "Alors, je vais prendre mon parapluie.", "cn": "所以我会带上我的雨伞。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "il fait beau", "meaning": "天气好", "pos": "loc.", "cefr_level": "A1", "example": "Aujourd'hui, il fait beau à Paris.", "pronunciation": "il fɛ bo", "line_seq": 1 },
+        { "word": "le ciel", "meaning": "天空", "pos": "n.m.", "cefr_level": "A2", "example": "Le ciel est bleu.", "pronunciation": "lə sjɛl", "line_seq": 2 },
+        { "word": "du soleil", "meaning": "阳光", "pos": "n.m.", "cefr_level": "A1", "example": "Il y a du soleil.", "pronunciation": "dy sɔ.lɛj", "line_seq": 2 },
+        { "word": "froid", "meaning": "冷的", "pos": "adj.", "cefr_level": "A1", "example": "Il fait un peu froid ce matin.", "pronunciation": "fʁwa", "line_seq": 3 },
+        { "word": "une écharpe", "meaning": "围巾", "pos": "n.f.", "cefr_level": "A2", "example": "Je porte un manteau et une écharpe.", "pronunciation": "yn e.ʃaʁp", "line_seq": 4 },
+        { "word": "pleuvoir", "meaning": "下雨", "pos": "v.", "cefr_level": "A2", "example": "Demain, il va pleuvoir.", "pronunciation": "plø.vwaʁ", "line_seq": 5 },
+        { "word": "parapluie", "meaning": "雨伞", "pos": "n.m.", "cefr_level": "A2", "example": "Je vais prendre mon parapluie.", "pronunciation": "pa.ʁa.plɥi", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_a2_006",
+      "title": "购物",
+      "format": "dialogue",
+      "cefr_level": "A2",
+      "topic": "购物",
+      "body_fr": "Bonjour, je cherche un cadeau pour mon ami.\nQu'est-ce que vous aimez ? On a de jolis livres.\nHum, je préfère quelque chose de petit et pas cher.\nRegardez ces stylos, ils sont très bien et pas chers.\nJe vais en prendre deux, merci.\nVoilà, cinq euros. Merci et au revoir !",
+      "body_cn": "你好，我在给我朋友找一份礼物。\n您喜欢什么？我们有漂亮的书。\n嗯，我更喜欢小巧又不贵的东西。\n看看这些钢笔，很好而且不贵。\n我买两支吧，谢谢。\n给您，五欧元。谢谢，再见！",
+      "audio_url": null,
+      "sort_order": 6,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, je cherche un cadeau pour mon ami.", "cn": "你好，我在给我朋友找一份礼物。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Qu'est-ce que vous aimez ? On a de jolis livres.", "cn": "您喜欢什么？我们有漂亮的书。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Hum, je préfère quelque chose de petit et pas cher.", "cn": "嗯，我更喜欢小巧又不贵的东西。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Regardez ces stylos, ils sont très bien et pas chers.", "cn": "看看这些钢笔，很好而且不贵。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Je vais en prendre deux, merci.", "cn": "我买两支吧，谢谢。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Voilà, cinq euros. Merci et au revoir !", "cn": "给您，五欧元。谢谢，再见！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "cherche", "meaning": "寻找", "pos": "v.", "cefr_level": "A2", "example": "Je cherche un cadeau pour mon ami.", "pronunciation": "ʃɛʁʃ", "line_seq": 1 },
+        { "word": "un cadeau", "meaning": "一份礼物", "pos": "n.m.", "cefr_level": "A2", "example": "Je cherche un cadeau.", "pronunciation": "œ̃ ka.do", "line_seq": 1 },
+        { "word": "livres", "meaning": "书", "pos": "n.m.", "cefr_level": "A2", "example": "On a de jolis livres.", "pronunciation": "livʁ", "line_seq": 2 },
+        { "word": "petit", "meaning": "小的", "pos": "adj.", "cefr_level": "A1", "example": "Quelque chose de petit et pas cher.", "pronunciation": "pə.ti", "line_seq": 3 },
+        { "word": "pas cher", "meaning": "不贵，便宜", "pos": "loc.", "cefr_level": "A2", "example": "Quelque chose de petit et pas cher.", "pronunciation": "pa ʃɛʁ", "line_seq": 3 },
+        { "word": "stylos", "meaning": "钢笔，笔", "pos": "n.m.", "cefr_level": "A2", "example": "Regardez ces stylos.", "pronunciation": "sti.lo", "line_seq": 4 },
+        { "word": "au revoir", "meaning": "再见", "pos": "loc.", "cefr_level": "A1", "example": "Merci et au revoir !", "pronunciation": "o ʁə.vwaʁ", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_a2_007",
+      "title": "在咖啡馆",
+      "format": "dialogue",
+      "cefr_level": "A2",
+      "topic": "日常",
+      "body_fr": "Bonjour, je voudrais un café, s'il vous plaît.\nBonjour ! Un café noir ou un café au lait ?\nUn café au lait, s'il vous plaît.\nVous le voulez avec du sucre ?\nNon, merci. Sans sucre.\nTrès bien. Ça fait trois euros.",
+      "body_cn": "你好，我想要一杯咖啡。\n您好！黑咖啡还是牛奶咖啡？\n牛奶咖啡，谢谢。\n您要加糖吗？\n不用，谢谢。不加糖。\n好的。一共三欧元。",
+      "audio_url": null,
+      "sort_order": 7,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, je voudrais un café, s'il vous plaît.", "cn": "你好，我想要一杯咖啡。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Bonjour ! Un café noir ou un café au lait ?", "cn": "您好！黑咖啡还是牛奶咖啡？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Un café au lait, s'il vous plaît.", "cn": "牛奶咖啡，谢谢。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Vous le voulez avec du sucre ?", "cn": "您要加糖吗？", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Non, merci. Sans sucre.", "cn": "不用，谢谢。不加糖。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Très bien. Ça fait trois euros.", "cn": "好的。一共三欧元。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "un café", "meaning": "一杯咖啡", "pos": "n.m.", "cefr_level": "A1", "example": "Je voudrais un café, s'il vous plaît.", "pronunciation": "œ̃ ka.fe", "line_seq": 1 },
+        { "word": "café noir", "meaning": "黑咖啡", "pos": "n.m.", "cefr_level": "A2", "example": "Un café noir ou un café au lait ?", "pronunciation": "ka.fe nwaʁ", "line_seq": 2 },
+        { "word": "café au lait", "meaning": "牛奶咖啡", "pos": "n.m.", "cefr_level": "A2", "example": "Un café au lait, s'il vous plaît.", "pronunciation": "ka.fe o lɛ", "line_seq": 3 },
+        { "word": "du sucre", "meaning": "糖", "pos": "n.m.", "cefr_level": "A2", "example": "Vous le voulez avec du sucre ?", "pronunciation": "dy sykʁ", "line_seq": 4 },
+        { "word": "sans sucre", "meaning": "不加糖", "pos": "loc.", "cefr_level": "A2", "example": "Non, merci. Sans sucre.", "pronunciation": "sɑ̃ sykʁ", "line_seq": 5 },
+        { "word": "euros", "meaning": "欧元", "pos": "n.m.", "cefr_level": "A2", "example": "Ça fait trois euros.", "pronunciation": "ø.ʁo", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_001",
+      "title": "租房",
+      "format": "dialogue",
+      "cefr_level": "B1",
+      "topic": "生活",
+      "body_fr": "Bonjour, j'appelle au sujet de l'appartement à louer.\nOui, bonjour. Il est encore disponible.\nPourriez-vous me dire le montant du loyer ?\nBien sûr. C'est six cents euros par mois, charges comprises.\nEst-ce que les animaux sont acceptés ?\nNon, désolé, mais il y a un parc juste à côté.",
+      "body_cn": "您好，我打电话是想问租房的事。\n是的，您好。房子还空着。\n您能告诉我租金是多少吗？\n当然。每月六百欧元，含杂费。\n可以养宠物吗？\n抱歉，不行，不过旁边就有个公园。",
+      "audio_url": null,
+      "sort_order": 1,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, j'appelle au sujet de l'appartement à louer.", "cn": "您好，我打电话是想问租房的事。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, bonjour. Il est encore disponible.", "cn": "是的，您好。房子还空着。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Pourriez-vous me dire le montant du loyer ?", "cn": "您能告诉我租金是多少吗？", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Bien sûr. C'est six cents euros par mois, charges comprises.", "cn": "当然。每月六百欧元，含杂费。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Est-ce que les animaux sont acceptés ?", "cn": "可以养宠物吗？", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Non, désolé, mais il y a un parc juste à côté.", "cn": "抱歉，不行，不过旁边就有个公园。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "l'appartement", "meaning": "公寓", "pos": "n.m.", "cefr_level": "A2", "example": "J'appelle au sujet de l'appartement à louer.", "pronunciation": "la.paʁt.mɑ̃", "line_seq": 1 },
+        { "word": "à louer", "meaning": "出租", "pos": "loc.", "cefr_level": "A2", "example": "L'appartement à louer.", "pronunciation": "a lwe", "line_seq": 1 },
+        { "word": "disponible", "meaning": "可用的，空着的", "pos": "adj.", "cefr_level": "B1", "example": "Il est encore disponible.", "pronunciation": "dis.po.nibl", "line_seq": 2 },
+        { "word": "loyer", "meaning": "租金", "pos": "n.m.", "cefr_level": "B1", "example": "Le montant du loyer ?", "pronunciation": "lwa.je", "line_seq": 3 },
+        { "word": "charges", "meaning": "杂费，公共费用", "pos": "n.f.", "cefr_level": "B1", "example": "Six cents euros par mois, charges comprises.", "pronunciation": "ʃaʁʒ", "line_seq": 4 },
+        { "word": "par mois", "meaning": "每月", "pos": "loc.", "cefr_level": "A2", "example": "C'est six cents euros par mois.", "pronunciation": "paʁ mwa", "line_seq": 4 },
+        { "word": "acceptés", "meaning": "被接受，被允许", "pos": "v.", "cefr_level": "B1", "example": "Est-ce que les animaux sont acceptés ?", "pronunciation": "ak.sɛp.te", "line_seq": 5 },
+        { "word": "à côté", "meaning": "在旁边", "pos": "loc.", "cefr_level": "A2", "example": "Il y a un parc juste à côté.", "pronunciation": "a ko.te", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_002",
+      "title": "看病",
+      "format": "dialogue",
+      "cefr_level": "B1",
+      "topic": "健康",
+      "body_fr": "Bonjour docteur, je ne me sens pas très bien.\nBonjour. Depuis quand avez-vous mal à la tête ?\nDepuis deux jours, et j'ai aussi un peu de fièvre.\nAvez-vous pris des médicaments ?\nNon, pas encore. Je voulais vous voir d'abord.\nD'accord. Je vais vous faire une ordonnance.",
+      "body_cn": "医生您好，我感觉不太舒服。\n您好。您头疼多久了？\n两天了，还有点发烧。\n您吃药了吗？\n还没有。我想先来看看。\n好的。我给您开个处方。",
+      "audio_url": null,
+      "sort_order": 2,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour docteur, je ne me sens pas très bien.", "cn": "医生您好，我感觉不太舒服。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Bonjour. Depuis quand avez-vous mal à la tête ?", "cn": "您好。您头疼多久了？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Depuis deux jours, et j'ai aussi un peu de fièvre.", "cn": "两天了，还有点发烧。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Avez-vous pris des médicaments ?", "cn": "您吃药了吗？", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Non, pas encore. Je voulais vous voir d'abord.", "cn": "还没有。我想先来看看。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "D'accord. Je vais vous faire une ordonnance.", "cn": "好的。我给您开个处方。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "docteur", "meaning": "医生", "pos": "n.m.", "cefr_level": "A2", "example": "Bonjour docteur, je ne me sens pas très bien.", "pronunciation": "dɔk.tœʁ", "line_seq": 1 },
+        { "word": "mal à la tête", "meaning": "头疼", "pos": "loc.", "cefr_level": "A2", "example": "Avez-vous mal à la tête ?", "pronunciation": "mal a la tɛt", "line_seq": 2 },
+        { "word": "fièvre", "meaning": "发烧", "pos": "n.f.", "cefr_level": "B1", "example": "J'ai aussi un peu de fièvre.", "pronunciation": "fjɛvʁ", "line_seq": 3 },
+        { "word": "médicaments", "meaning": "药物", "pos": "n.m.", "cefr_level": "B1", "example": "Avez-vous pris des médicaments ?", "pronunciation": "me.di.ka.mɑ̃", "line_seq": 4 },
+        { "word": "pas encore", "meaning": "还没有", "pos": "loc.", "cefr_level": "A2", "example": "Non, pas encore.", "pronunciation": "pa zɑ̃.kɔʁ", "line_seq": 5 },
+        { "word": "d'abord", "meaning": "首先，先", "pos": "adv.", "cefr_level": "B1", "example": "Je voulais vous voir d'abord.", "pronunciation": "da.bɔʁ", "line_seq": 5 },
+        { "word": "une ordonnance", "meaning": "处方", "pos": "n.f.", "cefr_level": "B1", "example": "Je vais vous faire une ordonnance.", "pronunciation": "yn ɔʁ.dɔ.nɑ̃s", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_003",
+      "title": "工作闲聊",
+      "format": "dialogue",
+      "cefr_level": "B1",
+      "topic": "工作",
+      "body_fr": "Salut Paul, comment s'est passée ta semaine ?\nAssez bien, mais j'ai été très occupé au bureau.\nMoi aussi, j'ai eu beaucoup de réunions.\nTu as raison, on travaille trop ces temps-ci.\nOui. Heureusement, le week-end arrive bientôt.\nOn devrait aller prendre un verre vendredi soir !",
+      "body_cn": "嗨保罗，你这周过得怎么样？\n还不错，不过我在办公室很忙。\n我也是，我开了很多会。\n你说得对，我们最近工作太多了。\n是啊。好在周末快到了。\n我们周五晚上该去喝一杯！",
+      "audio_url": null,
+      "sort_order": 3,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Salut Paul, comment s'est passée ta semaine ?", "cn": "嗨保罗，你这周过得怎么样？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Assez bien, mais j'ai été très occupé au bureau.", "cn": "还不错，不过我在办公室很忙。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Moi aussi, j'ai eu beaucoup de réunions.", "cn": "我也是，我开了很多会。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Tu as raison, on travaille trop ces temps-ci.", "cn": "你说得对，我们最近工作太多了。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Oui. Heureusement, le week-end arrive bientôt.", "cn": "是啊。好在周末快到了。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "On devrait aller prendre un verre vendredi soir !", "cn": "我们周五晚上该去喝一杯！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "semaine", "meaning": "星期，一周", "pos": "n.f.", "cefr_level": "A1", "example": "Comment s'est passée ta semaine ?", "pronunciation": "sə.mɛn", "line_seq": 1 },
+        { "word": "occupé", "meaning": "忙碌的", "pos": "adj.", "cefr_level": "B1", "example": "J'ai été très occupé au bureau.", "pronunciation": "ɔ.ky.pe", "line_seq": 2 },
+        { "word": "bureau", "meaning": "办公室", "pos": "n.m.", "cefr_level": "A2", "example": "J'ai été très occupé au bureau.", "pronunciation": "by.ʁo", "line_seq": 2 },
+        { "word": "réunions", "meaning": "会议", "pos": "n.f.", "cefr_level": "B1", "example": "J'ai eu beaucoup de réunions.", "pronunciation": "ʁe.y.njɔ̃", "line_seq": 3 },
+        { "word": "ces temps-ci", "meaning": "最近，这些日子", "pos": "loc.", "cefr_level": "B1", "example": "On travaille trop ces temps-ci.", "pronunciation": "se tɑ̃ si", "line_seq": 4 },
+        { "word": "week-end", "meaning": "周末", "pos": "n.m.", "cefr_level": "A2", "example": "Le week-end arrive bientôt.", "pronunciation": "wik.ɛnd", "line_seq": 5 },
+        { "word": "bientôt", "meaning": "不久，很快", "pos": "adv.", "cefr_level": "A2", "example": "Le week-end arrive bientôt.", "pronunciation": "bjɛ̃.to", "line_seq": 5 },
+        { "word": "prendre un verre", "meaning": "喝一杯", "pos": "loc.", "cefr_level": "B1", "example": "On devrait aller prendre un verre vendredi soir !", "pronunciation": "pʁɑ̃dʁ œ̃ vɛʁ", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_004",
+      "title": "坐火车出行",
+      "format": "monologue",
+      "cefr_level": "B1",
+      "topic": "出行",
+      "body_fr": "Hier, j'ai pris le train pour aller à Lyon.\nLe départ était à huit heures, mais le train a eu du retard.\nJ'attendais sur le quai avec une dame âgée.\nHeureusement, nous avons trouvé des places assises.\nPendant le voyage, j'ai lu un magazine et j'ai écouté de la musique.\nNous sommes arrivés enfin à midi.",
+      "body_cn": "昨天我坐火车去了里昂。\n八点出发，但火车晚点了。\n我和一位老太太在站台上等车。\n幸运的是，我们找到了座位。\n旅途中我读了杂志，听了音乐。\n我们终于在中午到达了。",
+      "audio_url": null,
+      "sort_order": 4,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Hier, j'ai pris le train pour aller à Lyon.", "cn": "昨天我坐火车去了里昂。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Le départ était à huit heures, mais le train a eu du retard.", "cn": "八点出发，但火车晚点了。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "J'attendais sur le quai avec une dame âgée.", "cn": "我和一位老太太在站台上等车。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Heureusement, nous avons trouvé des places assises.", "cn": "幸运的是，我们找到了座位。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Pendant le voyage, j'ai lu un magazine et j'ai écouté de la musique.", "cn": "旅途中我读了杂志，听了音乐。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "Nous sommes arrivés enfin à midi.", "cn": "我们终于在中午到达了。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "train", "meaning": "火车", "pos": "n.m.", "cefr_level": "A1", "example": "J'ai pris le train pour aller à Lyon.", "pronunciation": "tʁɛ̃", "line_seq": 1 },
+        { "word": "départ", "meaning": "出发", "pos": "n.m.", "cefr_level": "B1", "example": "Le départ était à huit heures.", "pronunciation": "de.paʁ", "line_seq": 2 },
+        { "word": "retard", "meaning": "延误，迟到", "pos": "n.m.", "cefr_level": "B1", "example": "Le train a eu du retard.", "pronunciation": "ʁə.taʁ", "line_seq": 2 },
+        { "word": "quai", "meaning": "站台", "pos": "n.m.", "cefr_level": "B1", "example": "J'attendais sur le quai.", "pronunciation": "kɛ", "line_seq": 3 },
+        { "word": "âgée", "meaning": "年长的", "pos": "adj.", "cefr_level": "B1", "example": "Une dame âgée.", "pronunciation": "a.ʒe", "line_seq": 3 },
+        { "word": "places assises", "meaning": "座位", "pos": "n.f.", "cefr_level": "B1", "example": "Nous avons trouvé des places assises.", "pronunciation": "plas a.siz", "line_seq": 4 },
+        { "word": "pendant", "meaning": "在……期间", "pos": "prép.", "cefr_level": "A2", "example": "Pendant le voyage, j'ai lu un magazine.", "pronunciation": "pɑ̃.dɑ̃", "line_seq": 5 },
+        { "word": "enfin", "meaning": "终于", "pos": "adv.", "cefr_level": "B1", "example": "Nous sommes arrivés enfin à midi.", "pronunciation": "ɑ̃.fɛ̃", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_005",
+      "title": "约会邀请",
+      "format": "dialogue",
+      "cefr_level": "B1",
+      "topic": "日常",
+      "body_fr": "Tu es libre samedi soir ? Je voudrais t'inviter au restaurant.\nOui, avec plaisir ! À quelle heure ?\nVers dix-neuf heures, ça te va ?\nOui, très bien. On se retrouve où ?\nDevant le cinéma, près de la place centrale.\nParfait. Je t'attendrai là. À samedi !",
+      "body_cn": "周六晚上你有空吗？我想请你去餐厅。\n好啊，很乐意！几点？\n七点左右，你方便吗？\n好的。我们在哪儿见？\n电影院门口，中央广场附近。\n完美。我在那儿等你。周六见！",
+      "audio_url": null,
+      "sort_order": 5,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Tu es libre samedi soir ? Je voudrais t'inviter au restaurant.", "cn": "周六晚上你有空吗？我想请你去餐厅。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, avec plaisir ! À quelle heure ?", "cn": "好啊，很乐意！几点？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Vers dix-neuf heures, ça te va ?", "cn": "七点左右，你方便吗？", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Oui, très bien. On se retrouve où ?", "cn": "好的。我们在哪儿见？", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Devant le cinéma, près de la place centrale.", "cn": "电影院门口，中央广场附近。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Parfait. Je t'attendrai là. À samedi !", "cn": "完美。我在那儿等你。周六见！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "libre", "meaning": "空闲的", "pos": "adj.", "cefr_level": "A2", "example": "Tu es libre samedi soir ?", "pronunciation": "libʁ", "line_seq": 1 },
+        { "word": "inviter", "meaning": "邀请", "pos": "v.", "cefr_level": "B1", "example": "Je voudrais t'inviter au restaurant.", "pronunciation": "ɛ̃.vi.te", "line_seq": 1 },
+        { "word": "avec plaisir", "meaning": "很乐意", "pos": "loc.", "cefr_level": "B1", "example": "Oui, avec plaisir !", "pronunciation": "a.vɛk plɛ.ziʁ", "line_seq": 2 },
+        { "word": "vers", "meaning": "大约，将近", "pos": "prép.", "cefr_level": "A2", "example": "Vers dix-neuf heures, ça te va ?", "pronunciation": "vɛʁ", "line_seq": 3 },
+        { "word": "se retrouve", "meaning": "碰面，会合", "pos": "v.", "cefr_level": "B1", "example": "On se retrouve où ?", "pronunciation": "sə ʁə.tʁuv", "line_seq": 4 },
+        { "word": "place", "meaning": "广场", "pos": "n.f.", "cefr_level": "A2", "example": "Près de la place centrale.", "pronunciation": "plas", "line_seq": 5 },
+        { "word": "Parfait", "meaning": "完美的，太好了", "pos": "adj.", "cefr_level": "B1", "example": "Parfait. Je t'attendrai là.", "pronunciation": "paʁ.fɛ", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_006",
+      "title": "打电话",
+      "format": "monologue",
+      "cefr_level": "B1",
+      "topic": "日常",
+      "body_fr": "Ce matin, j'ai téléphoné à mon frère qui habite à Marseille.\nMalheureusement, il n'a pas répondu du premier coup.\nJ'ai laissé un message sur son répondeur.\nDeux heures plus tard, il m'a rappelé.\nNous avons parlé de nos parents et de nos projets.\nLa communication a duré presque une heure.",
+      "body_cn": "今天早上我给住在马赛的哥哥打了电话。\n不幸的是，他第一次没接。\n我在他的答录机上留了言。\n两小时后，他回了电话。\n我们聊了父母和我们的计划。\n通话持续了将近一个小时。",
+      "audio_url": null,
+      "sort_order": 6,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Ce matin, j'ai téléphoné à mon frère qui habite à Marseille.", "cn": "今天早上我给住在马赛的哥哥打了电话。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Malheureusement, il n'a pas répondu du premier coup.", "cn": "不幸的是，他第一次没接。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "J'ai laissé un message sur son répondeur.", "cn": "我在他的答录机上留了言。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Deux heures plus tard, il m'a rappelé.", "cn": "两小时后，他回了电话。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Nous avons parlé de nos parents et de nos projets.", "cn": "我们聊了父母和我们的计划。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "La communication a duré presque une heure.", "cn": "通话持续了将近一个小时。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "téléphoné", "meaning": "打电话", "pos": "v.", "cefr_level": "A2", "example": "J'ai téléphoné à mon frère.", "pronunciation": "te.le.fɔ.ne", "line_seq": 1 },
+        { "word": "répondu", "meaning": "回答，接（电话）", "pos": "v.", "cefr_level": "B1", "example": "Il n'a pas répondu du premier coup.", "pronunciation": "ʁe.pɔ̃.dy", "line_seq": 2 },
+        { "word": "laissé", "meaning": "留下", "pos": "v.", "cefr_level": "B1", "example": "J'ai laissé un message.", "pronunciation": "lɛ.se", "line_seq": 3 },
+        { "word": "message", "meaning": "留言，消息", "pos": "n.m.", "cefr_level": "A2", "example": "J'ai laissé un message sur son répondeur.", "pronunciation": "mɛ.saʒ", "line_seq": 3 },
+        { "word": "répondeur", "meaning": "答录机", "pos": "n.m.", "cefr_level": "B1", "example": "Sur son répondeur.", "pronunciation": "ʁe.pɔ̃.dœʁ", "line_seq": 3 },
+        { "word": "plus tard", "meaning": "之后，稍后", "pos": "loc.", "cefr_level": "A2", "example": "Deux heures plus tard, il m'a rappelé.", "pronunciation": "ply taʁ", "line_seq": 4 },
+        { "word": "rappelé", "meaning": "回电话", "pos": "v.", "cefr_level": "B1", "example": "Il m'a rappelé.", "pronunciation": "ʁa.pə.le", "line_seq": 4 },
+        { "word": "communication", "meaning": "通话，交流", "pos": "n.f.", "cefr_level": "B1", "example": "La communication a duré presque une heure.", "pronunciation": "kɔ.my.ni.ka.sjɔ̃", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b1_007",
+      "title": "在邮局寄包裹",
+      "format": "dialogue",
+      "cefr_level": "B1",
+      "topic": "生活",
+      "body_fr": "Bonjour, je voudrais envoyer ce paquet en Chine.\nBonjour. Vous voulez l'envoyer par avion ou par bateau ?\nPar avion, s'il vous plaît. Combien de temps ça prend ?\nÀ peu près dix jours. Ça coûte vingt euros.\nD'accord. Je vais aussi acheter des timbres.\nTrès bien, voici votre reçu et vos timbres.",
+      "body_cn": "您好，我想把这个包裹寄到中国。\n您好。您想空运还是海运？\n空运吧。要多久？\n大约十天。费用是二十欧元。\n好的。我还要买些邮票。\n好的，这是您的收据和邮票。",
+      "audio_url": null,
+      "sort_order": 7,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, je voudrais envoyer ce paquet en Chine.", "cn": "您好，我想把这个包裹寄到中国。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Bonjour. Vous voulez l'envoyer par avion ou par bateau ?", "cn": "您好。您想空运还是海运？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Par avion, s'il vous plaît. Combien de temps ça prend ?", "cn": "空运吧。要多久？", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "À peu près dix jours. Ça coûte vingt euros.", "cn": "大约十天。费用是二十欧元。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "D'accord. Je vais aussi acheter des timbres.", "cn": "好的。我还要买些邮票。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Très bien, voici votre reçu et vos timbres.", "cn": "好的，这是您的收据和邮票。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "envoyer", "meaning": "寄，发送", "pos": "v.", "cefr_level": "A2", "example": "Je voudrais envoyer ce paquet en Chine.", "pronunciation": "ɑ̃.vwa.je", "line_seq": 1 },
+        { "word": "paquet", "meaning": "包裹", "pos": "n.m.", "cefr_level": "B1", "example": "Je voudrais envoyer ce paquet.", "pronunciation": "pa.kɛ", "line_seq": 1 },
+        { "word": "par avion", "meaning": "空运", "pos": "loc.", "cefr_level": "B1", "example": "Vous voulez l'envoyer par avion ?", "pronunciation": "paʁ a.vjɔ̃", "line_seq": 2 },
+        { "word": "bateau", "meaning": "船", "pos": "n.m.", "cefr_level": "A2", "example": "Par avion ou par bateau ?", "pronunciation": "ba.to", "line_seq": 2 },
+        { "word": "coûte", "meaning": "花费", "pos": "v.", "cefr_level": "A2", "example": "Ça coûte vingt euros.", "pronunciation": "kut", "line_seq": 4 },
+        { "word": "timbres", "meaning": "邮票", "pos": "n.m.", "cefr_level": "B1", "example": "Je vais aussi acheter des timbres.", "pronunciation": "tɛ̃bʁ", "line_seq": 5 },
+        { "word": "reçu", "meaning": "收据", "pos": "n.m.", "cefr_level": "B1", "example": "Voici votre reçu et vos timbres.", "pronunciation": "ʁə.sy", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_001",
+      "title": "环境保护",
+      "format": "monologue",
+      "cefr_level": "B2",
+      "topic": "社会",
+      "body_fr": "Ces dernières années, la question de l'environnement est devenue centrale.\nBeaucoup de villes cherchent à réduire leurs déchets et leur consommation d'énergie.\nLe tri sélectif, par exemple, est maintenant courant dans les foyers français.\nPourtant, les habitudes individuelles ne suffisent pas à elles seules.\nIl faut aussi que les entreprises prennent leurs responsabilités.\nÀ mon avis, seule une action collective peut réellement changer la situation.",
+      "body_cn": "近年来，环境问题已成为核心议题。\n许多城市试图减少垃圾和能源消耗。\n例如垃圾分类如今在法国家庭很普遍。\n然而，仅靠个人习惯是不够的。\n企业也必须承担起责任。\n在我看来，只有集体行动才能真正改变现状。",
+      "audio_url": null,
+      "sort_order": 1,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Ces dernières années, la question de l'environnement est devenue centrale.", "cn": "近年来，环境问题已成为核心议题。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Beaucoup de villes cherchent à réduire leurs déchets et leur consommation d'énergie.", "cn": "许多城市试图减少垃圾和能源消耗。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Le tri sélectif, par exemple, est maintenant courant dans les foyers français.", "cn": "例如垃圾分类如今在法国家庭很普遍。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Pourtant, les habitudes individuelles ne suffisent pas à elles seules.", "cn": "然而，仅靠个人习惯是不够的。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Il faut aussi que les entreprises prennent leurs responsabilités.", "cn": "企业也必须承担起责任。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "À mon avis, seule une action collective peut réellement changer la situation.", "cn": "在我看来，只有集体行动才能真正改变现状。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "environnement", "meaning": "环境", "pos": "n.m.", "cefr_level": "B1", "example": "La question de l'environnement est devenue centrale.", "pronunciation": "ɑ̃.vi.ʁɔn.mɑ̃", "line_seq": 1 },
+        { "word": "réduire", "meaning": "减少", "pos": "v.", "cefr_level": "B2", "example": "Beaucoup de villes cherchent à réduire leurs déchets.", "pronunciation": "ʁe.dɥiʁ", "line_seq": 2 },
+        { "word": "déchets", "meaning": "垃圾，废弃物", "pos": "n.m.", "cefr_level": "B2", "example": "Réduire leurs déchets et leur consommation d'énergie.", "pronunciation": "de.ʃɛ", "line_seq": 2 },
+        { "word": "consommation", "meaning": "消耗，消费", "pos": "n.f.", "cefr_level": "B1", "example": "Leur consommation d'énergie.", "pronunciation": "kɔ̃.sɔ.ma.sjɔ̃", "line_seq": 2 },
+        { "word": "tri sélectif", "meaning": "垃圾分类", "pos": "n.m.", "cefr_level": "B2", "example": "Le tri sélectif est maintenant courant.", "pronunciation": "tʁi se.lɛk.tif", "line_seq": 3 },
+        { "word": "pourtant", "meaning": "然而，不过", "pos": "adv.", "cefr_level": "B2", "example": "Pourtant, les habitudes individuelles ne suffisent pas.", "pronunciation": "puʁ.tɑ̃", "line_seq": 4 },
+        { "word": "responsabilités", "meaning": "责任", "pos": "n.f.", "cefr_level": "B2", "example": "Les entreprises prennent leurs responsabilités.", "pronunciation": "ʁɛs.pɔ̃.sa.bi.li.te", "line_seq": 5 },
+        { "word": "collective", "meaning": "集体的", "pos": "adj.", "cefr_level": "B2", "example": "Seule une action collective peut réellement changer la situation.", "pronunciation": "kɔ.lɛk.tiv", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_002",
+      "title": "工作讨论",
+      "format": "dialogue",
+      "cefr_level": "B2",
+      "topic": "工作",
+      "body_fr": "Je pense que notre projet prend trop de retard.\nJe suis d'accord, mais il nous manque des ressources.\nFaut-il demander de l'aide à une autre équipe ?\nCe serait utile, à condition de clarifier les rôles.\nAlors, je propose qu'on se réunisse dès lundi.\nBonne idée. J'enverrai l'ordre du jour cet après-midi.",
+      "body_cn": "我觉得我们的项目拖延太久了。\n我同意，但我们缺少资源。\n要不要向另一个团队求助？\n这会有用，前提是明确分工。\n那我建议我们周一就开会。\n好主意。我今天下午发议程。",
+      "audio_url": null,
+      "sort_order": 2,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Je pense que notre projet prend trop de retard.", "cn": "我觉得我们的项目拖延太久了。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Je suis d'accord, mais il nous manque des ressources.", "cn": "我同意，但我们缺少资源。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Faut-il demander de l'aide à une autre équipe ?", "cn": "要不要向另一个团队求助？", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Ce serait utile, à condition de clarifier les rôles.", "cn": "这会有用，前提是明确分工。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Alors, je propose qu'on se réunisse dès lundi.", "cn": "那我建议我们周一就开会。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Bonne idée. J'enverrai l'ordre du jour cet après-midi.", "cn": "好主意。我今天下午发议程。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "projet", "meaning": "项目", "pos": "n.m.", "cefr_level": "B1", "example": "Notre projet prend trop de retard.", "pronunciation": "pʁɔ.ʒɛ", "line_seq": 1 },
+        { "word": "retard", "meaning": "延误，拖延", "pos": "n.m.", "cefr_level": "B1", "example": "Notre projet prend trop de retard.", "pronunciation": "ʁə.taʁ", "line_seq": 1 },
+        { "word": "manque", "meaning": "缺少", "pos": "v.", "cefr_level": "B2", "example": "Il nous manque des ressources.", "pronunciation": "mɑ̃k", "line_seq": 2 },
+        { "word": "ressources", "meaning": "资源", "pos": "n.f.", "cefr_level": "B2", "example": "Il nous manque des ressources.", "pronunciation": "ʁə.suʁs", "line_seq": 2 },
+        { "word": "à condition de", "meaning": "前提是，条件是", "pos": "loc.", "cefr_level": "B2", "example": "À condition de clarifier les rôles.", "pronunciation": "a kɔ̃.di.sjɔ̃ də", "line_seq": 4 },
+        { "word": "clarifier", "meaning": "澄清，明确", "pos": "v.", "cefr_level": "B2", "example": "À condition de clarifier les rôles.", "pronunciation": "kla.ʁi.fje", "line_seq": 4 },
+        { "word": "propose", "meaning": "建议，提议", "pos": "v.", "cefr_level": "B1", "example": "Je propose qu'on se réunisse dès lundi.", "pronunciation": "pʁɔ.poz", "line_seq": 5 },
+        { "word": "ordre du jour", "meaning": "议程", "pos": "n.m.", "cefr_level": "B2", "example": "J'enverrai l'ordre du jour cet après-midi.", "pronunciation": "ɔʁdʁ dy ʒuʁ", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_003",
+      "title": "文化差异",
+      "format": "dialogue",
+      "cefr_level": "B2",
+      "topic": "文化",
+      "body_fr": "Tu as remarqué une différence entre la culture chinoise et la culture française ?\nOui, par exemple, les Français attachent beaucoup d'importance aux repas.\nC'est vrai, un repas peut durer plusieurs heures ici.\nEn Chine, on partage souvent les plats au milieu de la table.\nC'est une belle coutume, mais je ne m'y suis pas encore habitué.\nÇa vient avec le temps. L'important est de rester curieux.",
+      "body_cn": "你注意到中国文化和法国文化的差异了吗？\n是的，比如法国人非常重视用餐。\n确实，这里一顿饭能吃好几个小时。\n在中国，大家常常分享桌中间的菜。\n这是很好的习俗，但我还没习惯。\n慢慢来。重要的是保持好奇。",
+      "audio_url": null,
+      "sort_order": 3,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Tu as remarqué une différence entre la culture chinoise et la culture française ?", "cn": "你注意到中国文化和法国文化的差异了吗？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, par exemple, les Français attachent beaucoup d'importance aux repas.", "cn": "是的，比如法国人非常重视用餐。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "C'est vrai, un repas peut durer plusieurs heures ici.", "cn": "确实，这里一顿饭能吃好几个小时。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "En Chine, on partage souvent les plats au milieu de la table.", "cn": "在中国，大家常常分享桌中间的菜。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "C'est une belle coutume, mais je ne m'y suis pas encore habitué.", "cn": "这是很好的习俗，但我还没习惯。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Ça vient avec le temps. L'important est de rester curieux.", "cn": "慢慢来。重要的是保持好奇。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "différence", "meaning": "差异，不同", "pos": "n.f.", "cefr_level": "B1", "example": "Tu as remarqué une différence entre les deux cultures ?", "pronunciation": "di.fe.ʁɑ̃s", "line_seq": 1 },
+        { "word": "attachent", "meaning": "重视，赋予", "pos": "v.", "cefr_level": "B2", "example": "Les Français attachent beaucoup d'importance aux repas.", "pronunciation": "a.taʃ", "line_seq": 2 },
+        { "word": "durer", "meaning": "持续", "pos": "v.", "cefr_level": "B1", "example": "Un repas peut durer plusieurs heures ici.", "pronunciation": "dy.ʁe", "line_seq": 3 },
+        { "word": "plusieurs", "meaning": "好几个，数个", "pos": "adj.", "cefr_level": "B1", "example": "Un repas peut durer plusieurs heures.", "pronunciation": "plyzjœʁ", "line_seq": 3 },
+        { "word": "partage", "meaning": "分享", "pos": "v.", "cefr_level": "B1", "example": "On partage souvent les plats au milieu de la table.", "pronunciation": "paʁ.taʒ", "line_seq": 4 },
+        { "word": "coutume", "meaning": "习俗", "pos": "n.f.", "cefr_level": "B2", "example": "C'est une belle coutume.", "pronunciation": "ku.tym", "line_seq": 5 },
+        { "word": "habitué", "meaning": "习惯的", "pos": "adj.", "cefr_level": "B2", "example": "Je ne m'y suis pas encore habitué.", "pronunciation": "a.bi.tɥe", "line_seq": 5 },
+        { "word": "curieux", "meaning": "好奇的", "pos": "adj.", "cefr_level": "B1", "example": "L'important est de rester curieux.", "pronunciation": "ky.ʁjø", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_004",
+      "title": "媒体报道",
+      "format": "monologue",
+      "cefr_level": "B2",
+      "topic": "媒体",
+      "body_fr": "De nos jours, les médias sociaux occupent une place prépondérante dans notre vie.\nL'information circule plus vite que jamais, mais sa fiabilité reste incertaine.\nIl est donc essentiel de développer un esprit critique.\nAvant de croire une nouvelle, je vérifie toujours plusieurs sources.\nLes journalistes ont aussi un rôle important à jouer.\nLeur responsabilité est de distinguer les faits des opinions.",
+      "body_cn": "如今，社交媒体在我们的生活中占据主导地位。\n信息传播比以往更快，但可靠性仍不确定。\n因此培养批判精神至关重要。\n在相信一条新闻前，我总会核实多个来源。\n记者也扮演着重要角色。\n他们的责任是区分事实与观点。",
+      "audio_url": null,
+      "sort_order": 4,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "De nos jours, les médias sociaux occupent une place prépondérante dans notre vie.", "cn": "如今，社交媒体在我们的生活中占据主导地位。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "L'information circule plus vite que jamais, mais sa fiabilité reste incertaine.", "cn": "信息传播比以往更快，但可靠性仍不确定。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Il est donc essentiel de développer un esprit critique.", "cn": "因此培养批判精神至关重要。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Avant de croire une nouvelle, je vérifie toujours plusieurs sources.", "cn": "在相信一条新闻前，我总会核实多个来源。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Les journalistes ont aussi un rôle important à jouer.", "cn": "记者也扮演着重要角色。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "Leur responsabilité est de distinguer les faits des opinions.", "cn": "他们的责任是区分事实与观点。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "médias", "meaning": "媒体", "pos": "n.m.", "cefr_level": "B1", "example": "Les médias sociaux occupent une place prépondérante.", "pronunciation": "me.dja", "line_seq": 1 },
+        { "word": "prépondérante", "meaning": "占主导地位的", "pos": "adj.", "cefr_level": "C1", "example": "Une place prépondérante dans notre vie.", "pronunciation": "pʁe.pɔ̃.de.ʁɑ̃t", "line_seq": 1 },
+        { "word": "circule", "meaning": "流通，传播", "pos": "v.", "cefr_level": "B2", "example": "L'information circule plus vite que jamais.", "pronunciation": "siʁ.kyl", "line_seq": 2 },
+        { "word": "fiabilité", "meaning": "可靠性", "pos": "n.f.", "cefr_level": "B2", "example": "Sa fiabilité reste incertaine.", "pronunciation": "fja.bi.li.te", "line_seq": 2 },
+        { "word": "esprit critique", "meaning": "批判精神", "pos": "n.m.", "cefr_level": "B2", "example": "Il est essentiel de développer un esprit critique.", "pronunciation": "ɛ.spʁi kʁi.tik", "line_seq": 3 },
+        { "word": "vérifie", "meaning": "核实，检查", "pos": "v.", "cefr_level": "B1", "example": "Je vérifie toujours plusieurs sources.", "pronunciation": "ve.ʁi.fje", "line_seq": 4 },
+        { "word": "journalistes", "meaning": "记者", "pos": "n.m.", "cefr_level": "B1", "example": "Les journalistes ont un rôle important à jouer.", "pronunciation": "ʒuʁ.na.list", "line_seq": 5 },
+        { "word": "distinguer", "meaning": "区分", "pos": "v.", "cefr_level": "B2", "example": "Distinguer les faits des opinions.", "pronunciation": "dis.tɛ̃.ɡe", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_005",
+      "title": "远程办公之辩",
+      "format": "dialogue",
+      "cefr_level": "B2",
+      "topic": "社会",
+      "body_fr": "Le télétravail a complètement changé notre manière de travailler.\nOui, mais je crois qu'il a aussi ses limites.\nPar exemple ?\nOn perd le contact humain et la séparation entre vie privée et travail.\nC'est vrai, mais on gagne beaucoup de temps en transport.\nPeut-être que la solution est un modèle hybride, à mi-chemin.",
+      "body_cn": "远程办公彻底改变了我们的工作方式。\n是的，但我认为它也有局限。\n比如呢？\n我们失去了人际接触，也模糊了私生活与工作的界限。\n确实，但我们在通勤上省了很多时间。\n也许解决方案是折中的混合模式。",
+      "audio_url": null,
+      "sort_order": 5,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Le télétravail a complètement changé notre manière de travailler.", "cn": "远程办公彻底改变了我们的工作方式。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, mais je crois qu'il a aussi ses limites.", "cn": "是的，但我认为它也有局限。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Par exemple ?", "cn": "比如呢？", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "On perd le contact humain et la séparation entre vie privée et travail.", "cn": "我们失去了人际接触，也模糊了私生活与工作的界限。", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "C'est vrai, mais on gagne beaucoup de temps en transport.", "cn": "确实，但我们在通勤上省了很多时间。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Peut-être que la solution est un modèle hybride, à mi-chemin.", "cn": "也许解决方案是折中的混合模式。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "télétravail", "meaning": "远程办公", "pos": "n.m.", "cefr_level": "B2", "example": "Le télétravail a complètement changé notre manière de travailler.", "pronunciation": "te.le.tʁa.vaj", "line_seq": 1 },
+        { "word": "manière", "meaning": "方式", "pos": "n.f.", "cefr_level": "B1", "example": "Notre manière de travailler.", "pronunciation": "ma.njɛʁ", "line_seq": 1 },
+        { "word": "limites", "meaning": "局限，界限", "pos": "n.f.", "cefr_level": "B2", "example": "Il a aussi ses limites.", "pronunciation": "li.mit", "line_seq": 2 },
+        { "word": "contact humain", "meaning": "人际接触", "pos": "n.m.", "cefr_level": "B2", "example": "On perd le contact humain.", "pronunciation": "kɔ̃.takt y.mɛ̃", "line_seq": 4 },
+        { "word": "vie privée", "meaning": "私生活", "pos": "n.f.", "cefr_level": "B2", "example": "La séparation entre vie privée et travail.", "pronunciation": "vi pʁi.ve", "line_seq": 4 },
+        { "word": "transport", "meaning": "交通，通勤", "pos": "n.m.", "cefr_level": "B1", "example": "On gagne beaucoup de temps en transport.", "pronunciation": "tʁɑ̃s.pɔʁ", "line_seq": 5 },
+        { "word": "modèle hybride", "meaning": "混合模式", "pos": "n.m.", "cefr_level": "B2", "example": "La solution est un modèle hybride.", "pronunciation": "mɔ.dɛl i.bʁid", "line_seq": 6 },
+        { "word": "à mi-chemin", "meaning": "折中地，中途", "pos": "loc.", "cefr_level": "B2", "example": "Un modèle hybride, à mi-chemin.", "pronunciation": "a mi.ʃə.mɛ̃", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_006",
+      "title": "求职面试",
+      "format": "dialogue",
+      "cefr_level": "B2",
+      "topic": "工作",
+      "body_fr": "Bonjour, merci de me recevoir. Je m'intéresse beaucoup à ce poste.\nBonjour. Pouvez-vous vous présenter en quelques mots ?\nJ'ai cinq ans d'expérience dans le marketing digital.\nQuelles sont vos principales qualités, selon vous ?\nJe suis organisé et je m'adapte facilement au changement.\nTrès bien. Nous vous contacterons la semaine prochaine.",
+      "body_cn": "您好，感谢接待。我对这个职位很感兴趣。\n您好。您能简单介绍一下自己吗？\n我有五年数字营销经验。\n您觉得自己最大的优点是什么？\n我有条理，而且能轻松适应变化。\n很好。我们下周会联系您。",
+      "audio_url": null,
+      "sort_order": 6,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, merci de me recevoir. Je m'intéresse beaucoup à ce poste.", "cn": "您好，感谢接待。我对这个职位很感兴趣。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Bonjour. Pouvez-vous vous présenter en quelques mots ?", "cn": "您好。您能简单介绍一下自己吗？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "J'ai cinq ans d'expérience dans le marketing digital.", "cn": "我有五年数字营销经验。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Quelles sont vos principales qualités, selon vous ?", "cn": "您觉得自己最大的优点是什么？", "audio_url": null },
+        { "seq": 5, "speaker": "A", "fr": "Je suis organisé et je m'adapte facilement au changement.", "cn": "我有条理，而且能轻松适应变化。", "audio_url": null },
+        { "seq": 6, "speaker": "B", "fr": "Très bien. Nous vous contacterons la semaine prochaine.", "cn": "很好。我们下周会联系您。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "recevoir", "meaning": "接待，接见", "pos": "v.", "cefr_level": "B1", "example": "Merci de me recevoir.", "pronunciation": "ʁə.sə.vwaʁ", "line_seq": 1 },
+        { "word": "poste", "meaning": "职位", "pos": "n.m.", "cefr_level": "B2", "example": "Je m'intéresse beaucoup à ce poste.", "pronunciation": "pɔst", "line_seq": 1 },
+        { "word": "expérience", "meaning": "经验", "pos": "n.f.", "cefr_level": "B1", "example": "J'ai cinq ans d'expérience dans le marketing digital.", "pronunciation": "ɛk.spe.ʁjɑ̃s", "line_seq": 3 },
+        { "word": "marketing", "meaning": "营销", "pos": "n.m.", "cefr_level": "B2", "example": "Dans le marketing digital.", "pronunciation": "maʁ.ke.tiŋ", "line_seq": 3 },
+        { "word": "qualités", "meaning": "优点，品质", "pos": "n.f.", "cefr_level": "B2", "example": "Quelles sont vos principales qualités, selon vous ?", "pronunciation": "ka.li.te", "line_seq": 4 },
+        { "word": "organisé", "meaning": "有条理的", "pos": "adj.", "cefr_level": "B2", "example": "Je suis organisé.", "pronunciation": "ɔʁ.ɡa.ni.ze", "line_seq": 5 },
+        { "word": "adapte", "meaning": "适应", "pos": "v.", "cefr_level": "B2", "example": "Je m'adapte facilement au changement.", "pronunciation": "a.dapt", "line_seq": 5 },
+        { "word": "contacterons", "meaning": "将联系", "pos": "v.", "cefr_level": "B1", "example": "Nous vous contacterons la semaine prochaine.", "pronunciation": "kɔ̃.tak.tə.ʁɔ̃", "line_seq": 6 }
+      ]
+    },
+    {
+      "id": "inp_b2_007",
+      "title": "大城市生活的权衡",
+      "format": "monologue",
+      "cefr_level": "B2",
+      "topic": "社会",
+      "body_fr": "Vivre en grande ville présente des avantages indéniables.\nOn y trouve une variété de services et de cultures exceptionnelle.\nMais le coût de la vie y est souvent élevé.\nLe bruit et la pollution pèsent aussi sur le quotidien.\nMalgré tout, beaucoup de jeunes choisissent de s'y installer.\nC'est un choix qui reflète nos aspirations et nos priorités.",
+      "body_cn": "住在大城市有不可否认的优势。\n这里能找到格外丰富的服务和文化。\n但生活成本往往很高。\n噪音和污染也影响着日常生活。\n尽管如此，许多年轻人还是选择在此定居。\n这个选择反映了我们的抱负与优先事项。",
+      "audio_url": null,
+      "sort_order": 7,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Vivre en grande ville présente des avantages indéniables.", "cn": "住在大城市有不可否认的优势。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "On y trouve une variété de services et de cultures exceptionnelle.", "cn": "这里能找到格外丰富的服务和文化。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Mais le coût de la vie y est souvent élevé.", "cn": "但生活成本往往很高。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Le bruit et la pollution pèsent aussi sur le quotidien.", "cn": "噪音和污染也影响着日常生活。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Malgré tout, beaucoup de jeunes choisissent de s'y installer.", "cn": "尽管如此，许多年轻人还是选择在此定居。", "audio_url": null },
+        { "seq": 6, "speaker": null, "fr": "C'est un choix qui reflète nos aspirations et nos priorités.", "cn": "这个选择反映了我们的抱负与优先事项。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "indéniables", "meaning": "不可否认的", "pos": "adj.", "cefr_level": "C1", "example": "Des avantages indéniables.", "pronunciation": "ɛ̃.de.njabl", "line_seq": 1 },
+        { "word": "variété", "meaning": "多样性", "pos": "n.f.", "cefr_level": "B2", "example": "Une variété de services et de cultures exceptionnelle.", "pronunciation": "va.ʁje.te", "line_seq": 2 },
+        { "word": "exceptionnelle", "meaning": "格外的，出众的", "pos": "adj.", "cefr_level": "B2", "example": "Une variété exceptionnelle.", "pronunciation": "ɛk.sɛp.sjɔ.nɛl", "line_seq": 2 },
+        { "word": "coût de la vie", "meaning": "生活成本", "pos": "n.m.", "cefr_level": "B1", "example": "Le coût de la vie y est souvent élevé.", "pronunciation": "ku də la vi", "line_seq": 3 },
+        { "word": "élevé", "meaning": "高的", "pos": "adj.", "cefr_level": "B2", "example": "Le coût de la vie est élevé.", "pronunciation": "e.lə.ve", "line_seq": 3 },
+        { "word": "pollution", "meaning": "污染", "pos": "n.f.", "cefr_level": "B2", "example": "Le bruit et la pollution pèsent sur le quotidien.", "pronunciation": "pɔ.ly.sjɔ̃", "line_seq": 4 },
+        { "word": "quotidien", "meaning": "日常生活", "pos": "n.m.", "cefr_level": "B2", "example": "Le bruit pèse sur le quotidien.", "pronunciation": "kɔ.ti.djɛ̃", "line_seq": 4 },
+        { "word": "malgré tout", "meaning": "尽管如此", "pos": "loc.", "cefr_level": "B2", "example": "Malgré tout, beaucoup de jeunes choisissent de s'y installer.", "pronunciation": "mal.ɡʁe tu", "line_seq": 5 },
+        { "word": "aspirations", "meaning": "抱负，愿望", "pos": "n.f.", "cefr_level": "C1", "example": "Un choix qui reflète nos aspirations et nos priorités.", "pronunciation": "as.pi.ʁa.sjɔ̃", "line_seq": 6 }
+      ]
+    }
+  ]
+}

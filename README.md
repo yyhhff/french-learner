@@ -9,32 +9,43 @@
 
 核心差异化：用户说错时不给红叉，而是由 AI 顺着语义自然接话，把正确说法"重述"回去。**协议层保证"说错话"永远返回 HTTP 200，只有 `recast_of != null` 时才渲染重述卡。**
 
-## 当前状态：全栈可运行版本（E2E 联调通过）
+## 当前状态：阶段二完成（GLM 可插拔重述 + i+1 输入流，独立 QA 109/109 通过）
 
 本目录是**独立 Git 仓库**，提交历史：
-- `280e9d7` 前端原型 Demo
-- `b1fd04f` 项目章程 + 架构契约
-- `2e13369` 全栈版本（后端 7 端点 + 前端 Web 应用）
+- `280e9d7` 前端原型 Demo　`b1fd04f` 章程+契约 v1　`2e13369` 全栈版本
+- `0687252` 本地 Whisper 根治 network　`768e776` edge-tts 神经语音　`2a0cf63` Chrome 音频修复
+- `b22b549` 阶段二章程 + 架构契约 v2　`5acf5ba` 阶段二 A+B 实现　`c0b1f5e` 独立 QA 报告
+
+阶段二新增两条主线：**A 智谱 GLM 可插拔重述**（无 key 自动降级本地规则）、**B i+1 可理解输入流**（A2/B1/B2 三级各 7 篇、共 21 篇 / 157 生词）。详见 `docs/PHASE2_CHARTER.md`、`docs/ARCHITECTURE_V2.md`、`docs/QA_REPORT.md`。
 
 ### 目录结构
 
 ```
 french-learner/
 ├── docs/
-│   ├── ARCHITECTURE.md       # 架构契约：7 API + 5 表 + 字段一致性清单（前后端唯一输入）
-│   └── PROJECT_CHARTER.md    # 项目章程：目标/WBS/RACI/风险/汇报机制
+│   ├── ARCHITECTURE.md       # 契约 v1：7 API + 5 表 + 字段一致性清单
+│   ├── ARCHITECTURE_V2.md    # 契约 v2：GLM 适配 + 输入流 5 端点 + 语料 schema（四方唯一输入）
+│   ├── PROJECT_CHARTER.md    # 阶段一章程
+│   ├── PHASE2_CHARTER.md     # 阶段二章程：双主线目标/WBS/RACI/10 项风险
+│   └── QA_REPORT.md          # 独立 QA：109 用例全通过、零阻塞缺陷
 ├── backend/                  # FastAPI 服务
-│   ├── app.py                # 7 端点、统一响应包裹、CORS、异常处理、静态托管
-│   ├── db.py                 # sqlite3 建表/CRUD（标准库，无 ORM）
+│   ├── app.py                # v1 7 端点 + v2 输入流 5 端点 + ASR/TTS 代理 + 静态托管
+│   ├── db.py                 # sqlite3 建表/CRUD（标准库，无 ORM），含 3 张输入流表
 │   ├── srs.py                # SM-2 调度，接口可无痛换 FSRS
-│   ├── ai.py                 # 重述引擎：LLM（可选）+ 本地规则降级
+│   ├── ai.py                 # 重述引擎：智谱 GLM（可插拔）+ 严格容错降级 + 合并收词
 │   ├── seed.py               # 种子数据：1 用户 + 4 场景 + 起始对话 + 生词卡
-│   ├── requirements.txt      # 仅 fastapi、uvicorn
+│   ├── seed_input.py         # 语料加载器：幂等同步 data/input/texts.json，单条非法跳过
+│   ├── .env.example          # GLM_API_KEY / BASE_URL / MODEL 配置模板（不含真实 key）
+│   ├── requirements.txt      # 仅 fastapi、uvicorn（阶段二零新依赖）
 │   └── data/yaya.db          # 运行时生成，不入 git，删库重启自动重建
 ├── frontend/                 # 原生 HTML/CSS/JS，零构建
-│   ├── index.html            # 场景/对话/生词本/记忆账本
+│   ├── index.html            # 「对话陪练 / 分级阅读」双视图 + 生词本 + 记忆账本
 │   ├── styles.css            # 暖色圆润、无红色打击性反馈
-│   └── app.js                # fetch 调 API + Web Speech ASR/TTS + 离线降级
+│   └── app.js                # fetch 调 12 端点 + ASR/TTS + 输入流交互 + 离线降级
+├── data/input/               # 内容角色产出的分级语料（入 git）
+│   ├── texts.json            # 21 篇 A2/B1/B2 对话与短文 + 157 生词标注
+│   └── README.md             # 语料来源/许可/音频兜底说明
+├── asr_service/              # 本地语音识别+合成服务（端口 8010）
 ├── demo.html                 # 历史单文件原型（保留供对照）
 └── .gitignore
 ```
@@ -49,6 +60,14 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
 后端同时托管前端静态文件，无需另起前端服务。
+
+**启用真实 AI 重述（可选）**：默认无 key，重述走本地规则（覆盖典型错误、离线可用）。你有智谱 GLM key 时，在 `backend/` 下复制 `.env.example` 为 `.env` 并填入 `GLM_API_KEY`，启动前导出环境变量即可让重述覆盖任意错句：
+```bash
+cd tools/french-learner/backend
+set -a; . ./.env; set +a        # Git Bash（.env 已 gitignore，不入库）
+python -m uvicorn app:app --host 0.0.0.0 --port 8000
+```
+无 key / key 无效 / 超时 / 返回格式异常一律自动降级本地规则，永不 500。
 
 也可以**不启动后端**，直接双击 `frontend/index.html`：此时自动进入"离线演示模式"，用内嵌场景数据与重述规则完整演示核心体验（UI 有低调标签提示）。
 
@@ -66,8 +85,17 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000
 | GET | /api/asr/status | 本地语音服务是否可用（前端探测） |
 | POST | /api/asr/transcribe | 上传音频转写法语（转发到本地 Whisper） |
 | GET | /api/tts?text=... | 文本转高质量法语朗读 mp3（转发到 edge-tts，失败前端回退浏览器） |
+| GET | /api/input/levels | 输入流可用等级与各等级篇数 |
+| GET | /api/input/texts?level=&limit=&offset= | 分级文本列表 |
+| GET | /api/input/texts/{id} | 文本详情（逐句 + 生词） |
+| POST | /api/input/texts/{id}/collect | 生词收卡入库（幂等） |
+| GET | /api/input/recommend?exclude_ids=&limit= | i+1 难度自适应推荐 |
 
-统一响应包裹 `{code, data, message}`，成功 `code=0`。`/api/tts` 例外：直接返回音频流 `audio/mpeg`。
+统一响应包裹 `{code, data, message}`，成功 `code=0`。`/api/tts` 例外：直接返回音频流 `audio/mpeg`。新增 5 个输入流端点详见 `docs/ARCHITECTURE_V2.md` §5。
+
+### 分级阅读（i+1 可理解输入，阶段二主线 B）
+
+前端顶部「📖 分级阅读」Tab：按 A2/B1/B2 浏览 21 篇语料，逐句对照中文、点句朗读、一键收生词卡；「推荐下一篇」按 i+1 规则（当前 A2 → 目标 B1，结合生词覆盖率 coverage）选篇，读过的自动排除。语料为原创教学示例，音频暂缺由 edge-tts / 浏览器 TTS 兜底朗读。
 
 ### 语音交互（本地 Whisper，离线可用）
 
@@ -123,15 +151,21 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 - 实测：`Très bien ! Vous le voulez chaud ou froid ?` 经主后端合成返回 200/audio-mpeg/23184 bytes（1.5s），缓存命中 0s
 - 发音验证：慢速回听清楚识别 `Vous le voulez`（`le` 读成单词 /lə/ 而非字母）；全速时 tiny 把 `le` 听成 `ne` 属 tiny 连读识别局限，非发音问题
 
+**阶段二验收（2026-11-17，六角色三波 + 独立 QA）**：
+- 端到端联调：v1 零回归（health 1.0.0 / 4 场景 / profile A2→B2）；输入流三级各 7 篇入库、详情正常、recommend 命中 B1（`level_and_coverage`）；chat 无 key 时 200/4 字段/本地规则重述
+- 独立 QA（`docs/QA_REPORT.md`）：**109 用例 PASS 109 / FAIL 0 / BLOCK 0**——含 GLM 降级表 9 条 mock、收词幂等（含 5 并发）、recommend 三态、非法参数错误码、v1 七端点+三代理零回归、语料全量合规、字段四方一致；主库数据未被测试污染
+- 语料：21 篇（A2/B1/B2 各 7）/ 157 生词，生词 100% 命中原文
+- 未覆盖：真实智谱 key 的端到端调用（无 key 环境，成功路径为桩模拟）；前端浏览器交互 E2E（仅验证资源与端点）
+
 ## 后续规划（路线图）
 
 | 阶段 | 内容 | 状态 |
 |------|------|------|
 | 0 地基 | 用户档案 + CEFR 定级 + 场景词库数据管线 | 部分（种子数据已就绪，定级待做） |
-| 1 尖刀 | 重述式 AI 口语陪练（ASR + LLM + TTS） | 已实现（LLM 可插拔 + 降级） |
+| 1 尖刀 | 重述式 AI 口语陪练（ASR + LLM + TTS） | 已实现（智谱 GLM 可插拔 + 降级 + 神经语音 TTS + 本地 ASR） |
 | 2 记忆 | SM-2→FSRS 复习引擎 + 从对话自动制卡 | 已实现（SM-2，接口预留 FSRS） |
-| 3 输入 | i+1 可理解输入流（场景短视频） | 未开始 |
-| 4 达标 | DELF B2 / TCF 冲刺 + 真题 | 未开始 |
+| 3 输入 | i+1 可理解输入流 | 已实现（21 篇分级语料 + 5 端点 + 阅读界面 + 难度自适应） |
+| 4 达标 | DELF B2 / TCF 冲刺 + 真题 | 未开始（下一阶段） |
 
 技术选型（混合策略）：骨架自研 + FastAPI/SQLite + 原生 JS + LLM 可插拔 + SM-2/FSRS + 开源词库打底（注意 CC 许可）。
 

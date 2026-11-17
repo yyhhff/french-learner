@@ -566,6 +566,14 @@ function buildAsrHints(){
   state.cards.slice(0,40).forEach(c=>add(c && c.word));
   return [...seen].slice(0,40).join(' ');
 }
+// 前一句对话整句作为 ASR 上下文（实验证明：前一句够用，前两句无额外收益）
+function buildAsrContext(){
+  for(let i=state.chatLog.length-1;i>=0;i--){
+    const fr = String(state.chatLog[i] && state.chatLog[i].fr || '').trim();
+    if(fr) return fr.slice(0,200);
+  }
+  return '';
+}
 async function transcribeAudio(blob){
   setMicStatus('正在识别你说的话…');
   const ext = (blob.type.includes('mp4')?'.m4a':blob.type.includes('ogg')?'.ogg':'.webm');
@@ -577,6 +585,7 @@ async function transcribeAudio(blob){
       fd.append('file', blob, 'voice'+ext);
       fd.append('language', 'fr');
       fd.append('hints', buildAsrHints());
+      fd.append('context', buildAsrContext());
       const resp = await fetch('/api/asr/transcribe', {method:'POST', body:fd});
       data = await resp.json();
     }catch(e){

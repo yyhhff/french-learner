@@ -253,6 +253,10 @@ async def transcribe(request: Request):
         # 上下文热词（含法语重音，按 UTF-8 解码）：让解码器偏向用户上文出现过的词
         hints_m = re.search(r'name="hints"\r\n\r\n([^\r\n]*)', body.decode("utf-8", "ignore"))
         hotwords = (hints_m.group(1).strip()[:1000] if hints_m else "") or None
+        # 前一句对话整句作为上下文：拼到 initial_prompt 末尾，让解码器按对话续写
+        ctx_m = re.search(r'name="context"\r\n\r\n([^\r\n]*)', body.decode("utf-8", "ignore"))
+        context = (ctx_m.group(1).strip()[:200] if ctx_m else "")
+        initial_prompt = " ".join(x for x in (INITIAL_PROMPT, context) if x) or None
 
         # faster-whisper 通过 PyAV 解码；写临时文件更稳
         suffix = Path(filename).suffix or ".webm"
@@ -270,7 +274,7 @@ async def transcribe(request: Request):
                 beam_size=BEAM_SIZE,     # 5 路束搜索，兼顾准确率与 CPU 延迟
                 vad_filter=True,         # 过滤静音，减少幻觉
                 condition_on_previous_text=False,
-                initial_prompt=INITIAL_PROMPT or None,  # 法语场景热词偏置
+                initial_prompt=initial_prompt,           # 场景提示 + 前一句对话上下文
                 hotwords=hotwords,                        # 本次对话上下文词偏置（可覆盖近音误识）
                 temperature=0,                            # 贪心解码，结果确定可复现
                 no_speech_threshold=NO_SPEECH_THRESHOLD,

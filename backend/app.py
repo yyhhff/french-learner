@@ -286,6 +286,11 @@ async def asr_transcribe(request: Request):
     hints_m = re.search(r'name="hints"\r\n\r\n([^\r\n]*)', body.decode("utf-8", "ignore"))
     if hints_m:
         hints = hints_m.group(1).strip()[:1000]
+    # 前一句对话整句作为 initial_prompt 上下文（UTF-8，含法语重音）
+    context = ""
+    ctx_m = re.search(r'name="context"\r\n\r\n([^\r\n]*)', body.decode("utf-8", "ignore"))
+    if ctx_m:
+        context = ctx_m.group(1).strip()[:200]
     if not audio:
         raise ApiError(40001, 400, "空音频文件")
 
@@ -302,6 +307,7 @@ async def asr_transcribe(request: Request):
         [
             part("language", language),
             part("hints", hints),
+            part("context", context),
             f"--{boundary}\r\n"
             f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
             f"Content-Type: {audio_ct or 'application/octet-stream'}\r\n\r\n".encode(

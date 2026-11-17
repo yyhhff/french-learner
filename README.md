@@ -112,7 +112,8 @@ cd tools/french-learner
 python -m venv .venv-asr
 .venv-asr/Scripts/python.exe -m pip install faster-whisper fastapi uvicorn edge-tts -i https://mirrors.aliyun.com/pypi/simple
 ```
-> 需系统装有 `ffmpeg`（本机已有）。首次启动会下载 Whisper tiny 模型（约 75MB），之后离线可用。
+> 需系统装有 `ffmpeg`（本机已有）。默认模型为 **Whisper small（约 470MB）**，首次启动下载（国内请在启动前设 `HF_ENDPOINT=https://hf-mirror.com`），之后离线可用。若机器较慢，启动时设 `YAYA_ASR_MODEL=tiny` 即可回退到 tiny（约 75MB）。
+> **低置信保护**：解码用 `temperature=0` + `no_speech_threshold=0.6` + `compression_ratio_threshold=2.4` 三道门控，服务返回 `confidence` / `low_confidence`；低置信时前端**只把识别文本放进输入框、不自动提交**，提示你改一下或再录一次，避免错句进入对话。阈值见 `asr_service/server.py:49-51`。
 > **兼容性说明**：本机 Python 3.13 只能用 PyAV 19，而 faster-whisper 1.2.1 与 PyAV 19 的 `metadata_errors` 参数不兼容。本项目已绕开——`asr_service/server.py` 用 ffmpeg 将音频转 16kHz 单声道 PCM、以 numpy ndarray 传给 Whisper，完全不走 PyAV 解码路径，无需降级任何包。
 
 **启动两个服务**：

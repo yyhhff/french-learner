@@ -151,7 +151,7 @@ function normalizeTurn(t){
   };
 }
 function userTurn(fr){
-  return { id:null, role:'user', fr:fr, cn:'（你刚说的）', recast_of:null,
+  return { id:null, role:'user', fr:fr, cn:'翻译中…', recast_of:null,
     explanation:null, is_correction:false, created_at:null };
 }
 
@@ -215,17 +215,21 @@ function messageHTML(m){
   if(m.role==='user'){
     return `<div class="row user">
       <div class="who">我</div>
-      <div class="bubble"><span>${esc(m.fr)}</span>${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}</div>
+      <div class="bubble"><span>${esc(m.fr)}</span>
+        <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听我的这句发音">🔊</button>
+        ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
+      </div>
     </div>`;
   }
   // assistant：只有 recast_of != null 才是重述卡；绝无红叉/扣分
   if(m.recast_of!=null){
     return `<div class="recast">
       <div class="recast-card">
-        <div class="tag">🌱 呀呀的自然重述</div>
+        <div class="tag">🌱 呀呀的自然重述 <small>把你说的句子，用更自然的法语轻轻说回去</small></div>
         <div class="say"><span>${esc(m.fr)}</span>
-          <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听发音">🔊</button>
+          <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听呀呀的重述">🔊</button>
         </div>
+        ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
         <div class="why">${m.explanation?esc(m.explanation)+'<br>':''}你说的是：${esc(m.recast_of)}</div>
       </div>
     </div>`;
@@ -326,12 +330,35 @@ function resetChat(){
 function applyChatResult(data){
   const isCorrection = data.recast_of!=null;
   state.chatLog.push({
-    id:null, role:'assistant', fr:data.ai_text||'', cn:data._cn||'',
+    id:null, role:'assistant', fr:data.ai_text||'', cn:data._cn||'翻译中…',
     recast_of:data.recast_of==null?null:data.recast_of,
     explanation:data.explanation==null?null:data.explanation,
     is_correction:isCorrection, created_at:null
   });
   renderChat();
+  return state.chatLog.length-1;
+}
+
+// 把「我说的」和「呀呀回的」一起送去翻译，回填到对应气泡的中文小字
+async function translateTurns(texts, indexes){
+  try{
+    const res = await apiRequest('/api/translate', {
+      method:'POST', body:{ texts:texts }
+    });
+    if(!res || !Array.isArray(res.translations)) return;
+    res.translations.forEach((cn,i)=>{
+      const idx = indexes[i];
+      if(idx!=null && state.chatLog[idx]) state.chatLog[idx].cn = cn || '（暂时没有中文翻译）';
+    });
+    renderChat();
+  }catch(e){
+    // 翻译失败不打断对话，也不弹红叉
+    indexes.forEach(idx=>{
+      if(idx!=null && state.chatLog[idx] && state.chatLog[idx].cn==='翻译中…')
+        state.chatLog[idx].cn = '（暂时没有中文翻译）';
+    });
+    renderChat();
+  }
 }
 
 // 本地模拟 POST /api/chat：关键词命中规则 → 温柔重述；否则场景接话/通用句
@@ -360,9 +387,11 @@ async function submitUserText(text){
   if(!text) return;
   const history = state.chatLog.slice(-10).map(normalizeTurn);
   state.chatLog.push(userTurn(text));
+  const userIdx = state.chatLog.length-1;
   renderChat();
 
   if(!state.online){
+    state.chatLog[userIdx].cn = '（离线演示，暂无中文翻译）';
     applyChatResult(fallbackChat(state.currentSceneId, text));
     return;
   }
@@ -372,7 +401,8 @@ async function submitUserText(text){
       body:{ scene_id:state.currentSceneId, user_text:text, history:history }
     });
     if(data==null) return; // 业务错误，已提示
-    applyChatResult(data);
+    const assistantIdx = applyChatResult(data);
+    translateTurns([text, data.ai_text||''], [userIdx, assistantIdx]);
     if(Array.isArray(data.new_words)&&data.new_words.length){
       let added = false;
       data.new_words.forEach(w=>{
@@ -382,6 +412,7 @@ async function submitUserText(text){
     }
   }catch(e){
     setOffline();
+    state.chatLog[userIdx].cn = '（离线演示，暂无中文翻译）';
     applyChatResult(fallbackChat(state.currentSceneId, text));
   }
 }

@@ -82,6 +82,17 @@ SYSTEM_PROMPT = """你是「呀呀（YaYa）」，一位温柔、耐心的法语
 - explanation 要温和、简短（一句话），例如「想礼貌点单，法国人更常说 voudrais，不过你这样说也完全能懂」。
 - 确保输出是合法 JSON：字符串内的引号要正确转义。"""
 
+# ---------------------------------------------------------------- 法语→中文翻译（给对话气泡配中文）
+
+TRANSLATE_SYSTEM_PROMPT = """你是「呀呀法语」的翻译小助手，把法语口语翻译成自然、简洁的简体中文。
+
+要求：
+- 只输出一个 JSON 对象，不要解释、不要 markdown 代码围栏：{"translations":["译文1","译文2",...]}
+- translations 数组长度和顺序必须与用户给出的 texts 完全一致；每条都是字符串。
+- 译文要口语化、符合中文表达习惯，不要逐词硬翻；保留语气（问候、礼貌、疑问等）。
+- 如果某条不是法语或无法翻译，对应位置输出空字符串。
+- 字符串内的引号要正确转义，确保整个输出是合法 JSON。"""
+
 
 @dataclass
 class ChatResult:
@@ -243,14 +254,18 @@ def _parse_llm_content(content: str) -> ChatResult:
 
 # ---------------------------------------------------------------- §3.5 / §3.6 LLM 调用 + 重试
 
-def recast_llm(scene_id: str, user_text: str, history: list) -> ChatResult:
-    """调用智谱 OpenAI 兼容 /chat/completions；可重试异常仅 #2/#3/#4。"""
+def _glm_post(messages: list, max_tokens: int = 512, temperature: float = 0.7) -> str:
+    """智谱 OpenAI 兼容 /chat/completions 的统一 POST；返回 message.content 原文。
+
+    重试规则与 v2 契约一致：仅 #2 网络、#3 超时、#4 429/5xx 重试 1 次；
+    #5 401/403 等其他 4xx 立即抛出。格式异常留给调用方严格解析。
+    """
     url = GLM_BASE_URL + "/chat/completions"
     payload = {
         "model": GLM_MODEL,
-        "messages": _build_llm_messages(scene_id, user_text, history),
-        "temperature": 0.7,
-        "max_tokens": 512,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
     }
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
@@ -268,8 +283,7 @@ def recast_llm(scene_id: str, user_text: str, history: list) -> ChatResult:
             with urllib.request.urlopen(req, timeout=GLM_TIMEOUT_SECONDS) as resp:
                 raw = resp.read().decode("utf-8")
             body = json.loads(raw)
-            content = body["choices"][0]["message"]["content"]
-            return _parse_llm_content(content)
+            return body["choices"][0]["message"]["content"]
         except urllib.error.HTTPError as exc:
             # #4 429/5xx 可重试；#5 401/403/其他 4xx 立即降级。
             retryable = exc.code == 429 or 500 <= exc.code < 600
@@ -283,9 +297,15 @@ def recast_llm(scene_id: str, user_text: str, history: list) -> ChatResult:
                 time.sleep(RETRY_INTERVAL_SECONDS)
                 continue
             raise
-        # #6/#7 格式异常、#9 其他异常都不在此捕获，交由 recast() 兜底降级。
+        # #6/#7 格式异常、#9 其他异常都不在此捕获，交由调用方兜底降级。
 
     raise RuntimeError("LLM 调用失败")  # 逻辑不可达，防御性兜底
+
+
+def recast_llm(scene_id: str, user_text: str, history: list) -> ChatResult:
+    """调用智谱 OpenAI 兼容 /chat/completions；可重试异常仅 #2/#3/#4。"""
+    content = _glm_post(_build_llm_messages(scene_id, user_text, history))
+    return _parse_llm_content(content)
 
 
 # ---------------------------------------------------------------- §3.8 收词合并去重
@@ -374,6 +394,61 @@ def _extract_new_words(
             )
         )
     return created
+
+
+# ---------------------------------------------------------------- 法语→中文（批量，供对话气泡展示）
+
+def _parse_translation_content(content: str, expected: int) -> list[Optional[str]]:
+    """严格解析翻译结果：非合法 JSON/长度不符 → 抛 ValueError；空串 → None。"""
+    text = content.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text).strip()
+    try:
+        obj = json.loads(text)
+    except (ValueError, TypeError) as exc:
+        raise ValueError("翻译返回格式异常") from exc
+    if not isinstance(obj, dict) or not isinstance(obj.get("translations"), list):
+        raise ValueError("翻译返回格式异常")
+    raw = obj["translations"]
+    if len(raw) < expected:
+        raise ValueError("翻译返回格式异常")
+    result: list[Optional[str]] = []
+    for item in raw[:expected]:
+        if isinstance(item, str) and item.strip():
+            result.append(item.strip())
+        else:
+            result.append(None)
+    return result
+
+
+def translate_to_zh(texts: list) -> list[Optional[str]]:
+    """批量把法语译成中文；无 key 或任何失败 → 对应位置 None，绝不抛异常。"""
+    items = [t.strip() for t in texts if isinstance(t, str) and t.strip()]
+    if not items:
+        return [None] * len(texts)
+    if not GLM_API_KEY:
+        return [None] * len(texts)
+
+    messages = [
+        {"role": "system", "content": TRANSLATE_SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps({"texts": items}, ensure_ascii=False)},
+    ]
+    try:
+        content = _glm_post(messages, max_tokens=512, temperature=0.2)
+        parsed = _parse_translation_content(content, len(items))
+    except Exception as exc:  # 网络/额度/格式等任意异常 → 不阻断对话
+        logger.warning("中文翻译失败：%s", exc)
+        return [None] * len(texts)
+
+    out: list[Optional[str]] = []
+    cursor = 0
+    for t in texts:
+        if isinstance(t, str) and t.strip():
+            out.append(parsed[cursor] if cursor < len(parsed) else None)
+            cursor += 1
+        else:
+            out.append(None)
+    return out
 
 
 # ---------------------------------------------------------------- 统一入口

@@ -193,6 +193,21 @@ async def chat(request: Request):
     return ok(result.to_dict())
 
 
+@app.post("/api/translate")
+async def translate(request: Request):
+    """批量法语→中文，给对话气泡配译文。失败不抛 500，对应位置返回 null。"""
+    body = await json_body(request)
+    texts = body.get("texts")
+    if not isinstance(texts, list) or not texts:
+        raise ApiError(40001, 400, "缺少必填字段 texts（非空数组）")
+    if len(texts) > 10:
+        raise ApiError(40001, 400, "一次最多翻译 10 条")
+    for t in texts:
+        if not isinstance(t, str) or len(t) > 500:
+            raise ApiError(40001, 400, "texts 每项必须是 500 字以内的字符串")
+    return ok({"translations": ai.translate_to_zh(texts)})
+
+
 @app.get("/api/cards")
 async def cards(scene_id: str | None = None):
     return ok(db.list_cards(scene_id=scene_id))

@@ -78,6 +78,7 @@
   .row.user .who{background:var(--brand-soft);color:var(--brand)}
   .cn{display:block;font-size:11.5px;color:var(--muted);margin-top:5px}
   .row.user .cn{color:#FBE0D3}
+  .row.user .spk-btn{color:#fff;opacity:.9}
   .spk-btn{border:none;background:none;cursor:pointer;font-size:13px;opacity:.55;padding:0 0 0 8px;vertical-align:middle;transition:.15s}
   .spk-btn:hover{opacity:1;transform:scale(1.12)}
   .spk-btn.speaking{opacity:1;animation:spkPulse .8s ease-in-out infinite}
@@ -88,6 +89,7 @@
   @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   .recast-card{background:var(--teal-soft);border:1px solid #BFE6D6;border-radius:14px;padding:12px 15px}
   .recast-card .tag{font-size:11px;color:var(--teal);font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:5px}
+  .recast-card .tag small{font-weight:400;opacity:.8}
   .recast-card .say{font-size:14.5px;color:#0F6E56}
   .recast-card .say em{font-style:normal;font-weight:700;text-decoration:underline;text-decoration-color:#7CD3B2;text-underline-offset:3px}
   .recast-card .why{font-size:12px;color:var(--muted);margin-top:7px;padding-top:7px;border-top:1px dashed #BFE6D6}

@@ -29,7 +29,7 @@ french-learner/
 │   ├── PHASE2_CHARTER.md     # 阶段二章程：双主线目标/WBS/RACI/10 项风险
 │   └── QA_REPORT.md          # 独立 QA：109 用例全通过、零阻塞缺陷
 ├── backend/                  # FastAPI 服务
-│   ├── app.py                # v1 7 端点 + v2 输入流 5 端点 + ASR/TTS 代理 + 静态托管
+│   ├── app.py                # v1 7 端点 + v2 输入流 5 端点 + ASR/TTS 代理 + 批量翻译 + 静态托管
 │   ├── db.py                 # sqlite3 建表/CRUD（标准库，无 ORM），含 3 张输入流表
 │   ├── srs.py                # SM-2 调度，接口可无痛换 FSRS
 │   ├── ai.py                 # 重述引擎：智谱 GLM（可插拔）+ 严格容错降级 + 合并收词
@@ -41,7 +41,7 @@ french-learner/
 ├── frontend/                 # 原生 HTML/CSS/JS，零构建
 │   ├── index.html            # 「对话陪练 / 分级阅读」双视图 + 生词本 + 记忆账本
 │   ├── styles.css            # 暖色圆润、无红色打击性反馈
-│   └── app.js                # fetch 调 12 端点 + ASR/TTS + 输入流交互 + 离线降级
+│   └── app.js                # fetch 调全部端点 + ASR/TTS + 翻译回填 + 输入流交互 + 离线降级
 ├── data/input/               # 内容角色产出的分级语料（入 git）
 │   ├── texts.json            # 21 篇 A2/B1/B2 对话与短文 + 157 生词标注
 │   └── README.md             # 语料来源/许可/音频兜底说明
@@ -82,6 +82,7 @@ Git Bash 用户可用 `.env`：`cd tools/french-learner/backend && cp .env.examp
 | GET | /api/scenes | 场景列表 |
 | GET | /api/scenes/{scene_id} | 场景详情 + 起始对话 |
 | POST | /api/chat | 重述式对话（核心，纠错永远 200） |
+| POST | /api/translate | 批量法语→中文（每次最多 10 条，给对话气泡配中文小字） |
 | GET | /api/cards | 生词卡列表 |
 | POST | /api/cards/{id}/review | 提交复习评分（1~4） |
 | GET | /api/profile | 用户档案与统计 |
@@ -158,7 +159,8 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 - 端到端联调：v1 零回归（health 1.0.0 / 4 场景 / profile A2→B2）；输入流三级各 7 篇入库、详情正常、recommend 命中 B1（`level_and_coverage`）；chat 无 key 时 200/4 字段/本地规则重述
 - 独立 QA（`docs/QA_REPORT.md`）：**109 用例 PASS 109 / FAIL 0 / BLOCK 0**——含 GLM 降级表 9 条 mock、收词幂等（含 5 并发）、recommend 三态、非法参数错误码、v1 七端点+三代理零回归、语料全量合规、字段四方一致；主库数据未被测试污染
 - 语料：21 篇（A2/B1/B2 各 7）/ 157 生词，生词 100% 命中原文
-- 未覆盖：真实智谱 key 的端到端调用（无 key 环境，成功路径为桩模拟）；前端浏览器交互 E2E（仅验证资源与端点）
+- 后续补充：真实智谱 key 已用 `ZHIPU_API_KEY` 端到端冒烟通过（见 QA_REPORT §7）；对话气泡新增「双方 🔊 标准发音 + 中文翻译」，`/api/translate` 实测通过；仍未覆盖前端浏览器交互 E2E（仅验证资源与端点）
+- 对话体验：你说的每一句和呀呀的每一句（含自然重述卡）都有 🔊 标准神经语音朗读与中文小字；中文由 GLM 批量翻译，失败只显示温和占位、不打断对话
 
 ## 后续规划（路线图）
 

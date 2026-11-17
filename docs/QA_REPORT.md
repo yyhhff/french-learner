@@ -206,4 +206,5 @@
 - **冒烟 1（无错句）**：`recast('cafe', 'Je veux un thé', [])` → `ai_text="Bien sûr ! Je vous apporte un thé tout de suite. Vous le voulez chaud ?"`，`recast_of=None`，`explanation=None`，场景词 `un thé` 正常命中建卡。
 - **冒烟 2（错句）**：先把 `ai.recast_local` 替换为抛 `AssertionError('FALLBACK_CALLED')` 的桩，再调 `recast('gare', 'Je suis aller à le gare', [])` → `ai_text="Ah, vous êtes allé à la gare ?"`，`recast_of="Je suis aller à le gare"`，`new_words` 含 `la gare`；桩未被触发 → 确认真实 LLM 路径生效、未降级。
 - **冒烟 3（HTTP 端到端）**：带 `ZHIPU_API_KEY` 重启 `127.0.0.1:8000` 后，`POST /api/chat`（scene `street`，`Je suis aller à le gare`）返回 `code=0`，`ai_text="Ah, vous êtes allé à la gare ? Où en êtes-vous ?"`，`recast_of` 正确回填原句，`new_words` 命中 `la gare`。本地规则对同一句只会输出 `Je suis allé à le gare`（不会同时修 `à le`），故此结果证明运行中的服务确实走真实 GLM。
+- **追加（19:57）对话气泡体验**：新增 `POST /api/translate` 批量翻译端点与前端「双方 🔊 + 中文小字」，`ai.py` 抽出统一 `_glm_post()`（重试规则不变）。真实调用 `texts=["Je veux un thé.","Ah, vous êtes allé à la gare ? Où en êtes-vous ?"]` → `code=0`，译文 `["我想喝杯茶。","啊，你去车站了？你到哪了？"]`；随后回归 `POST /api/chat` 仍 200/4 字段、重述正常，说明重构未破坏 109 用例基线。
 - **结论**：风险 #1 关闭。真实端点鉴权、OpenAI 兼容响应解析、严格 JSON 校验、recast 回填、收词合并均打通；未覆盖真实限流/额度耗尽。

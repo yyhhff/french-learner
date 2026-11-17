@@ -5,7 +5,7 @@
 
 ## 一、摘要
 
-- **总用例数：24　PASS：24　FAIL：0　BLOCK：0**
+- **总用例数：28　PASS：28　FAIL：0　BLOCK：0**
 - **一句话结论**：三项修复（ASR 法语幻觉抑制、explanation 强制中文、前端修正提示与资源版本）均通过独立验收，v1 既有 HTTP 契约零回归，可交付。
 - 期间发现并闭环 1 个环境问题：运行中 8010 的 ASR 进程初始为旧代码（`/health` 无新字段），经 team-lead 重启后复测通过。该问题属部署环节，非代码缺陷。
 
@@ -55,13 +55,17 @@
 > S4 采用「直接 import `server.correct_french_pronunciation` 传字符串」的方式，绕开真实音频，精确验证近音词映射（`/ʃoʊ/←chaud`、`/ɔ̃ti/←un thé`）与短语还原（`chef onti→un thé`）。`Show !→Chaud !` 为用户原始报障样例，已复现并验证修复。
 > 另核对主后端代理 `backend/app.py:334-338` 已将 `raw_text`/`corrected` 透传到 `/api/asr/transcribe` 响应，E2E 结果证实两字段确实到达前端。
 
-### 3.3 `frontend/app.js` / `index.html`（3 例，全 PASS）
+### 3.3 `frontend/app.js` / `index.html` / `styles.css`（7 例，全 PASS）
 
 | 编号 | 验收项 | 预期 | 实际证据 | 结果 |
 |---|---|---|---|---|
 | F1 | `node --check app.js` | 退出码 0 | `rc=0, stderr=''` | **PASS** |
-| F2 | `index.html` 资源版本 | `app.js?v=6`、`styles.css?v=6` | 两者均为 True | **PASS** |
-| F3 | `transcribeAudio` 解析 `corrected`/`raw_text` | 均能解析并温和提示 | `app.js:573-579`：读取 `data.data.raw_text` 与 `data.data.corrected`，仅在 `corrected && rawText && rawText!==text` 时 `setMicStatus('已按法语发音把识别结果修正为：…')` 并 `submitUserText(text, rawText)`；`submitUserText(text, rawText)`（`app.js:391`）、`userTurn(fr, rawText)`（`app.js:154`）贯通 | **PASS** |
+| F2 | `index.html` 资源版本 | `app.js?v=6`、`styles.css?v=6`，无 `?v=5` 残留 | `index.html:7/153` 均为 `?v=6`；`grep -rn '?v=5' frontend/` 无输出 | **PASS** |
+| F3 | `transcribeAudio` 解析 `corrected`/`raw_text` | 均能解析并温和提示 | `app.js:573-579`：读取 `data.data.raw_text` 与 `data.data.corrected`，仅在 `corrected && rawText && rawText!==text` 时 `setMicStatus('已按法语发音把识别结果修正为：…')` 并 `submitUserText(text, rawText)` | **PASS** |
+| F4 | 修正信息贯通 user turn 并在气泡显示 | `asr_raw` 挂到 user turn，气泡追加 🎧 小字 | `normalizeTurn`（`app.js:150`）、`userTurn(fr,rawText)`（`app.js:159`，仅当有 raw 且 !=fr 时挂 `asr_raw`）、`messageHTML`（`app.js:226`，`m.asr_raw` 时渲染 `<span class="asr-note">🎧 原声识别：… → 已按法语修正</span>`） | **PASS** |
+| F5 | 🎧 小字样式非红色、低调 | 浅白半透明、虚线上边框、italic | `styles.css:82-83`：`.asr-note{color:rgba(255,255,255,.72);border-top:1px dashed rgba(255,255,255,.28);font-style:italic;font-size:10.5px}` | **PASS** |
+| F6 | 打字/点击/浏览器兜底路径不误伤 | 单参调用，不出现 🎧 行 | `submitUserText(text)` 在 `sendTyped`（`app.js:431`）、`tryIt`（`app.js:437`）、`browserRecognizeFallback`（`app.js:604`）均为单参 → `asr_raw` 为空 → 无 🎧 行 | **PASS** |
+| F7 | `corrected=false` 或无 `raw_text` 时走原流程 | 「识别到：xxx」，无 🎧 行 | `app.js:577` 条件不满足时走 `app.js:582` `submitUserText(text)` 单参；recast 卡片渲染逻辑（`app.js:224-236`）未改动 | **PASS** |
 
 ### 3.4 HTTP 回归（4 例，全 PASS）
 
@@ -76,7 +80,7 @@
 
 ## 四、缺陷清单
 
-**未发现代码缺陷（24 例全 PASS）。**
+**未发现代码缺陷（28 例全 PASS）。**
 
 过程中出现的 2 个 FAIL 经复核均非被测代码问题，已修正测试/环境后复跑通过：
 
@@ -104,5 +108,5 @@
 
 ---
 
-> 报告生成：qa（独立测试）｜用例统计：backend 7 + ASR 10 + frontend 3 + HTTP 4 = 24（全 PASS）
+> 报告生成：qa（独立测试）｜用例统计：backend 7 + ASR 10 + frontend 7 + HTTP 4 = 28（全 PASS）
 > 证据脚本位于系统临时目录（`C:\Users\Karen\AppData\Local\Temp\yaya_qa_*.py`），未写入项目仓库。

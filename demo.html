@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>呀呀法语 YaYa — 像婴儿一样，自然地学会法语</title>
+<style>
+  :root{
+    --bg:#F7F6F2; --surface:#FFFFFF; --ink:#26251F; --muted:#6E6C64;
+    --line:#E7E5DE; --brand:#E8794A; --brand-soft:#FBEDE5;
+    --teal:#1D9E75; --teal-soft:#E6F4EE; --blue:#3B7DD8; --blue-soft:#EAF1FB;
+    --amber:#C98A16; --amber-soft:#FBF1DC; --shadow:0 8px 30px rgba(60,50,30,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+
+  /* top bar */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:26px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:46px;height:46px;border-radius:14px;background:var(--brand);display:flex;align-items:center;
+    justify-content:center;color:#fff;font-size:24px;font-weight:700;box-shadow:0 6px 16px rgba(232,121,74,.28)}
+  .brand h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+  .brand p{font-size:12.5px;color:var(--muted)}
+  .top-right{display:flex;align-items:center;gap:14px}
+  .level-pill{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:7px 14px;font-size:13px;box-shadow:var(--shadow)}
+  .level-pill b{color:var(--teal);font-weight:700}
+  .bar{width:90px;height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;width:38%;background:linear-gradient(90deg,var(--teal),#5DCAA5);border-radius:99px}
+  .avatar{width:40px;height:40px;border-radius:50%;background:var(--blue-soft);color:var(--blue);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:230px 1fr 280px;gap:18px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}.side{order:2}.chat-card{order:1}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+  .card-h{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .card-h h2{font-size:14px;font-weight:700}
+  .card-h span{font-size:11.5px;color:var(--muted)}
+
+  /* scenario list */
+  .side{padding:10px}
+  .scn{display:flex;align-items:center;gap:12px;padding:12px;border-radius:13px;cursor:pointer;
+    transition:.15s;border:1.5px solid transparent;margin-bottom:4px}
+  .scn:hover{background:var(--bg)}
+  .scn.on{background:var(--brand-soft);border-color:#F3C9B4}
+  .scn .ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .scn .meta b{display:block;font-size:13.5px;font-weight:600}
+  .scn .meta small{color:var(--muted);font-size:11.5px}
+  .tip{margin:12px 10px 6px;padding:13px;border-radius:13px;background:var(--teal-soft);font-size:12px;color:#0F6E56;line-height:1.55}
+  .tip b{display:block;margin-bottom:3px;font-size:12.5px}
+
+  /* chat */
+  .chat-card{overflow:hidden}
+  .chat-h{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .chat-h .flag{font-size:22px}
+  .chat-h b{font-size:14.5px}
+  .chat-h p{font-size:11.5px;color:var(--muted)}
+  .chat-h .live{margin-left:auto;font-size:11px;color:var(--teal);background:var(--teal-soft);
+    padding:4px 10px;border-radius:99px;display:flex;align-items:center;gap:5px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--teal)}
+
+  .chat{padding:22px 20px;min-height:430px;display:flex;flex-direction:column;gap:16px;
+    background:linear-gradient(180deg,#FDFDFB,#FBFBF8)}
+  .row{display:flex;gap:10px;max-width:88%}
+  .row.me{margin-left:auto;flex-direction:row-reverse}
+  .bubble{padding:11px 15px;border-radius:16px;font-size:14px;position:relative}
+  .row.bot .bubble{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .row.me .bubble{background:var(--brand);color:#fff;border-bottom-right-radius:4px}
+  .who{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700}
+  .row.bot .who{background:var(--blue-soft);color:var(--blue)}
+  .row.me .who{background:var(--brand-soft);color:var(--brand)}
+  .cn{display:block;font-size:11.5px;color:var(--muted);margin-top:5px}
+  .row.me .cn{color:#FBE0D3}
+
+  /* recast bubble */
+  .recast{margin-left:38px;max-width:78%;animation:pop .35s ease both}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .recast-card{background:var(--teal-soft);border:1px solid #BFE6D6;border-radius:14px;padding:12px 15px}
+  .recast-card .tag{font-size:11px;color:var(--teal);font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:5px}
+  .recast-card .say{font-size:14.5px;color:#0F6E56}
+  .recast-card .say em{font-style:normal;font-weight:700;text-decoration:underline;text-decoration-color:#7CD3B2;text-underline-offset:3px}
+  .recast-card .why{font-size:12px;color:var(--muted);margin-top:7px;padding-top:7px;border-top:1px dashed #BFE6D6}
+  .recast-card .why b{color:var(--amber)}
+
+  /* composer */
+  .composer{border-top:1px solid var(--line);padding:14px 18px;background:#fff}
+  .try-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;align-items:center}
+  .try-row small{color:var(--muted);font-size:11.5px;margin-right:2px}
+  .chip{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:6px 13px;font-size:12.5px;
+    cursor:pointer;transition:.15s;color:var(--ink)}
+  .chip:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+  .chip.bad::after{content:"⚠";margin-left:6px;color:var(--amber);font-size:11px}
+  .input-line{display:flex;gap:10px;align-items:center}
+  .mic{width:42px;height:42px;border-radius:12px;background:var(--brand);color:#fff;border:none;cursor:pointer;
+    font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .mic.rec{background:#D85A30;animation:pulse 1.1s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,121,74,.5)}70%{box-shadow:0 0 0 12px rgba(232,121,74,0)}100%{box-shadow:0 0 0 0 rgba(232,121,74,0)}}
+  .fake-input{flex:1;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:13.5px;color:var(--ink);
+    background:var(--bg);outline:none;font-family:inherit;min-width:0}
+  .fake-input:focus{border-color:var(--brand);background:#fff}
+  .send-btn{border:none;background:var(--ink);color:#fff;border-radius:10px;padding:0 16px;height:42px;
+    font-size:13px;cursor:pointer;flex-shrink:0}
+  .send-btn:hover{background:#000}
+  #micStatus{font-size:11.5px;color:var(--muted);margin-top:8px;min-height:16px}
+
+  /* right panel */
+  .panel{margin-bottom:16px}
+  .panel .body{padding:14px 16px}
+  .vocab{display:flex;flex-direction:column;gap:11px}
+  .v{display:flex;align-items:center;gap:10px}
+  .v .w{border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-size:12.5px;min-width:74px;text-align:center}
+  .v .mean{font-size:12.5px;color:var(--ink)}
+  .v .mean small{display:block;color:var(--muted);font-size:11px}
+  .v .spk{margin-left:auto;color:var(--blue);cursor:pointer;font-size:13px}
+  .stat{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .stat:last-child{border:none}
+  .stat b{font-size:14px}
+  .stat .up{color:var(--teal)}
+  .ring{text-align:center;padding:8px 0 2px}
+  .ring .num{font-size:30px;font-weight:700;color:var(--teal);line-height:1}
+  .ring .lab{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .badge{display:inline-block;background:var(--amber-soft);color:var(--amber);font-size:11px;padding:3px 9px;border-radius:99px;margin-top:8px}
+
+  .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:26px}
+  .reset{background:none;border:none;color:var(--muted);font-size:11.5px;cursor:pointer;text-decoration:underline;margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">
+      <div class="logo">呀</div>
+      <div>
+        <h1>呀呀法语 <span style="font-size:12px;color:#A9A69E;font-weight:400">YaYa French</span></h1>
+        <p>像婴儿一样，自然地学会法语</p>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="level-pill">
+        <span>当前 <b>A2</b> → 目标 <b>B2</b></span>
+        <div class="bar"><i></i></div>
+        <span style="color:var(--muted);font-size:11.5px">词汇 1,280 / 6,500</span>
+      </div>
+      <div class="avatar">YU</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- left -->
+    <aside class="card side">
+      <div class="card-h"><h2>今日场景</h2><span>4 个</span></div>
+      <div id="scenarios"></div>
+      <div class="tip">
+        <b>🌱 呀呀小提醒</b>
+        这里没有红叉，也没有扣分。说错了没关系——我会顺着你的话自然接下去，悄悄把对的讲法"重述"给你听。
+      </div>
+    </aside>
+
+    <!-- center -->
+    <main class="card chat-card">
+      <div class="chat-h">
+        <span class="flag" id="scnFlag">☕</span>
+        <div><b id="scnTitle">在咖啡馆点单</b><p id="scnDesc">日常交流 · A2 难度</p></div>
+        <div class="live"><span class="dot"></span>AI 陪练在线</div>
+      </div>
+
+      <div class="chat" id="chat"></div>
+
+      <div class="composer">
+        <div class="try-row" id="tryRow">
+          <small>试试点击：</small>
+        </div>
+        <div class="input-line">
+          <button class="mic" id="micBtn" title="点击说话（浏览器语音识别）" onclick="toggleMic()">🎤</button>
+          <input id="userInput" class="fake-input" placeholder="点麦克风说法语，或直接输入后回车…"
+                 onkeydown="if(event.key==='Enter')sendTyped()">
+          <button class="send-btn" onclick="sendTyped()">发送</button>
+        </div>
+        <div id="micStatus">提示：语音识别用浏览器自带能力，需允许麦克风权限；建议用 Chrome / Edge。</div>
+      </div>
+    </main>
+
+    <!-- right -->
+    <aside>
+      <div class="card panel">
+        <div class="card-h"><h2>本场景生词</h2><span>自动收卡</span></div>
+        <div class="body"><div class="vocab" id="vocab"></div></div>
+      </div>
+      <div class="card panel">
+        <div class="card-h"><h2>记忆小账本</h2><span>FSRS 智能调度</span></div>
+        <div class="body">
+          <div class="ring"><div class="num">8</div><div class="lab">今日待复习卡片</div>
+            <span class="badge">连续学习 12 天 🔥</span></div>
+          <div class="stat"><span>本周新词</span><b>+46</b></div>
+          <div class="stat"><span>已掌握</span><b class="up">1,024</b></div>
+          <div class="stat"><span>今日正确率</span><b>87%</b></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <div class="foot">
+    呀呀法语 YaYa · 前端交互 Demo（对话为预置脚本，非真实 AI 调用）
+    <button class="reset" onclick="resetChat()">重置对话</button>
+  </div>
+</div>
+
+<script>
+const SCENARIOS = [
+  {
+    id:'cafe', flag:'☕', title:'在咖啡馆点单', desc:'日常交流 · A2 难度',
+    color:'#FBEDE5',
+    start:[
+      {role:'bot', fr:'Bonjour ! Qu’est-ce que vous voulez ?', cn:'你好！您想要点什么？'},
+      {role:'me', fr:'Je veux un café, s’il vous plaît.', cn:'我想要一杯咖啡，谢谢。'},
+      {role:'bot', fr:'Très bien ! Vous le voulez chaud ou froid ?', cn:'好的！您要热的还是冷的？'}
+    ],
+    tries:[
+      {text:'Je veux un thé.', bad:true, recast:{fixed:'Je <em>voudrais</em> un thé.', why:'想礼貌点单，法国人更常说 <b>voudrais</b>（条件式），比 veux 更自然——不过你这样说也完全能懂！'}},
+      {text:'Je voudrais un croissant.', bad:false, reply:{fr:'Un croissant ! Bien sûr. Vous en voulez un autre ?', cn:'一个可颂！当然。您还要再来一个吗？'}}
+    ],
+    vocab:[['un café','一杯咖啡','n.m.'],['voudrais','想要（礼貌）','条件式'],['chaud / froid','热 / 冷','adj.']]
+  },
+  {
+    id:'office', flag:'💼', title:'和同事聊周末', desc:'职场闲聊 · B1 难度',
+    color:'#EAF1FB',
+    start:[
+      {role:'bot', fr:'Salut ! Tu as fait quelque chose de sympa ce week-end ?', cn:'嗨！这周末做了什么好玩的事吗？'},
+      {role:'me', fr:'Oui, je suis allé au cinéma.', cn:'是的，我去了电影院。'},
+      {role:'bot', fr:'Ah, cools ! Quel film as-tu vu ?', cn:'哦不错！看了什么电影？'}
+    ],
+    tries:[
+      {text:'Je suis aller au musée.', bad:true, recast:{fixed:'Ah, tu es <em>allé</em> au musée ! Et alors ?', why:'复合过去时里，être 后面要用过去分词 <b>allé</b>，不是 aller。别担心，我说清楚了吧？接着聊～'}},
+      {text:'J’ai vu un film français.', bad:false, reply:{fr:'Vraiment ? Lequel ? Je adore les films français !', cn:'真的吗？哪一部？我超爱法国电影！'}}
+    ],
+    vocab:[['allé','去了','过去分词'],['le week-end','周末','n.m.'],['un film','电影','n.m.']]
+  },
+  {
+    id:'street', flag:'🗺️', title:'问路', desc:'出行 · A2 难度',
+    color:'#E6F4EE',
+    start:[
+      {role:'me', fr:'Excusez-moi, où est la gare, s’il vous plaît ?', cn:'打扰一下，请问火车站在哪里？'},
+      {role:'bot', fr:'La gare ? C’est à cinq minutes d’ici, tout droit.', cn:'火车站？离这五分钟，一直往前走。'},
+      {role:'me', fr:'Merci beaucoup !', cn:'非常感谢！'}
+    ],
+    tries:[
+      {text:'Où est le gare ?', bad:true, recast:{fixed:'Où est <em>la</em> gare ?', why:'gare 是阴性名词，要用 <b>la</b> 不是 le。记住 la gare（火车站）就好啦！'}},
+      {text:'C’est loin d’ici ?', bad:false, reply:{fr:'Non, pas du tout ! Tu peux y aller à pied.', cn:'不，一点都不远！你可以走路去。'}}
+    ],
+    vocab:[['la gare','火车站','n.f.'],['tout droit','一直走','adv.'],['à pied','步行','loc.']]
+  },
+  {
+    id:'doctor', flag:'🩺', title:'看医生', desc:'生活办事 · B1 难度',
+    color:'#FBF1DC',
+    start:[
+      {role:'bot', fr:'Bonjour, qu’est-ce qui ne va pas ?', cn:'你好，哪里不舒服？'},
+      {role:'me', fr:'J’ai mal à la tête depuis hier.', cn:'我从昨天起就头疼。'},
+      {role:'bot', fr:'D’accord. Vous avez de la fièvre ?', cn:'好的。您发烧吗？'}
+    ],
+    tries:[
+      {text:'J’ai mal au tête.', bad:true, recast:{fixed:'J’ai mal <em>à la</em> tête.', why:'「身体部位疼」用 à + 定冠词：tête 是阴性，所以是 <b>à la tête</b>。这个搭配记住就能用了！'}},
+      {text:'Non, je n’ai pas de fièvre.', bad:false, reply:{fr:'Bien. Je vais vous donner quelque chose pour la douleur.', cn:'好的。我给您开点止痛的。'}}
+    ],
+    vocab:[['avoir mal à','……疼','loc.'],['la fièvre','发烧','n.f.'],['la douleur','疼痛','n.f.']]
+  }
+];
+
+let current = 0;
+let chatLog = [];
+
+function renderScenarios(){
+  const el = document.getElementById('scenarios');
+  el.innerHTML = SCENARIOS.map((s,i)=>`
+    <div class="scn ${i===current?'on':''}" onclick="switchScn(${i})">
+      <div class="ico" style="background:${s.color}">${s.flag}</div>
+      <div class="meta"><b>${s.title}</b><small>${s.desc}</small></div>
+    </div>`).join('');
+}
+
+function bubble(msg){
+  const who = msg.role==='bot' ? '呀' : '我';
+  return `<div class="row ${msg.role==='bot'?'bot':'me'}">
+    <div class="who">${who}</div>
+    <div class="bubble">${msg.fr}<span class="cn">${msg.cn}</span></div>
+  </div>`;
+}
+
+function renderChat(){
+  document.getElementById('chat').innerHTML = chatLog.join('');
+  const c = document.getElementById('chat');
+  c.scrollTop = c.scrollHeight;
+}
+
+function switchScn(i){
+  current = i;
+  const s = SCENARIOS[i];
+  document.getElementById('scnFlag').textContent = s.flag;
+  document.getElementById('scnTitle').textContent = s.title;
+  document.getElementById('scnDesc').textContent = s.desc;
+  renderScenarios();
+  renderVocab();
+  resetChat();
+}
+
+function renderVocab(){
+  document.getElementById('vocab').innerHTML = SCENARIOS[current].vocab.map(v=>`
+    <div class="v">
+      <div class="w">${v[0]}</div>
+      <div class="mean">${v[1]}<small>${v[2]}</small></div>
+      <span class="spk">🔊</span>
+    </div>`).join('');
+}
+
+function renderTries(){
+  const s = SCENARIOS[current];
+  document.getElementById('tryRow').innerHTML =
+    `<small>试试点击：</small>` +
+    s.tries.map((t,i)=>`<button class="chip ${t.bad?'bad':''}" onclick="tryIt(${i})">${t.text}</button>`).join('');
+}
+
+function tryIt(i){
+  const t = SCENARIOS[current].tries[i];
+  chatLog.push(bubble({role:'me', fr:t.text, cn:'（你点击发送）'}));
+  if(t.bad){
+    chatLog.push(`<div class="recast">
+      <div class="recast-card">
+        <div class="tag">🌱 呀呀的自然重述</div>
+        <div class="say">${t.recast.fixed}</div>
+        <div class="why">${t.recast.why}</div>
+      </div>
+    </div>`);
+  } else {
+    chatLog.push(bubble({role:'bot', fr:t.reply.fr, cn:t.reply.cn}));
+  }
+  renderChat();
+}
+
+function resetChat(){
+  chatLog = SCENARIOS[current].start.map(bubble);
+  renderChat();
+  renderTries();
+}
+
+/* ---------- 语音 + 手动输入 ---------- */
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognizer = null, recording = false;
+
+function setMicStatus(text){ document.getElementById('micStatus').textContent = text; }
+
+function toggleMic(){
+  if(!SpeechRec){
+    setMicStatus('当前浏览器不支持语音识别，请用 Chrome / Edge，或直接在输入框打字。');
+    return;
+  }
+  if(recording){ if(recognizer) recognizer.stop(); return; }
+
+  recognizer = new SpeechRec();
+  recognizer.lang = 'fr-FR';           // 识别法语
+  recognizer.interimResults = false;
+  recognizer.continuous = false;
+
+  recognizer.onstart = ()=>{
+    recording = true;
+    document.getElementById('micBtn').classList.add('rec');
+    setMicStatus('🎙 在听了，请说法语…（再点麦克风可结束）');
+  };
+  recognizer.onresult = (e)=>{
+    const text = e.results[0][0].transcript.trim();
+    if(text){
+      document.getElementById('userInput').value = text;
+      submitUserText(text);
+    }
+  };
+  recognizer.onerror = (e)=>{
+    let msg = '识别出错：' + e.error;
+    if(e.error === 'not-allowed') msg = '麦克风权限被拒绝，请在浏览器地址栏允许麦克风。';
+    else if(e.error === 'no-speech') msg = '没听到声音，再试一次。';
+    setMicStatus(msg);
+  };
+  recognizer.onend = ()=>{
+    recording = false;
+    document.getElementById('micBtn').classList.remove('rec');
+  };
+
+  try{ recognizer.start(); }
+  catch(err){ setMicStatus('无法启动语音识别：' + err.message); }
+}
+
+function sendTyped(){
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  submitUserText(text);
+}
+
+/* Demo 里没有真实 AI：用关键词匹配把输入映射到预置的"重述"或"接话" */
+function submitUserText(text){
+  const s = SCENARIOS[current];
+  const lower = text.toLowerCase();
+  let matched = null;
+
+  const hit = s.tries.find(t => {
+    const key = t.text.toLowerCase().replace(/[.,!?]/g,'');
+    return lower.includes(key) || key.includes(lower.replace(/[.,!?]/g,''));
+  });
+  if(hit) matched = hit;
+
+  chatLog.push(bubble({role:'me', fr:text, cn:'（你刚说的）'}));
+
+  if(matched && matched.bad){
+    chatLog.push(`<div class="recast"><div class="recast-card">
+      <div class="tag">🌱 呀呀的自然重述</div>
+      <div class="say">${matched.recast.fixed}</div>
+      <div class="why">${matched.recast.why}</div>
+    </div></div>`);
+    setMicStatus('已根据你的话给出温和重述（Demo 为关键词匹配模拟）。');
+  } else if(matched && matched.reply){
+    chatLog.push(bubble({role:'bot', fr:matched.reply.fr, cn:matched.reply.cn}));
+    setMicStatus('已接话（Demo 为关键词匹配模拟）。');
+  } else {
+    chatLog.push(bubble({role:'bot', fr:'Ah, je vois ! Raconte-moi encore un peu.', cn:'啊，我明白了！再多说一点吧。'}));
+    setMicStatus('Demo 未匹配到预置句；正式版这里会由 AI 实时生成重述。');
+  }
+  renderChat();
+}
+
+renderScenarios();
+renderVocab();
+resetChat();
+</script>
+</body>
+</html>

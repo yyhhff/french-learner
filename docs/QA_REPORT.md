@@ -12,7 +12,7 @@
 - **测试时间**：2026-11-17 19:25:29（本地时间，2026-11-17）
 - **被测对象**：阶段二新代码（`backend/ai.py` GLM 适配与降级、`backend/app.py` 5 个 `/api/input/*` 路由、`backend/seed_input.py` 加载器、前端 `frontend/*`、语料 `data/input/texts.json`）。
 - **服务地址**：主服务 `http://127.0.0.1:8000`（只读验证）；本地语音服务 `http://127.0.0.1:8010`（ASR/TTS，健康探测通过）；隔离测试服务 `127.0.0.1:8123` / `8124`（进程内启动，连接临时 DB 副本）。
-- **无 key 状态**：测试进程与隔离服务的 `GLM_API_KEY`、`LLM_API_KEY` 均为空 → `ai.GLM_API_KEY=''`，`/api/chat` 零网络请求、200/code=0、结果来自本地规则。真实智谱 key 未配置（见「风险与限制」）。
+- **无 key 状态**：测试进程与隔离服务的 `GLM_API_KEY`、`LLM_API_KEY` 均为空 → `ai.GLM_API_KEY=''`，`/api/chat` 零网络请求、200/code=0、结果来自本地规则。真实智谱 key 当时未接入（19:40 已补真实冒烟，见文末「补充验证」）。
 - **种子数据基线**：profile `cefr_level=A2`、`target_level=B2`（故 i+1 目标为 B1）；语料 21 篇（A2/B1/B2 各 7）、生词 157、`word_cards` 14 张种子卡、`get_mastered_words()` 初始为空集。
 - **方法**：Python 3.13 + `urllib.request`/`curl` 打真实 HTTP；`monkeypatch ai.urllib.request.urlopen` 精确模拟降级表 9 条；静态解析 `ARCHITECTURE_V2.md` ↔ `db.py` DDL ↔ §5.2 Schema ↔ 语料 JSON 做四方字段核对。
 - **数据隔离（硬性约束遵守）**：所有写操作（chat 落库、collect 建卡、review 更新）均在临时副本 `yaya_http.db` / `yaya_mock.db` / `yaya_empty.db` 上完成；主库 `backend/data/yaya.db` 全程未被写操作污染。未执行任何 git 命令；未改动除本报告外的任何文件。
@@ -186,7 +186,7 @@
 
 ## 六、风险与限制
 
-1. **真实 GLM key 调用未测**：环境无 `GLM_API_KEY`/`LLM_API_KEY`，LLM 成功路径全部通过 `monkeypatch urlopen` 桩模拟（含合法 OpenAI 兼容响应体）。真实智谱端点的鉴权、限流、返回结构未做端到端验证，建议上线前用真实 key 打一次 `/api/chat` 冒烟。
+1. ~~**真实 GLM key 调用未测**~~ **已关闭（2026-11-17 19:40 补充冒烟）**：用户告知本机 key 在用户环境变量 `ZHIPU_API_KEY`，`ai.py` 已将其提升为最高优先级。用该 key 直连真实智谱端点 `https://open.bigmodel.cn/api/paas/v4/chat/completions`（模型 `glm-4-flash`）实测两例：① `Je veux un thé` → 自然回应且未硬纠错（`recast_of=None`）；② `Je suis aller à le gare` → `Ah, vous êtes allé à la gare ?`，`recast_of` 正确回填原句。测试中把 `recast_local` 替换为抛异常桩，确认**未走降级**。鉴权、返回结构、严格 JSON 解析均真实打通；限流/额度耗尽仍沿用 mock 验证，未做真实压测。详见文末「补充验证」。
 2. **Mock 边界**：降级表 9 条均按异常类型精确桩模拟（URLError/socket.timeout/HTTPError 429/5xx/401/403/非 JSON/格式异常/RuntimeError），已验证重试次数（可重试=2 次、不可重试=1 次）。但真实网络抖动组合与智谱侧特殊返回（如 `choices` 多元素）未穷尽。
 3. **i+1 打分档位**：三态 `level_and_coverage` / `level_only_fallback` / `no_candidate` 均已实测（I17/I21/Z03/I19）。因种子用户 `mastered_count=0`，未构造出 `coverage∈[0.7,0.9]` 的理想档实例；`_level_score`/`_coverage_score`（`app.py:430-456`）与 §6 打分表已做静态逐项核对，一致。
 4. **前端验证深度**：仅验证 `/` 含 Tab 标记、`app.js?v=4` 含 5 端点字符串、`styles.css?v=4` 可加载，未做浏览器 DOM 渲染与真实点击交互的端到端测试。
@@ -196,3 +196,14 @@
 ---
 
 > 报告生成时间：2026-11-17 19:25:29　｜　用例来源：HTTP 58 + Mock 29 + 静态/语料 18 + 空库 4 = 109。
+
+## 七、补充验证：真实智谱 key 端到端冒烟（2026-11-17 19:40）
+
+用户说明 key 位于本机用户环境变量 `ZHIPU_API_KEY`（User 作用域已设置，工具进程未继承）。变更与验证如下：
+
+- **代码变更**：`backend/ai.py` 的 key 解析优先级改为 `ZHIPU_API_KEY` > `GLM_API_KEY` > `LLM_API_KEY`；base_url/model 仍走 `GLM_*` > `LLM_*` > 默认。`.env.example`、`README.md`、`ARCHITECTURE_V2.md` 同步更新。
+- **取值核对**：进程内显式注入 `$env:ZHIPU_API_KEY = [Environment]::GetEnvironmentVariable('ZHIPU_API_KEY','User')` 后，`ai.GLM_API_KEY` 非空、`GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4`、`GLM_MODEL=glm-4-flash`。key 值未打印、未写入任何文件。
+- **冒烟 1（无错句）**：`recast('cafe', 'Je veux un thé', [])` → `ai_text="Bien sûr ! Je vous apporte un thé tout de suite. Vous le voulez chaud ?"`，`recast_of=None`，`explanation=None`，场景词 `un thé` 正常命中建卡。
+- **冒烟 2（错句）**：先把 `ai.recast_local` 替换为抛 `AssertionError('FALLBACK_CALLED')` 的桩，再调 `recast('gare', 'Je suis aller à le gare', [])` → `ai_text="Ah, vous êtes allé à la gare ?"`，`recast_of="Je suis aller à le gare"`，`new_words` 含 `la gare`；桩未被触发 → 确认真实 LLM 路径生效、未降级。
+- **冒烟 3（HTTP 端到端）**：带 `ZHIPU_API_KEY` 重启 `127.0.0.1:8000` 后，`POST /api/chat`（scene `street`，`Je suis aller à le gare`）返回 `code=0`，`ai_text="Ah, vous êtes allé à la gare ? Où en êtes-vous ?"`，`recast_of` 正确回填原句，`new_words` 命中 `la gare`。本地规则对同一句只会输出 `Je suis allé à le gare`（不会同时修 `à le`），故此结果证明运行中的服务确实走真实 GLM。
+- **结论**：风险 #1 关闭。真实端点鉴权、OpenAI 兼容响应解析、严格 JSON 校验、recast 回填、收词合并均打通；未覆盖真实限流/额度耗尽。

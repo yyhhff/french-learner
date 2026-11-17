@@ -35,7 +35,7 @@ french-learner/
 │   ├── ai.py                 # 重述引擎：智谱 GLM（可插拔）+ 严格容错降级 + 合并收词
 │   ├── seed.py               # 种子数据：1 用户 + 4 场景 + 起始对话 + 生词卡
 │   ├── seed_input.py         # 语料加载器：幂等同步 data/input/texts.json，单条非法跳过
-│   ├── .env.example          # GLM_API_KEY / BASE_URL / MODEL 配置模板（不含真实 key）
+│   ├── .env.example          # ZHIPU_API_KEY / GLM_API_KEY / BASE_URL / MODEL 模板（不含真实 key）
 │   ├── requirements.txt      # 仅 fastapi、uvicorn（阶段二零新依赖）
 │   └── data/yaya.db          # 运行时生成，不入 git，删库重启自动重建
 ├── frontend/                 # 原生 HTML/CSS/JS，零构建
@@ -61,13 +61,17 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 后端同时托管前端静态文件，无需另起前端服务。
 
-**启用真实 AI 重述（可选）**：默认无 key，重述走本地规则（覆盖典型错误、离线可用）。你有智谱 GLM key 时，在 `backend/` 下复制 `.env.example` 为 `.env` 并填入 `GLM_API_KEY`，启动前导出环境变量即可让重述覆盖任意错句：
-```bash
+**启用真实 AI 重述（可选）**：默认无 key，重述走本地规则（覆盖典型错误、离线可用）。本机已在用户环境变量 `ZHIPU_API_KEY` 中存有智谱 key，后端会**自动读取该变量（最高优先级）**，无需改任何配置；只要启动后端的进程能读到它即可。Windows PowerShell 新开终端会自动继承用户环境变量，直接启动即可：
+```powershell
 cd tools/french-learner/backend
-set -a; . ./.env; set +a        # Git Bash（.env 已 gitignore，不入库）
 python -m uvicorn app:app --host 0.0.0.0 --port 8000
 ```
-无 key / key 无效 / 超时 / 返回格式异常一律自动降级本地规则，永不 500。
+若你的终端读不到（例如进程在 key 设置前就已启动），可显式导出：
+```powershell
+$env:ZHIPU_API_KEY = [Environment]::GetEnvironmentVariable('ZHIPU_API_KEY','User')
+python -m uvicorn app:app --host 0.0.0.0 --port 8000
+```
+Git Bash 用户可用 `.env`：`cd tools/french-learner/backend && cp .env.example .env`，填入 `ZHIPU_API_KEY=你的key` 后 `set -a; . ./.env; set +a` 再启动（`.env` 已 gitignore，不入库）。key 优先级：`ZHIPU_API_KEY` > `GLM_API_KEY` > `LLM_API_KEY`；默认端点 `https://open.bigmodel.cn/api/paas/v4`，默认模型 `glm-4-flash`。无 key / key 无效 / 超时 / 返回格式异常一律自动降级本地规则，永不 500。
 
 也可以**不启动后端**，直接双击 `frontend/index.html`：此时自动进入"离线演示模式"，用内嵌场景数据与重述规则完整演示核心体验（UI 有低调标签提示）。
 
@@ -127,8 +131,7 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 ### AI 重述与降级
 
-设置环境变量 `LLM_API_KEY` / `LLM_BASE_URL`（默认 OpenAI）/ `LLM_MODEL`（默认 gpt-3.5-turbo）即启用真实 LLM 重述。
-未设置 key 或调用失败时，自动降级为本地规则式重述（覆盖 `je veux→Je voudrais`、`je suis aller→Je suis allé`、`le gare→la gare`、`au tête→à la tête`），保证离线也能演示且永不因纠错返回 500。
+环境变量按 `ZHIPU_API_KEY`（最高）→ `GLM_API_KEY` → `LLM_API_KEY` 取 key，端点/模型默认智谱 `https://open.bigmodel.cn/api/paas/v4` + `glm-4-flash`（也可用 `GLM_BASE_URL` / `GLM_MODEL` 覆盖）。未设置 key 或调用失败时，自动降级为本地规则式重述（覆盖 `je veux→Je voudrais`、`je suis aller→Je suis allé`、`le gare→la gare`、`au tête→à la tête`），保证离线也能演示且永不因纠错返回 500。2026-11-17 已用本机 `ZHIPU_API_KEY` 真实调用智谱端点冒烟通过。
 
 ## 验收记录（2026-11-17）
 

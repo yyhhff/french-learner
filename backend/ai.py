@@ -1,7 +1,7 @@
 """重述引擎：智谱 GLM 主适配（OpenAI 兼容端点）+ 本地规则降级，统一入口 recast()。
 
 契约 ARCHITECTURE_V2.md §3：
-- 环境变量优先级：GLM_* 为主，LLM_* 为兼容别名；两者 key 都为空 → 零网络请求走本地规则。
+- 环境变量优先级：ZHIPU_API_KEY（用户现有 env）> GLM_* > LLM_*；三者 key 都为空 → 零网络请求走本地规则。
 - 网络调用只用标准库 urllib.request / json / re / time / socket，零新依赖。
 - 严格 JSON 模式：content 非合法 JSON 对象或 ai_text 非非空字符串 → 降级。
 - 降级判定表 9 条逐条覆盖；除入参非法外，永不向前端抛 500。
@@ -28,10 +28,13 @@ import seed as seed_data
 logger = logging.getLogger("yaya.ai")
 
 # ---------------------------------------------------------------- §3.1 环境变量与优先级
-# 每个参数独立按 GLM_* -> LLM_* -> 默认 取第一个非空值（or 的空串语义）。
+# key 按 ZHIPU_API_KEY -> GLM_API_KEY -> LLM_API_KEY 取第一个非空值（or 的空串语义）；
+# base_url / model 仍按 GLM_* -> LLM_* -> 默认 取第一个非空值。
+# ZHIPU_API_KEY 是用户机器上已有的智谱 key 变量名，优先级最高，开箱即用。
 
 GLM_API_KEY = (
-    os.environ.get("GLM_API_KEY", "").strip()
+    os.environ.get("ZHIPU_API_KEY", "").strip()
+    or os.environ.get("GLM_API_KEY", "").strip()
     or os.environ.get("LLM_API_KEY", "").strip()
 )
 GLM_BASE_URL = (

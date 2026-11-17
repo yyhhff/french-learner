@@ -77,23 +77,26 @@
 
 ### 3.1 环境变量与优先级
 
-对每个参数（key / base_url / model）**独立**按以下顺序取第一个非空值（Python 中 `or` 的空串语义正好实现"非空"判断）：
+key / base_url / model 各自独立取第一个非空值（Python 中 `or` 的空串语义正好实现"非空"判断）。**key 新增本机已有变量 `ZHIPU_API_KEY` 作为最高优先级**，不需要用户为本项目重复造 key：
 
 ```python
-GLM_API_KEY  = os.environ.get("GLM_API_KEY",  "").strip() or os.environ.get("LLM_API_KEY",  "").strip()
+GLM_API_KEY  = os.environ.get("ZHIPU_API_KEY", "").strip() or os.environ.get("GLM_API_KEY", "").strip() or os.environ.get("LLM_API_KEY", "").strip()
 GLM_BASE_URL = os.environ.get("GLM_BASE_URL", "").strip() or os.environ.get("LLM_BASE_URL", "").strip() or "https://open.bigmodel.cn/api/paas/v4"
 GLM_MODEL    = os.environ.get("GLM_MODEL",    "").strip() or os.environ.get("LLM_MODEL",    "").strip() or "glm-4-flash"
 ```
 
 | 优先级 | KEY | BASE_URL | MODEL | 说明 |
 |:---:|-----|----------|-------|------|
-| 1（最高） | `GLM_API_KEY` | `GLM_BASE_URL` | `GLM_MODEL` | 阶段二主变量 |
-| 2（兼容别名 / 后备） | `LLM_API_KEY` | `LLM_BASE_URL` | `LLM_MODEL` | v1 旧配置继续可用；仅设了这些且未设 GLM_* 时生效 |
-| 3（默认） | 空（→ 降级） | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` | 三者都没设时 |
+| 1（最高） | `ZHIPU_API_KEY` | — | — | 用户机器已有的智谱 key 变量，开箱即用 |
+| 2 | `GLM_API_KEY` | `GLM_BASE_URL` | `GLM_MODEL` | 阶段二主变量（未设 ZHIPU_API_KEY 时生效） |
+| 3（兼容别名 / 后备） | `LLM_API_KEY` | `LLM_BASE_URL` | `LLM_MODEL` | v1 旧配置继续可用 |
+| 4（默认） | 空（→ 降级） | `https://open.bigmodel.cn/api/paas/v4` | `glm-4-flash` | 三者都没设时 |
+
+注：base_url / model **不读** `ZHIPU_*`，始终走 `GLM_*` → `LLM_*` → 默认值。
 
 **关键判定**：
-- `GLM_API_KEY` 与 `LLM_API_KEY` **均为空** → 判定为"无 key"，**不发任何网络请求**，直接走本地规则。
-- 若使用**非智谱**的 OpenAI 兼容供应商：必须**同时**设置 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` 三者（缺 base_url/model 会落到 GLM 默认值导致端点与供应商不匹配）。此点须在 `.env.example` 注释说明。
+- `ZHIPU_API_KEY` / `GLM_API_KEY` / `LLM_API_KEY` **均为空** → 判定为"无 key"，**不发任何网络请求**，直接走本地规则。
+- 若使用**非智谱**的 OpenAI 兼容供应商：不要设 `ZHIPU_API_KEY`，必须**同时**设置 `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` 三者（缺 base_url/model 会落到 GLM 默认值导致端点与供应商不匹配）。此点须在 `.env.example` 注释说明。
 
 ### 3.2 端点与默认值
 
@@ -102,7 +105,7 @@ GLM_MODEL    = os.environ.get("GLM_MODEL",    "").strip() or os.environ.get("LLM
 | 完整请求 URL | `{GLM_BASE_URL}/chat/completions`（构造时 `.rstrip("/")` 去掉尾斜杠） |
 | 默认完整 URL | `https://open.bigmodel.cn/api/paas/v4/chat/completions` |
 | 默认模型 | `glm-4-flash` |
-| 鉴权头 | `Authorization: Bearer {GLM_API_KEY}` |
+| 鉴权头 | `Authorization: Bearer {GLM_API_KEY}`（该内部变量按 §3.1 从 ZHIPU_API_KEY / GLM_API_KEY / LLM_API_KEY 解析） |
 | 请求方法 | POST |
 
 ### 3.3 请求体 / 响应体样例
@@ -167,7 +170,7 @@ GLM_MODEL    = os.environ.get("GLM_MODEL",    "").strip() or os.environ.get("LLM
 
 | # | 条件 | 是否重试 | 动作 |
 |---|------|:---:|------|
-| 1 | `GLM_API_KEY` 与 `LLM_API_KEY` 均为空 | 否 | **无 key**：直接本地规则，零网络请求 |
+| 1 | `ZHIPU_API_KEY` / `GLM_API_KEY` / `LLM_API_KEY` 均为空 | 否 | **无 key**：直接本地规则，零网络请求 |
 | 2 | DNS 失败 / 连接拒绝 / 网络不可达（`URLError` 非 HTTP） | 是（1 次） | 重试仍失败 → 本地规则 |
 | 3 | 单次请求超时（`socket.timeout` / `TimeoutError`，超过 `GLM_TIMEOUT_SECONDS`） | 是（1 次） | 重试仍失败 → 本地规则 |
 | 4 | HTTP 429（限流）或 5xx | 是（1 次） | 重试仍失败 → 本地规则 |
@@ -672,6 +675,7 @@ coverage = known / total  if total > 0 else None   # 无生词标注 → None
 
 | 统一名称 | 出现位置 |
 |----------|----------|
+| `ZHIPU_API_KEY` | §3.1、§9.1 `.env.example`、README（本机已有变量，最高优先级） |
 | `GLM_API_KEY` | §3.1、§9.1 `.env.example` |
 | `GLM_BASE_URL` | §3.1、§3.2、§9.1 |
 | `GLM_MODEL` | §3.1、§3.2、§9.1 |
@@ -726,7 +730,7 @@ coverage = known / total  if total > 0 else None   # 无生词标注 → None
 
 | # | 场景 | 预期 |
 |---|------|------|
-| 1 | 无 key（`GLM_API_KEY`/`LLM_API_KEY` 都空）调 `/api/chat` | 零网络请求，结果来自本地规则，保证 HTTP 200、`code=0` |
+| 1 | 无 key（`ZHIPU_API_KEY`/`GLM_API_KEY`/`LLM_API_KEY` 都空）调 `/api/chat` | 零网络请求，结果来自本地规则，保证 HTTP 200、`code=0` |
 | 2 | key 无效（401）| 立即降级本地规则，不重试，不抛 500 |
 | 3 | 超时 / 连接失败（mock `urlopen` 抛异常）| 重试 1 次后降级，`code=0` |
 | 4 | LLM 返回非 JSON / `ai_text` 缺失或空 | 按 §3.4 严格模式降级本地规则 |
@@ -755,14 +759,19 @@ coverage = known / total  if total > 0 else None   # 无生词标注 → None
 ### 9.1 `backend/.env.example`（不含真实 key）
 
 ```dotenv
-# ===== 智谱 GLM（阶段二主供应商，优先级最高）=====
+# ===== 智谱 GLM（阶段二主供应商）=====
+# 首选：本机已有的 ZHIPU_API_KEY（用户环境变量）。若已导出则无需在此重复填写。
+ZHIPU_API_KEY=
+# 备选：若本机没有 ZHIPU_API_KEY，可改用下面这个变量，效果相同。
 GLM_API_KEY=
+# 端点/模型：可选，默认即下面两行。
 GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 GLM_MODEL=glm-4-flash
 
 # ===== 通用 OpenAI 兼容别名（可选后备）=====
-# 说明：仅当对应 GLM_* 未设置时生效。
-# 若改用非智谱供应商，必须同时设置下面三项（否则 base_url/model 会落到上面的 GLM 默认值）。
+# 说明：key 优先级 ZHIPU_API_KEY > GLM_API_KEY > LLM_API_KEY；
+#       base_url/model 优先级 GLM_* > LLM_* > 默认值。
+# 若改用非智谱供应商，不要设 ZHIPU_API_KEY，且必须同时设置下面三项。
 LLM_API_KEY=
 LLM_BASE_URL=
 LLM_MODEL=
@@ -783,13 +792,12 @@ set -a; . ./.env; set +a        # bash / Git Bash
 uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Windows PowerShell 示例：
+Windows PowerShell 示例（本机已有 `ZHIPU_API_KEY`，新开终端会自动继承；若进程已存在则手动补一次）：
 ```powershell
-$env:GLM_API_KEY = "你的key"
-$env:GLM_BASE_URL = "https://open.bigmodel.cn/api/paas/v4"
-$env:GLM_MODEL = "glm-4-flash"
+$env:ZHIPU_API_KEY = [Environment]::GetEnvironmentVariable('ZHIPU_API_KEY','User')
 uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
+若本机没有 `ZHIPU_API_KEY`，改用 `$env:GLM_API_KEY = "你的key"`（端点/模型默认即为智谱，可省略）。
 
 ### 9.3 目录结构（v2 增量部分）
 

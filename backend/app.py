@@ -331,7 +331,12 @@ async def asr_transcribe(request: Request):
     text = (result.get("text") or "").strip()
     if not text:
         raise ApiError(40001, 400, "没听清，请再说一次或直接打字")
-    return ok({"text": text, "language": result.get("language")})
+    return ok({
+        "text": text,
+        "language": result.get("language"),
+        "raw_text": result.get("raw_text"),
+        "corrected": bool(result.get("corrected")),
+    })
 
 
 @app.get("/api/tts")

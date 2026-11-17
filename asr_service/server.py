@@ -44,6 +44,22 @@ MODEL_SIZE = os.environ.get("YAYA_ASR_MODEL", "tiny")
 DEVICE = os.environ.get("YAYA_ASR_DEVICE", "cpu")
 COMPUTE_TYPE = os.environ.get("YAYA_ASR_COMPUTE", "int8")
 
+# 解码配置：beam_size=1 贪心解码虽快，但 tiny 模型容易把法语近音词锁死成英文
+# （chaud→"show"、un thé→"onti"）。提到 5 让解码器有机会在多个候选里选更
+# 贴合法语语境的那条；CPU+tiny+短句（<=15s）通常仍在 1-3 秒量级。
+# 如需极致低延迟可用 YAYA_ASR_BEAM_SIZE=1 回退。
+BEAM_SIZE = max(1, int(os.environ.get("YAYA_ASR_BEAM_SIZE", "5")))
+
+# 场景热词偏置：用一段自然法语给解码器提示本对话高频词（咖啡馆/车站点单），
+# 显著降低 tiny 模型把 chaud/the/cafe/gare 误识别成英文的概率。
+# 可用 YAYA_ASR_INITIAL_PROMPT 覆盖；置为空字符串可关闭偏置。
+INITIAL_PROMPT = os.environ.get(
+    "YAYA_ASR_INITIAL_PROMPT",
+    "Conversation en français dans un café ou à la gare. "
+    "Je voudrais un café, un thé bien chaud, s'il vous plaît. "
+    "Le train arrive en gare. Bonjour, vous désirez ?",
+)
+
 _model = None
 
 
@@ -67,6 +83,8 @@ async def health():
         "model_loaded": _model is not None,
         "model_size": MODEL_SIZE,
         "device": DEVICE,
+        "beam_size": BEAM_SIZE,
+        "initial_prompt_enabled": bool(INITIAL_PROMPT),
     }
 
 
@@ -113,9 +131,56 @@ def decode_with_ffmpeg(src_path: str) -> np.ndarray:
             pass
 
 
+# ---------------------------------------------------------------- 保守发音纠正
+# 只处理「明确的英文误识别词」——它们是 tiny 模型在法语输入上最典型的幻觉，
+# 且几乎不可能作为正常法语出现。正常法语句子（含合法词 chef）一律原样返回。
+# 注意：show / chef 单独出现时可能是合法英文/法文，因此仅做近音词映射，
+# 不改写句子结构；"chef onti" 这类固定误识别短语才整体还原为 "un thé"。
+_PHRASE_RULES = [
+    # 吞掉可能被一起误识别的前置冠词，避免出现 "un un thé"
+    (re.compile(r"\b(?:un\s+)?chef\s+(?:onti|onty|onte)\b", re.IGNORECASE), "un thé"),
+    (re.compile(r"\bun\s+(?:onti|onty|onte)\b", re.IGNORECASE), "un thé"),
+]
+_WORD_MAP = {
+    "show": "chaud",   # /ʃoʊ/ ← chaud /ʃo/
+    "sho": "chaud",
+    "onti": "un thé",  # /ɔ̃ti/ ← un thé /œ̃ te/
+    "onty": "un thé",
+    "onte": "un thé",
+}
+_WORD_RE = re.compile(
+    r"\b(" + "|".join(re.escape(w) for w in _WORD_MAP) + r")\b", re.IGNORECASE
+)
+
+
+def _with_case(replacement: str, matched: str) -> str:
+    """让替换词继承被替换片段的大小写风格（Show→Chaud、SHOW→CHAUD）。"""
+    if matched.isupper():
+        return replacement.upper()
+    if matched[:1].isupper():
+        return replacement[:1].upper() + replacement[1:]
+    return replacement
+
+
+def correct_french_pronunciation(raw_text: str) -> dict:
+    """保守地把英文误识别词还原成法语近音词。
+
+    返回 ``{"text": 修正后, "raw_text": 原文, "corrected": 是否改动}``，
+    便于上游/前端在确实发生修正时给出低调提示，而不是误伤正常法语。
+    """
+    raw = (raw_text or "").strip()
+    text = raw
+    for pattern, replacement in _PHRASE_RULES:
+        text = pattern.sub(lambda m: _with_case(replacement, m.group(0)), text)
+    text = _WORD_RE.sub(
+        lambda m: _with_case(_WORD_MAP[m.group(1).lower()], m.group(1)), text
+    )
+    return {"text": text, "raw_text": raw, "corrected": text != raw}
+
+
 @app.post("/transcribe")
 async def transcribe(request: Request):
-    """接收音频文件，返回法语转写文本。"""
+    """接收音频文件，返回法语转写文本（含保守发音修正标记）。"""
     try:
         content_type = request.headers.get("content-type", "")
         body = await request.body()
@@ -141,16 +206,28 @@ async def transcribe(request: Request):
             segments, info = model.transcribe(
                 audio_array,
                 language=language,
-                beam_size=1,          # 贪心解码，最快
-                vad_filter=True,      # 过滤静音，减少幻觉
+                beam_size=BEAM_SIZE,     # 5 路束搜索，兼顾准确率与 CPU 延迟
+                vad_filter=True,         # 过滤静音，减少幻觉
                 condition_on_previous_text=False,
+                initial_prompt=INITIAL_PROMPT or None,  # 法语场景热词偏置
             )
-            text = "".join(seg.text for seg in segments).strip()
+            raw_text = "".join(seg.text for seg in segments).strip()
+            result = correct_french_pronunciation(raw_text)
+            text = result["text"]
             elapsed = time.time() - t0
-            logger.info("转写完成：lang=%s %.1fs text=%r", info.language, elapsed, text)
+            logger.info(
+                "转写完成：lang=%s %.1fs corrected=%s text=%r raw=%r",
+                info.language,
+                elapsed,
+                result["corrected"],
+                text,
+                raw_text,
+            )
             return {
                 "ok": True,
-                "text": text,
+                "text": text,                     # 修正后文本（供主流程使用）
+                "raw_text": result["raw_text"],   # 原始转写（供前端提示/排查）
+                "corrected": result["corrected"], # 是否发生保守修正
                 "language": info.language,
                 "language_probability": round(info.language_probability, 3),
                 "elapsed": round(elapsed, 2),

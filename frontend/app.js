@@ -147,12 +147,17 @@ function normalizeTurn(t){
     recast_of: t.recast_of==null ? null : t.recast_of,
     explanation: t.explanation==null ? null : t.explanation,
     is_correction: !!(t.is_correction),
+    asr_raw: t.asr_raw==null ? null : t.asr_raw,
     created_at: t.created_at==null ? null : t.created_at
   };
 }
-function userTurn(fr){
-  return { id:null, role:'user', fr:fr, cn:'翻译中…', recast_of:null,
+function userTurn(fr, rawText){
+  const t = { id:null, role:'user', fr:fr, cn:'翻译中…', recast_of:null,
     explanation:null, is_correction:false, created_at:null };
+  // 语音识别被修正过：记住原声文本，在气泡里用一行小字低调说明（打字输入不带此字段）
+  const raw = rawText==null ? '' : String(rawText).trim();
+  if(raw && raw!==String(fr).trim()) t.asr_raw = raw;
+  return t;
 }
 
 /* ---------- API 层：统一解析 {code,data,message} ---------- */
@@ -218,6 +223,7 @@ function messageHTML(m){
       <div class="bubble"><span>${esc(m.fr)}</span>
         <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听我的这句发音">🔊</button>
         ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
+        ${m.asr_raw?`<span class="asr-note">🎧 原声识别：${esc(m.asr_raw)} → 已按法语修正</span>`:''}
       </div>
     </div>`;
   }
@@ -382,11 +388,11 @@ function fallbackChat(sceneId, userText){
     explanation:null, new_words:[], _cn:'啊，我明白了！再多说一点吧。' };
 }
 
-async function submitUserText(text){
+async function submitUserText(text, rawText){
   text = String(text||'').trim();
   if(!text) return;
   const history = state.chatLog.slice(-10).map(normalizeTurn);
-  state.chatLog.push(userTurn(text));
+  state.chatLog.push(userTurn(text, rawText));
   const userIdx = state.chatLog.length-1;
   renderChat();
 
@@ -563,10 +569,18 @@ async function transcribeAudio(blob){
       const resp = await fetch('/api/asr/transcribe', {method:'POST', body:fd});
       const data = await resp.json();
       if(data.code===0 && data.data && data.data.text){
-        const text = data.data.text.trim();
+        const text = String(data.data.text).trim();
+        const rawText = data.data.raw_text==null ? '' : String(data.data.raw_text).trim();
+        const corrected = !!data.data.corrected;
         document.getElementById('userInput').value = text;
-        setMicStatus('识别到：'+text);
-        submitUserText(text);
+        // ASR 明确标记已修正且原声与结果不同：温和小字提示，不打红叉、不弹错误
+        if(corrected && rawText && rawText!==text){
+          setMicStatus('已按法语发音把识别结果修正为：'+text);
+          submitUserText(text, rawText);
+        }else{
+          setMicStatus('识别到：'+text);
+          submitUserText(text);
+        }
         return;
       }
     }catch(e){ /* 落到浏览器识别或打字 */ }

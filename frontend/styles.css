@@ -78,6 +78,9 @@
   .row.user .who{background:var(--brand-soft);color:var(--brand)}
   .cn{display:block;font-size:11.5px;color:var(--muted);margin-top:5px}
   .row.user .cn{color:#FBE0D3}
+  /* 语音原声被修正的低调说明：浅色小字，不抢正文、不打红叉、不打断对话 */
+  .asr-note{display:block;font-size:10.5px;line-height:1.5;color:rgba(255,255,255,.72);
+    margin-top:4px;padding-top:4px;border-top:1px dashed rgba(255,255,255,.28);font-style:italic}
   .row.user .spk-btn{color:#fff;opacity:.9}
   .spk-btn{border:none;background:none;cursor:pointer;font-size:13px;opacity:.55;padding:0 0 0 8px;vertical-align:middle;transition:.15s}
   .spk-btn:hover{opacity:1;transform:scale(1.12)}

@@ -72,14 +72,14 @@ SYSTEM_PROMPT = """你是「呀呀（YaYa）」，一位温柔、耐心的法语
   {
     "ai_text": "string，你用法语说的回应；若发生纠错，正确说法要自然嵌在这里",
     "recast_of": "string 或 null，被纠错的『用户原句』；未纠错时必须为 null",
-    "explanation": "string 或 null，面向中文用户的温和一句讲解；未纠错时必须为 null",
+    "explanation": "string 或 null，面向中文用户的温和一句讲解；必须是简体中文一句话，绝对不能出现法语或英语；未纠错时必须为 null",
     "new_words": "array，你在回应中用到的、用户可能不认识的法语词，0~5 个"
   }
 - new_words 数组每个元素形如：
   {"word": "法语词或短语", "meaning": "中文释义", "pos": "词性缩写", "cefr_level": "A2"}
   其中 pos 可用 n.m./n.f./adj./adv./loc./v./cond. 等；cefr_level 取 A1/A2/B1/B2/C1/C2，不确定时为 null。
 - 如果用户的表达没有错误，recast_of 与 explanation 都必须为 null，不要为了纠错而纠错。
-- explanation 要温和、简短（一句话），例如「想礼貌点单，法国人更常说 voudrais，不过你这样说也完全能懂」。
+- 【硬约束】explanation 必须且只能是【简体中文】的一句话：它是给用户看的讲解，用户不懂法语/英语。严禁写成法语或英语句子，严禁把用户的法语原句整段照抄进来。例如正确写法：「想礼貌点单，法国人更常说 voudrais，不过你这样说也完全能懂」；错误写法：「Le mot 'show' peut être utilisé pour exprimer...」。如果 explanation 不是简体中文，就视为输出格式错误，必须改写成上面这样的简体中文后再输出。
 - 确保输出是合法 JSON：字符串内的引号要正确转义。"""
 
 # ---------------------------------------------------------------- 法语→中文翻译（给对话气泡配中文）
@@ -451,6 +451,44 @@ def translate_to_zh(texts: list) -> list[Optional[str]]:
     return out
 
 
+# ---------------------------------------------------------------- explanation 中文化兜底
+# 真实 GLM 偶尔不遵守 SYSTEM_PROMPT，把 explanation 写成法语/英文。用户看不懂，
+# 这里在入口层做最后一道保险：非空却不含中日韩字符 → 尝试翻译，失败给温和占位。
+
+# 覆盖：日文假名、CJK 扩展 A、CJK 基本区、CJK 兼容汉字、韩文音节。
+_CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af]")
+_EXPLANATION_ZH_PLACEHOLDER = "这里有个更自然的说法，跟着呀呀读一遍就好啦～"
+
+
+def _has_cjk(text: str) -> bool:
+    return bool(_CJK_RE.search(text))
+
+
+def _ensure_explanation_zh(result: ChatResult) -> None:
+    """把非中文的 explanation 兜底成中文；中文 explanation 不触发任何网络请求。
+
+    只改 result.explanation，不动 recast_of / new_words / ai_text。translate_to_zh
+    自身对所有失败都已降级返回 None；这里再包一层 try 以绝对保障不抛异常。
+    """
+    explanation = result.explanation
+    if not (isinstance(explanation, str) and explanation.strip()):
+        return
+    if _has_cjk(explanation):
+        return
+
+    translated = None
+    try:
+        translated = translate_to_zh([explanation])[0]
+    except Exception as exc:  # 防御性：translate_to_zh 契约上不抛，仍兜底
+        logger.warning("explanation 中文兜底翻译异常：%s", exc)
+
+    if isinstance(translated, str) and translated.strip() and _has_cjk(translated):
+        result.explanation = translated.strip()
+    else:
+        # 翻译失败或译文仍非中文 → 温和中文占位，不把看不懂的外语展示给用户。
+        result.explanation = _EXPLANATION_ZH_PLACEHOLDER
+
+
 # ---------------------------------------------------------------- 统一入口
 
 def recast(scene_id: str, user_text: str, history: list) -> ChatResult:
@@ -469,6 +507,7 @@ def recast(scene_id: str, user_text: str, history: list) -> ChatResult:
         # #1 无 key：零网络请求，直接本地规则。
         result = recast_local(scene_id, user_text)
 
+    _ensure_explanation_zh(result)  # 非中文讲解兜底翻译/占位；中文零额外请求
     result.llm_new_words = llm_new_words
     result.new_words = _extract_new_words(scene_id, result.ai_text, llm_new_words)
     return result

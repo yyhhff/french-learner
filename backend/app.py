@@ -7,7 +7,10 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import string
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -83,6 +86,31 @@ _TRIM_CHARS = string.punctuation + "«»„“”…¿¡·°\t\n\r "
 
 def normalize_user_text(text: str) -> str:
     return str(text).strip().strip(_TRIM_CHARS).strip()
+
+
+def _parse_multipart(body: bytes, content_type: str) -> tuple[bytes, str, str]:
+    """极简 multipart 解析：提取第一个文件字段的字节、文件名、content-type。
+
+    只用标准库，避免为主后端引入 python-multipart 依赖。
+    """
+    m = re.search(r"boundary=(?:\"([^\"]+)\"|([^;\s]+))", content_type)
+    if not m:
+        raise ApiError(40001, 400, "缺少 multipart boundary")
+    boundary = (m.group(1) or m.group(2)).encode("utf-8")
+    parts = body.split(b"--" + boundary)
+    for part in parts:
+        if b"Content-Disposition:" not in part or b"filename=" not in part:
+            continue
+        header_blob, _, payload = part.partition(b"\r\n\r\n")
+        header = header_blob.decode("utf-8", "ignore")
+        fn = re.search(r'filename="([^"]*)"', header)
+        ct = re.search(r"Content-Type:\s*([^\r\n]+)", header)
+        # 去掉payload末尾的 \r\n
+        payload = payload.rstrip(b"\r\n")
+        return payload, (fn.group(1) if fn else "audio.webm"), (
+            ct.group(1).strip() if ct else "application/octet-stream"
+        )
+    raise ApiError(40001, 400, "multipart 中没有找到音频文件字段")
 
 
 # ---------------------------------------------------------------- 路由（全部先声明）
@@ -199,6 +227,93 @@ async def profile():
     if data is None:
         raise ApiError(50001, 500, "用户档案不存在")
     return ok(data)
+
+
+# ---------------------------------------------------------------- 本地 ASR 代理
+
+ASR_SERVICE_URL = os.environ.get(
+    "YAYA_ASR_URL", "http://127.0.0.1:8010"
+).rstrip("/")
+
+
+@app.get("/api/asr/status")
+async def asr_status():
+    """前端启动时探测本地 ASR 服务是否可用，决定是否显示麦克风。"""
+    try:
+        with urllib.request.urlopen(ASR_SERVICE_URL + "/health", timeout=2) as resp:
+            import json
+
+            info = json.loads(resp.read().decode("utf-8"))
+        return ok({"available": True, **info})
+    except Exception:  # noqa: BLE001 - 服务未起是正常状态
+        return ok({"available": False})
+
+
+@app.post("/api/asr/transcribe")
+async def asr_transcribe(request: Request):
+    """转发音频到本地 ASR 服务，返回转写文本。
+
+    ASR 服务未启动或失败时返回 40001 + 明确提示，前端据此降级为打字，
+    绝不因为语音不可用而中断对话主流程。
+    """
+    content_type = request.headers.get("content-type", "")
+    body = await request.body()
+    audio, filename, audio_ct = _parse_multipart(body, content_type)
+    language = "fr"
+    lang_m = re.search(r'name="language"\r\n\r\n([^\r\n]+)', body.decode("latin-1", "ignore"))
+    if lang_m:
+        language = lang_m.group(1).strip() or "fr"
+    if not audio:
+        raise ApiError(40001, 400, "空音频文件")
+
+    boundary = "----yayaAsrBoundary"
+
+    def part(name: str, value: str) -> bytes:
+        return (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="{name}"\r\n\r\n'
+            f"{value}\r\n"
+        ).encode("utf-8")
+
+    body = b"".join(
+        [
+            part("language", language),
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+            f"Content-Type: {audio_ct or 'application/octet-stream'}\r\n\r\n".encode(
+                "utf-8"
+            ),
+            audio,
+            f"\r\n--{boundary}--\r\n".encode("utf-8"),
+        ]
+    )
+    req = urllib.request.Request(
+        ASR_SERVICE_URL + "/transcribe",
+        data=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            import json
+
+            result = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        raise ApiError(50001, 500, f"语音转写失败（ASR 服务返回 {exc.code}）")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("ASR 服务不可用：%s", exc)
+        raise ApiError(
+            40001,
+            400,
+            "本地语音服务未启动，请改用打字，或启动 ASR 服务后再试。",
+        )
+
+    if not result.get("ok"):
+        raise ApiError(50001, 500, result.get("error", "语音转写失败"))
+    text = (result.get("text") or "").strip()
+    if not text:
+        raise ApiError(40001, 400, "没听清，请再说一次或直接打字")
+    return ok({"text": text, "language": result.get("language")})
 
 
 # ---------------------------------------------------------------- 启动初始化

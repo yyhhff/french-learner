@@ -5,8 +5,15 @@ __pycache__/
 # 运行时数据库（seed 可在启动时自动重建）
 backend/data/
 
-# 本地环境
+# 本地环境（ASR 独立虚拟环境，含 Whisper 依赖，体积大不入库）
 .venv/
+.venv-asr/
 venv/
 *.log
 .DS_Store
+
+# 临时下载的 wheel 与测试音频
+.wheelhouse/
+*.mp3
+*.webm
+*.wav

@@ -400,59 +400,119 @@ function speak(btn){
   window.speechSynthesis.speak(u);
 }
 
-const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognizer = null, recording = false;
+/* 语音输入：MediaRecorder 录音 → 上传本地 Whisper 服务转写（不依赖境外服务）
+   降级顺序：本地 ASR 服务 → 浏览器自带识别（若在境外网络可用）→ 打字 */
+let mediaRecorder = null, audioChunks = [], recording = false;
+let asrAvailable = null; // null=未探测 true/false
 
-function toggleMic(){
-  if(!SpeechRec){
-    setMicStatus('当前浏览器不支持语音识别，请用 Chrome / Edge，或直接在输入框打字。');
-    notify('这个浏览器不支持语音识别，可以直接打字哦');
+function pickMimeType(){
+  const candidates = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  for(const t of candidates){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t; }
+  return '';
+}
+
+async function checkAsr(){
+  if(asrAvailable!==null) return asrAvailable;
+  try{
+    const r = await apiRequest('/api/asr/status');
+    asrAvailable = !!(r && r.available);
+  }catch(e){ asrAvailable = false; }
+  return asrAvailable;
+}
+
+async function toggleMic(){
+  const btn = document.getElementById('micBtn');
+  if(recording){ if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop(); return; }
+
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+    setMicStatus('这个浏览器不支持录音，请用 Chrome / Edge，或直接打字。');
+    notify('浏览器不支持录音，可以直接打字哦');
     return;
   }
-  if(recording){ if(recognizer) recognizer.stop(); return; }
 
-  recognizer = new SpeechRec();
-  recognizer.lang = 'fr-FR';
-  recognizer.interimResults = false;
-  recognizer.continuous = false;
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){
+    setMicStatus('麦克风权限被拒绝。请点地址栏左侧锁图标允许麦克风，或直接打字。');
+    notify('需要麦克风权限，也可以直接打字');
+    return;
+  }
 
-  recognizer.onstart = ()=>{
-    recording = true;
-    document.getElementById('micBtn').classList.add('rec');
-    setMicStatus('🎙 在听了，请说法语…（再点麦克风可结束）');
-  };
-  recognizer.onresult = (e)=>{
-    const text = e.results[0][0].transcript.trim();
-    if(text){
-      document.getElementById('userInput').value = text;
-      submitUserText(text);
+  try{
+    const mime = pickMimeType();
+    mediaRecorder = new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size) audioChunks.push(e.data); };
+    mediaRecorder.onstart = ()=>{
+      recording = true;
+      btn.classList.add('rec');
+      setMicStatus('🎙 在听，请说法语…说完再点一次麦克风，或等 2 秒自动结束');
+    };
+    mediaRecorder.onstop = async ()=>{
+      recording = false;
+      btn.classList.remove('rec');
+      stream.getTracks().forEach(t=>t.stop());
+      const blob = new Blob(audioChunks, {type: mediaRecorder.mimeType || 'audio/webm'});
+      if(!blob.size){ setMicStatus('没录到声音，再试一次或直接打字。'); return; }
+      await transcribeAudio(blob);
+    };
+    mediaRecorder.start();
+    // 最长 15 秒自动结束，避免一直占着麦克风
+    setTimeout(()=>{ if(recording && mediaRecorder.state!=='inactive') mediaRecorder.stop(); }, 15000);
+  }catch(e){
+    stream.getTracks().forEach(t=>t.stop());
+    setMicStatus('录音启动失败：'+e.message+'（可直接打字）');
+  }
+}
+
+async function transcribeAudio(blob){
+  setMicStatus('正在识别你说的话…');
+  const ext = (blob.type.includes('mp4')?'.m4a':blob.type.includes('ogg')?'.ogg':'.webm');
+  const available = await checkAsr();
+  if(available){
+    try{
+      const fd = new FormData();
+      fd.append('file', blob, 'voice'+ext);
+      fd.append('language', 'fr');
+      const resp = await fetch('/api/asr/transcribe', {method:'POST', body:fd});
+      const data = await resp.json();
+      if(data.code===0 && data.data && data.data.text){
+        const text = data.data.text.trim();
+        document.getElementById('userInput').value = text;
+        setMicStatus('识别到：'+text);
+        submitUserText(text);
+        return;
+      }
+    }catch(e){ /* 落到浏览器识别或打字 */ }
+  }
+  // 降级：浏览器自带识别（多数国内网络不可用，但保留兜底）
+  await browserRecognizeFallback();
+}
+
+function browserRecognizeFallback(){
+  return new Promise((resolve)=>{
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SpeechRec){
+      setMicStatus('本地语音服务未启动，请直接打字（或先启动 ASR 服务）。');
+      document.getElementById('userInput').focus();
+      resolve(); return;
     }
-  };
-  recognizer.onerror = (e)=>{
-    let msg = '';
-    switch(e.error){
-      case 'not-allowed':
-      case 'service-not-allowed':
-        msg = '麦克风权限被拒绝。请点浏览器地址栏左侧的锁图标允许麦克风，或直接在下方打字。'; break;
-      case 'no-speech':
-        msg = '没听到声音，再点一次麦克风试试，也可以直接打字。'; break;
-      case 'network':
-        msg = '语音服务连不上啦：浏览器自带的法语识别依赖境外服务，国内网络通常无法访问。请暂时用打字，输入框已经为你准备好了。'; break;
-      case 'aborted':
-        msg = '识别已取消。'; break;
-      default:
-        msg = '识别出错（'+e.error+'），请直接打字重试。';
-    }
-    setMicStatus(msg);
-    const input = document.getElementById('userInput');
-    if(input) input.focus();
-  };
-  recognizer.onend = ()=>{
-    recording = false;
-    document.getElementById('micBtn').classList.remove('rec');
-  };
-  try { recognizer.start(); }
-  catch(err){ setMicStatus('无法启动语音识别：'+err.message+'（可直接打字）'); }
+    const rec = new SpeechRec();
+    rec.lang='fr-FR'; rec.interimResults=false; rec.continuous=false;
+    rec.onresult=(e)=>{
+      const text=(e.results[0][0].transcript||'').trim();
+      if(text){ document.getElementById('userInput').value=text; setMicStatus('识别到：'+text); submitUserText(text); }
+      resolve();
+    };
+    rec.onerror=(e)=>{
+      const msg = e.error==='network'
+        ? '本地语音服务未启动，浏览器识别也连不上（境外服务）。请直接打字。'
+        : '识别未成功（'+e.error+'），请直接打字。';
+      setMicStatus(msg); document.getElementById('userInput').focus(); resolve();
+    };
+    try{ rec.start(); }catch(e){ setMicStatus('请直接打字。'); resolve(); }
+  });
 }
 
 /* ---------- 复习：4 档评分调 POST /api/cards/{id}/review ---------- */

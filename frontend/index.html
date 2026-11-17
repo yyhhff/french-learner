@@ -54,12 +54,12 @@
       <div class="composer">
         <div class="try-row" id="tryRow"><small>试试点击：</small></div>
         <div class="input-line">
-          <button class="mic" id="micBtn" title="点击说话（浏览器语音识别）" onclick="toggleMic()">🎤</button>
+          <button class="mic" id="micBtn" title="点击说话（本地语音识别）" onclick="toggleMic()">🎤</button>
           <input id="userInput" class="fake-input" placeholder="点麦克风说法语，或直接输入后回车…"
                  onkeydown="if(event.key==='Enter')sendTyped()">
           <button class="send-btn" onclick="sendTyped()">发送</button>
         </div>
-        <div id="micStatus">提示：语音识别用浏览器自带能力，需允许麦克风权限；建议用 Chrome / Edge。也可以直接打字。</div>
+        <div id="micStatus">提示：点麦克风说话，本地 AI 离线转写法语（需启动语音服务）；也可直接打字。首次使用需允许麦克风权限。</div>
       </div>
     </main>
 

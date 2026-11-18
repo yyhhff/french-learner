@@ -17,6 +17,7 @@ import os
 import re
 import socket
 import time
+import unicodedata
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
@@ -72,14 +73,15 @@ SYSTEM_PROMPT = """你是「呀呀（YaYa）」，一位温柔、耐心的法语
   {
     "ai_text": "string，你用法语说的回应；若发生纠错，正确说法要自然嵌在这里",
     "recast_of": "string 或 null，被纠错的『用户原句』；未纠错时必须为 null",
-    "explanation": "string 或 null，面向中文用户的温和一句讲解；必须是简体中文一句话，绝对不能出现法语或英语；未纠错时必须为 null",
+    "explanation": "string 或 null，面向中文用户的温和一句讲解；必须是简体中文一句话；未纠错时必须为 null",
     "new_words": "array，你在回应中用到的、用户可能不认识的法语词，0~5 个"
   }
 - new_words 数组每个元素形如：
   {"word": "法语词或短语", "meaning": "中文释义", "pos": "词性缩写", "cefr_level": "A2"}
   其中 pos 可用 n.m./n.f./adj./adv./loc./v./cond. 等；cefr_level 取 A1/A2/B1/B2/C1/C2，不确定时为 null。
 - 如果用户的表达没有错误，recast_of 与 explanation 都必须为 null，不要为了纠错而纠错。
-- 【硬约束】explanation 必须且只能是【简体中文】的一句话：它是给用户看的讲解，用户不懂法语/英语。严禁写成法语或英语句子，严禁把用户的法语原句整段照抄进来。例如正确写法：「想礼貌点单，法国人更常说 voudrais，不过你这样说也完全能懂」；错误写法：「Le mot 'show' peut être utilisé pour exprimer...」。如果 explanation 不是简体中文，就视为输出格式错误，必须改写成上面这样的简体中文后再输出。
+- 【硬约束】纠错专指「把用户刚才那句话用更自然的法语再说一遍」：ai_text 必须真正包含对用户原句的修正（同一说话人视角、同一语义、只修语言错误），修正说法必须能在 ai_text 中找到。绝不能把「你（呀呀）接下来要做或要说的话」当成用户的正确说法来纠错。用户的话是片段、语义不明或意图无法确定时，必须 recast_of=null、explanation=null，自然接话即可，绝不硬凑纠错。
+- 【硬约束】explanation 必须是【简体中文】的一句话：它是给用户看的讲解，用户不懂成段的法语/英语。严禁写成成段的法语或英语句子，严禁把用户的法语原句整段照抄进来。如需提及具体的法语词或短语，只允许用单引号包裹的短形式，并且必须遵守：正确形式写在前面、错误形式写在后面，正确形式必须与你 ai_text 中实际给出的说法一致，绝不能把对错或顺序写反。讲解语法规则时，规则表述本身也必须与例子方向一致——说法语形容词一般放在名词**后面**（如 'un café froid'，froid 在 café 后面），绝不能把「之前/之后」这类方位词写反。例如正确写法：「想礼貌点单，法国人更常说 'voudrais'，不过你这样说也完全能懂」「法语里形容词一般放在名词后面，所以更自然的是 'café froid' 而不是 'froid café'」；错误写法：「Le mot 'show' peut être utilisé...」（成段外语）、把顺序写反的「所以是 'froid café' 而不是 'café froid'」、以及方向写反的「形容词放在名词之前，所以是 'café froid'」。如果 explanation 不是简体中文，就视为输出格式错误，必须改写成上面这样的简体中文后再输出。
 - 确保输出是合法 JSON：字符串内的引号要正确转义。"""
 
 # ---------------------------------------------------------------- 法语→中文翻译（给对话气泡配中文）
@@ -489,6 +491,113 @@ def _ensure_explanation_zh(result: ChatResult) -> None:
         result.explanation = _EXPLANATION_ZH_PLACEHOLDER
 
 
+# ---------------------------------------------------------------- explanation 语序兜底（验收缺陷 D1）
+# 真实 GLM 偶尔把「正确形式 vs 错误形式」的顺序写反（如「所以是 'froid café' 而不是
+# 'café froid'」）。最后一道保险：explanation 含「而不是/不是/而非」且带单引号短形式
+# 时，与 ai_text（正确回应）一致的一方视为正确形式；若「而不是」之前引用的片段与
+# ai_text 不符、而之后的片段反而一致 → 判定颠倒，机械交换两个片段。
+# 无法判定或异常时一律保持原样，绝不抛出。
+
+# 单引号片段，允许内部撇号（法语 j'aime / l'homme）：撇号后跟拉丁字母视为缩合撇号
+_QUOTED_RE = re.compile(r"'((?:[^']|'(?=[A-Za-zÀ-ÿ])){1,80})'")
+_EXPLAIN_ORDER_KEYS = ("而不是", "不是", "而非")
+
+
+def _norm_fr(text: str) -> str:
+    """法语片段归一化：去音调、小写、去空白与常见标点，用于做包含比较。
+
+    去音调按 NFD 分解后剔除组合符号（é→e、à→a），避免 allé/allér 这类
+    因重音符号造成的假性不匹配。
+    """
+    decomposed = unicodedata.normalize("NFD", (text or "").lower())
+    stripped = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+    return re.sub(r"[\s.,!?;:«»'\"()-]+", "", stripped)
+
+
+def _validate_explanation_order(result: ChatResult) -> None:
+    """校验 explanation 中「正确形式在前」的约束，颠倒时交换两个引号片段。
+
+    判定只依赖 ai_text（重述里的正确说法），不依赖 recast_of——用户原句
+    本来就含错误形式，拿它做参照会让对错双方都「匹配成功」而失效。
+    """
+    try:
+        if not (isinstance(result.recast_of, str) and result.recast_of.strip()):
+            return  # 仅纠错轮触发（D1 范围）；非纠错轮不干预
+        explanation = result.explanation
+        if not (isinstance(explanation, str) and explanation.strip()):
+            return
+        if not (isinstance(result.ai_text, str) and result.ai_text.strip()):
+            return
+        keyword_pos = max(
+            (explanation.find(k) for k in _EXPLAIN_ORDER_KEYS if k in explanation),
+            default=-1,
+        )
+        if keyword_pos < 0:
+            return
+        matches = list(_QUOTED_RE.finditer(explanation))
+        if len(matches) < 2:
+            return
+        before = [m for m in matches if m.start() < keyword_pos]
+        after = [m for m in matches if m.start() > keyword_pos]
+        if not before or not after:
+            return
+        claimed_ok = _norm_fr(before[-1].group(1))
+        claimed_bad = _norm_fr(after[0].group(1))
+        if not claimed_ok or not claimed_bad:
+            return
+        hay = _norm_fr(result.ai_text)
+        if claimed_ok in hay or claimed_bad not in hay:
+            return  # 顺序正确，或两个片段都与/都不与 ai_text 匹配：无法判定，不动
+        # 确认颠倒：交换两个完整引号片段（含引号），占位符防止连环替换
+        fixed = explanation.replace(after[0].group(0), "\x00")
+        fixed = fixed.replace(before[-1].group(0), "'" + after[0].group(1) + "'")
+        fixed = fixed.replace("\x00", "'" + before[-1].group(1) + "'")
+        result.explanation = fixed
+        logger.warning("explanation 正确/错误形式颠倒，已自动交换：%s", fixed)
+    except Exception as exc:  # 防御性：校验只做增益，绝不影响主链路
+        logger.warning("explanation 语序校验异常，保持原样：%s", exc)
+
+
+# ---------------------------------------------------------------- 伪重述兜底（验收缺陷 D2）
+# 真实 GLM 间歇性把「接下来该说的话」硬凑成用户句子的「正确说法」（recast_of 非空，
+# 但 ai_text 与原句毫无词汇关联，甚至角色错位）。保险：recast_of 与 ai_text 无任何
+# 词汇锚（归一化后 ≥3 字母内容词子串匹配）→ 判定伪重述，降级为普通回应：保留
+# ai_text，清空 recast_of / explanation。宁可不纠错，不教错的。异常一律不抛。
+
+_RECAST_STOPWORDS = frozenset(
+    """je tu il elle on nous vous ils elles me te se lui leur y en ce cet cette ces
+    mon ma mes ton ta tes son sa ses notre nos votre vos le la les un une des du de
+    au aux a et ou mais donc car ne pas plus est sont suis es ete qui que quoi dont
+    va vas vais vont allons allez aller allé allée ça bien tres très si""".split()
+)
+
+
+def _validate_recast_relevance(result: ChatResult) -> None:
+    """recast_of 与 ai_text 无词汇锚时判定伪重述，降级为普通回应。
+
+    锚刻意放宽：任一 ≥3 字母、非虚词的原句词（归一化后）在 ai_text 中出现
+    子串即放行——真重述必然保留话题词；阈值过高会把合法重述误杀。
+    """
+    try:
+        if not (isinstance(result.recast_of, str) and result.recast_of.strip()):
+            return
+        if not (isinstance(result.ai_text, str) and result.ai_text.strip()):
+            return
+        hay = _norm_fr(result.ai_text)
+        if not hay:
+            return
+        for raw in re.findall(r"[a-zà-öø-ÿ]+", result.recast_of.lower()):
+            if len(raw) < 3 or raw in _RECAST_STOPWORDS:
+                continue
+            if _norm_fr(raw) in hay:
+                return  # 有锚：视为真重述，放行
+        result.recast_of = None
+        result.explanation = None
+        logger.warning("伪重述已降级为普通回应：ai_text 与 recast_of 无词汇锚")
+    except Exception as exc:  # 防御性：校验只做增益，绝不影响主链路
+        logger.warning("伪重述校验异常，保持原样：%s", exc)
+
+
 # ---------------------------------------------------------------- 统一入口
 
 def recast(scene_id: str, user_text: str, history: list) -> ChatResult:
@@ -507,7 +616,12 @@ def recast(scene_id: str, user_text: str, history: list) -> ChatResult:
         # #1 无 key：零网络请求，直接本地规则。
         result = recast_local(scene_id, user_text)
 
+    if result.recast_of:
+        # recast_of 以用户输入为唯一权威，防 GLM 回填截断/漂移（验收缺陷 D2）
+        result.recast_of = user_text
     _ensure_explanation_zh(result)  # 非中文讲解兜底翻译/占位；中文零额外请求
+    _validate_recast_relevance(result)  # 伪重述兜底：无词汇锚降级为普通回应（D2）
+    _validate_explanation_order(result)  # 「正确形式在前」校验，颠倒自动交换（D1）
     result.llm_new_words = llm_new_words
     result.new_words = _extract_new_words(scene_id, result.ai_text, llm_new_words)
     return result

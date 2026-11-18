@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -159,6 +160,19 @@ CREATE TABLE IF NOT EXISTS input_words (
 CREATE INDEX IF NOT EXISTS idx_input_texts_level ON input_texts (cefr_level, sort_order);
 CREATE INDEX IF NOT EXISTS idx_input_lines_text ON input_lines (text_id, seq);
 CREATE INDEX IF NOT EXISTS idx_input_words_text ON input_words (text_id);
+
+-- ===== 阶段0 增量：定级/考级尝试表（旧 8 表结构一字不改）=====
+CREATE TABLE IF NOT EXISTS attempts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL,
+    kind         TEXT    NOT NULL CHECK (kind IN ('placement', 'exam')),
+    score        INTEGER NOT NULL,
+    detail_json  TEXT    NOT NULL,
+    created_at   TEXT    NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_attempts_user_kind ON attempts (user_id, kind, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_attempts_kind ON attempts (kind);
 """
 
 
@@ -231,6 +245,18 @@ def row_to_user(row: sqlite3.Row) -> dict:
         "xp": row["xp"],
         "streak_days": row["streak_days"],
         "last_active_date": row["last_active_date"],
+        "created_at": row["created_at"],
+    }
+
+
+def row_to_attempt(row: sqlite3.Row) -> dict:
+    """attempts 出参：detail_json 保持 JSON 字符串，由调用方 json.loads。"""
+    return {
+        "id": row["id"],
+        "user_id": row["user_id"],
+        "kind": row["kind"],
+        "score": row["score"],
+        "detail_json": row["detail_json"],
         "created_at": row["created_at"],
     }
 
@@ -809,3 +835,58 @@ def collect_input_words(
         "already_existed": already_existed,
         "skipped": skipped,
     }
+
+
+# ================================================================ 阶段0 增量：定级尝试
+# attempts 仅存原始记录，本阶段只写 kind='placement'；kind='exam' 为波二预留。
+
+def add_attempt(user_id: int, kind: str, score: int, detail: dict) -> dict:
+    conn = get_conn()
+    try:
+        cur = conn.execute(
+            "INSERT INTO attempts (user_id, kind, score, detail_json, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, kind, score, json.dumps(detail, ensure_ascii=False), now_iso()),
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT * FROM attempts WHERE id = ?", (cur.lastrowid,)
+        ).fetchone()
+        return row_to_attempt(row)
+    finally:
+        conn.close()
+
+
+def get_latest_attempt(user_id: int, kind: str) -> dict | None:
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT * FROM attempts WHERE user_id = ? AND kind = ? ORDER BY id DESC LIMIT 1",
+            (user_id, kind),
+        ).fetchone()
+        return row_to_attempt(row) if row else None
+    finally:
+        conn.close()
+
+
+def count_attempts(user_id: int, kind: str) -> int:
+    conn = get_conn()
+    try:
+        return conn.execute(
+            "SELECT COUNT(*) AS n FROM attempts WHERE user_id = ? AND kind = ?",
+            (user_id, kind),
+        ).fetchone()["n"]
+    finally:
+        conn.close()
+
+
+def set_user_cefr_level(user_id: int, level: str) -> None:
+    """只更新 cefr_level；target_level / xp / streak_days 一律不动。"""
+    conn = get_conn()
+    try:
+        conn.execute(
+            "UPDATE users SET cefr_level = ? WHERE id = ?", (level, user_id)
+        )
+        conn.commit()
+    finally:
+        conn.close()

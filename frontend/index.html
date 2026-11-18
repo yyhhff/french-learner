@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
 <div class="wrap">
@@ -29,10 +29,11 @@
     </div>
   </div>
 
-  <!-- 视图切换：对话 / 阅读 -->
+  <!-- 视图切换：对话 / 阅读 / 定级 -->
   <div class="view-tabs" role="tablist">
     <button class="view-tab on" id="tabChat" onclick="switchView('chat')">💬 对话陪练</button>
     <button class="view-tab" id="tabRead" onclick="switchView('read')">📖 分级阅读</button>
+    <button class="view-tab" id="tabAssessment" onclick="switchView('assessment')">🎯 定级</button>
     <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
   </div>
 
@@ -133,6 +134,25 @@
     </div>
   </div>
 
+  <!-- 定级：快速测一测（参考等级，随时可重测） -->
+  <div id="viewAssessment" class="view hidden">
+    <div class="asm-wrap">
+
+      <!-- 引导态 -->
+      <div id="asmIntro" class="card asm-intro-card">
+        <div class="asm-intro-emoji">🎯</div>
+        <h2>快速测一测</h2>
+        <p>约 3 分钟，12 道选择题，随时可重测。<br>一份轻松的小自测，帮你找到更贴合自己的起点 🌱</p>
+        <button class="asm-primary" id="asmStartBtn" onclick="startAssessment()">开始测一测</button>
+      </div>
+
+      <!-- 答题态 / 结果态：由 app.js 填充 -->
+      <div id="asmQuiz"></div>
+      <div id="asmResult"></div>
+
+    </div>
+  </div>
+
   <div class="foot">
     呀呀法语 YaYa · 让每一次开口，都变成温柔的进步
     <button class="reset" onclick="resetChat()">重置对话</button>
@@ -150,6 +170,6 @@
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=9" defer></script>
+<script src="app.js?v=11" defer></script>
 </body>
 </html>

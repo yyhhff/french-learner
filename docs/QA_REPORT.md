@@ -208,3 +208,31 @@
 - **冒烟 3（HTTP 端到端）**：带 `ZHIPU_API_KEY` 重启 `127.0.0.1:8000` 后，`POST /api/chat`（scene `street`，`Je suis aller à le gare`）返回 `code=0`，`ai_text="Ah, vous êtes allé à la gare ? Où en êtes-vous ?"`，`recast_of` 正确回填原句，`new_words` 命中 `la gare`。本地规则对同一句只会输出 `Je suis allé à le gare`（不会同时修 `à le`），故此结果证明运行中的服务确实走真实 GLM。
 - **追加（19:57）对话气泡体验**：新增 `POST /api/translate` 批量翻译端点与前端「双方 🔊 + 中文小字」，`ai.py` 抽出统一 `_glm_post()`（重试规则不变）。真实调用 `texts=["Je veux un thé.","Ah, vous êtes allé à la gare ? Où en êtes-vous ?"]` → `code=0`，译文 `["我想喝杯茶。","啊，你去车站了？你到哪了？"]`；随后回归 `POST /api/chat` 仍 200/4 字段、重述正常，说明重构未破坏 109 用例基线。
 - **结论**：风险 #1 关闭。真实端点鉴权、OpenAI 兼容响应解析、严格 JSON 校验、recast 回填、收词合并均打通；未覆盖真实限流/额度耗尽。
+
+## 八、验收期缺陷 D1：explanation 正确/错误形式颠倒（2026-11-18）
+
+- **现象**（上级验收发现）：输入 `Je veux un froid café, s'il vous plaît.`，重述正确（`Bien sûr, un café froid.`），但解释写成「在法语中，形容词放在名词后面，所以是 'froid café' 而不是 'café froid'。」——正确/错误形式颠倒。
+- **根因**：SYSTEM_PROMPT 自相矛盾（要求 explanation 绝不出现法语，但其"正确示例"本身含法语词 voudrais），且从未约束「正确形式在前、与重述一致」；后端仅有语言兜底（`_ensure_explanation_zh` 管"是不是中文"），无正确性校验（管"说得对不对"）。
+- **修复**（`backend/ai.py`）：
+  1. 提示词：消除矛盾——允许单引号包裹的法语短形式，硬约束「正确形式在前、错误形式在后、正确形式必须与 ai_text 中实际说法一致」，附正反示例；
+  2. 新增确定性兜底 `_validate_explanation_order`：仅纠错轮（`recast_of` 非空）且 explanation 含「而不是/不是/而非」及 ≥2 个单引号片段（正则支持法语缩合撇号 j'aime/l'homme）时，与 `ai_text` 归一化匹配的一方视为正确形式；判定颠倒则机械交换两个片段，无法判定或异常一律保持原样，绝不抛出。
+- **验证**：
+  - 离线单测 **9/9 PASS**（颠倒交换 / 顺序正确不动 / 撇号片段颠倒交换 / 撇号顺序正确不动 / 双片段均匹配不动 / 均不匹配不动 / 无引号 / 无关键字 / recast_of 空）；
+  - 真实 GLM 直调 2 次（scene `cafe` + 原句）：两次 explanation 均正确形式在前、与重述一致，未再颠倒；
+  - HTTP 端到端（`start.bat` 重启后 `POST /api/chat`，scene `cafe`）：`code=0`、HTTP 200，`ai_text="D'accord, je vous apporte un café froid tout de suite. Ça va bien pour vous ?"`，explanation「在咖啡馆点单时，可以说 'Je veux un café froid, s'il vous plaît'。」——顺序正确。
+- **边界**：兜底仅覆盖「单引号片段 + 而不是类关键字」这一模板类；主防线是提示词约束。本次改动仅涉 explanation 生成与校验，未批量重跑 109 用例（v1/v2 其余链路未动）。
+
+## 九、验收期缺陷 D2：伪重述（凑 recast_of 但未真正纠错）+ recast_of 截断（2026-11-18）
+
+- **现象**（上级验收发现）：输入片段句 `S'en va ?`，GLM 间歇性硬凑 `recast_of`，ai_text（"Bien sûr, je vais préparer votre croissant…"）与原句无词汇关联、角色错位（把服务员的台词当成顾客的"正确说法"）；且 recast_of 回填被截断为 `S'en va`（丢 `?`）。复现取证：同一输入 2 次直调，一次伪重述、一次正常——**间歇性**，提示词单防线不可靠。
+- **根因**：① SYSTEM_PROMPT 未定义"纠错"的充要条件（= 对用户原句的修正说法须出现在 ai_text 中），GLM 可把"接下来该说的话"当正确说法；② 后端无 recast_of 与 ai_text 的相关性校验；③ recast_of 直接采信 GLM 回填，无用户原句权威覆盖。
+- **修复**（`backend/ai.py`）：
+  1. SYSTEM_PROMPT 新增硬约束：纠错专指把用户原句用更自然的法语再说一遍，修正说法必须能在 ai_text 中找到；片段/语义不明必须 `recast_of=null` 纯接话；
+  2. 新增 `_validate_recast_relevance` 兜底：recast_of 与 ai_text 归一化后无词汇锚（任一 ≥3 字母非虚词内容词子串匹配；归一化含 NFD 去重音，cinéma/cinema 可匹配）→ 判定伪重述 → 降级普通回应（recast_of/explanation 置 null，保留 ai_text）——宁可不纠错，不教错的；虚词表覆盖代词/冠词/常用助动词；
+  3. `recast()` 入口：recast_of 非空时一律以 `user_text` 覆盖回填（用户输入是唯一权威，治截断/漂移）；
+  4. 顺带（D1 家族残留，本节回归中发现）：提示词补「规则表述方向必须与例子一致（形容词在名词后面）」约束及反例，治 explanation 中「之前/之后」方位词写反。
+- **验证**：
+  - 离线单测 **8/8 PASS**（真机 D2 原型降级 / gare、froid café、撇号 j'aime、重音 cinéma 真重述均放行 / 纯虚词句降级 / recast_of 空不动 / ai_text 空不抛）；
+  - 真实 GLM 直调：`S'en va ?` × 2 用户可见行为均正确（无伪重述卡；日志显示兜底真实拦截 2 次）；对照组真错句重述正常、recast_of 完整；
+  - HTTP 端到端 × 2：真实错句（explanation 方向正确 + 完整回填）与片段句（`recast_of=null` 无卡）均 200/code 0。
+- **边界**：词汇锚刻意放宽（任一内容词命中即放行），可能漏放个别伪重述（概率低、无错误教学危害大于误杀）；"之前/之后"方位词错误仅提示词约束（机械校验需词性标注，零依赖约束下不做）；本地规则路径不受影响（其 ai_text 按构造含修正说法）。

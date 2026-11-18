@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 import ai
+import assessment
 import db
 import srs
 import seed
@@ -540,6 +541,84 @@ async def input_recommend(
     return ok({"text": detail, "target_level": target, "reason": reason})
 
 
+# ---------------------------------------------------------------- 阶段0 定级 API（先于静态 mount 声明）
+# 契约 ARCHITECTURE_PLACEMENT.md v1.1 §3：取卷隐藏答案；交卷按 id 判分 + 幂等写回。
+
+@app.get("/api/assessment/questions")
+async def assessment_questions():
+    """取卷：公开视图 5 字段，绝不下发 answer_idx / explanation_zh。"""
+    public = assessment.public_questions(assessment.load_questions())
+    return ok({"questions": public, "total": len(public)})
+
+
+@app.post("/api/assessment/submit")
+async def assessment_submit(request: Request):
+    """交卷判分：先校验 → 判分定级 → 幂等写回 → 返回 PlacementResult。"""
+    questions = assessment.load_questions()
+    if not questions:  # §6.1.3 先判题库，题库空返回 50001 而非答案数量错
+        raise ApiError(50001, 500, "定级题库暂不可用，无法判分")
+
+    body = await json_body(request)
+    answers = body.get("answers")
+    if not isinstance(answers, list) or not answers:
+        raise ApiError(40001, 400, "answers 必须是非空数组")
+    if len(answers) != len(questions):
+        raise ApiError(40001, 400, "答案数量与题目数量不一致")
+
+    question_ids = {q["id"] for q in questions}
+    seen_ids: set = set()
+    for item in answers:
+        if not isinstance(item, dict):
+            raise ApiError(40001, 400, "answers 元素必须是对象")
+        answer_id = item.get("id")
+        if not isinstance(answer_id, str) or not answer_id.strip():
+            raise ApiError(40001, 400, "答案项 id 不能为空")
+        if answer_id not in question_ids:
+            raise ApiError(40001, 400, f"题目不存在：{answer_id}")
+        if answer_id in seen_ids:
+            raise ApiError(40001, 400, f"题目 id 重复：{answer_id}")
+        seen_ids.add(answer_id)
+        answer_idx = item.get("answer_idx")
+        if not isinstance(answer_idx, int) or isinstance(answer_idx, bool):
+            raise ApiError(40001, 400, "answer_idx 必须是整数")
+        if not 0 <= answer_idx <= 3:
+            raise ApiError(40001, 400, "答案索引超出范围")
+    if seen_ids != question_ids:
+        raise ApiError(40001, 400, "答案题目集合与题库不一致")
+
+    total = len(questions)
+    result = assessment.grade(answers, questions)
+    interpretation = assessment.interpretation_zh(
+        result["level"], result["weak_skill"], result["score"], total, result["rate"]
+    )
+
+    user_id = db.DEFAULT_USER_ID
+    if db.get_latest_attempt(user_id, "placement") is not None:
+        persisted = False  # §6.4 已定级：不写库、不更新 cefr_level，仍返回本次算分
+    else:
+        detail = {
+            "total": total,
+            "level": result["level"],
+            "rate": result["rate"],
+            "weighted_score": result["weighted_score"],
+            "weak_skill": result["weak_skill"],
+            "interpretation_zh": interpretation,
+            "answers": result["correct_flags"],
+        }
+        db.add_attempt(user_id, "placement", result["score"], detail)
+        db.set_user_cefr_level(user_id, result["level"])
+        persisted = True
+
+    return ok({
+        "score": result["score"],
+        "total": total,
+        "weighted_score": result["weighted_score"],
+        "level": result["level"],
+        "interpretation_zh": interpretation,
+        "persisted": persisted,
+    })
+
+
 # ---------------------------------------------------------------- 启动初始化
 
 db.init_db()
@@ -547,6 +626,10 @@ if db.is_empty():
     logger.info("空库，灌入种子数据…")
     seed.seed_if_empty()
 seed_input.load_input_corpus()  # 新增：每次启动同步语料（幂等，文件缺失不阻断）
+try:  # 定级题库：幂等加载，文件缺失/异常不阻断启动（其余 15 端点正常）
+    assessment.load_questions()
+except Exception as exc:  # noqa: BLE001
+    logger.warning("定级题库加载异常，题库降级为空：%s", exc)
 
 # ---------------------------------------------------------------- 静态托管（最后 mount）
 

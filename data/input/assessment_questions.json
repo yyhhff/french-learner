@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "questions": [
+    {
+      "id": "asm_a2_001",
+      "level": "A2",
+      "skill": "词汇",
+      "question": "Le pain 在法语中是什么意思？（提示：面包店里常见的食物）",
+      "options": ["牛奶", "面包", "奶酪", "苹果"],
+      "answer_idx": 1,
+      "explanation_zh": "pain 在我们常去的面包店里随处可见，它的意思就是『面包』，一根法棍 une baguette 便是面包的一种哦。牛奶是 lait，奶酪是 fromage，苹果是 pomme——记住这几个高频词，日常买东西就更顺啦。"
+    },
+    {
+      "id": "asm_a2_002",
+      "level": "A2",
+      "skill": "词汇",
+      "question": "「Il est sept heures et demie.」现在是几点？",
+      "options": ["七点整", "八点整", "六点半", "七点半"],
+      "answer_idx": 3,
+      "explanation_zh": "在法语里，sept heures et demie 直译是『七点再加一半』，也就是七点半。et demie 表示『一半』，所以不是整点哦。记住这个说法，看时间就轻松多啦。"
+    },
+    {
+      "id": "asm_a2_003",
+      "level": "A2",
+      "skill": "语法",
+      "question": "Choisissez la bonne forme : « Nous ___ français. »（选择动词 parler 的正确现在时变位）",
+      "options": ["parlons", "parle", "parles", "parlent"],
+      "answer_idx": 0,
+      "explanation_zh": "主语是 nous（我们），现在时变位要以 -ons 结尾，所以是 parlons。parle 配 je/il，parles 配 tu，parlent 配 ils/elles，都是别的『人称搭档』。多读几遍 nous parlons，自然就顺口啦。"
+    },
+    {
+      "id": "asm_a2_004",
+      "level": "A2",
+      "skill": "理解",
+      "question": "看到标识「Défense de fumer」，你理解成什么？（En voyant ce panneau, que comprenez-vous ?）",
+      "options": ["可以吸烟", "吸烟区", "禁止吸烟", "小心烟火"],
+      "answer_idx": 2,
+      "explanation_zh": "Défense de fumer 直译是『不准吸烟』，défense de + 动词表示『禁止做某事』，这是一个很常见的公共标识，认出它就能看懂告示啦。其他几个选项把意思弄反或换了话题，留意这个小陷阱哦。"
+    },
+    {
+      "id": "asm_b1_001",
+      "level": "B1",
+      "skill": "词汇",
+      "question": "« J'en ai assez de ce bruit ! » Qu'est-ce que cette phrase veut dire ?",
+      "options": ["我很享受这噪音", "我已经习惯了这噪音", "我受够了这噪音", "是我在制造这噪音"],
+      "answer_idx": 2,
+      "explanation_zh": "en avoir assez de 是个很地道的短语，意思是『受够了、厌烦了』，所以这句话是在说『我受够这噪音了』。它和『享受』正好相反哦。慢慢掌握这个短语，表达情绪会更自然。"
+    },
+    {
+      "id": "asm_b1_002",
+      "level": "B1",
+      "skill": "语法",
+      "question": "Complétez au passé composé : « Hier, nous ___ au musée. »",
+      "options": ["sommes allés", "allons", "allions", "irons"],
+      "answer_idx": 0,
+      "explanation_zh": "句首的 Hier（昨天）明确指向过去，要用复合过去时。aller 这个动词比较特别，它借 être 当帮手，还要和主语配合——nous 对应 allés，所以 sommes allés 才对。allons 是现在时，allions 是未完成过去时，irons 是将来时，都和『昨天』对不上。"
+    },
+    {
+      "id": "asm_b1_003",
+      "level": "B1",
+      "skill": "语法",
+      "question": "Choisissez la bonne forme : « Je ___ venir, mais je n'ai pas le temps. »",
+      "options": ["veux", "voulais", "voudrai", "voudrais"],
+      "answer_idx": 3,
+      "explanation_zh": "这里想表达一个委婉的愿望『我本来很想来』，用条件式现在时最贴切，也就是 voudrais。veux 语气太直接，voulais 只描述过去的状态，voudrai 是将来的『会想要』。轻轻用上 voudrais，说话立刻更柔和有礼啦。"
+    },
+    {
+      "id": "asm_b1_004",
+      "level": "B1",
+      "skill": "理解",
+      "question": "« — Le train part à 8h15. — On a encore le temps, il est 7h50. » Que veut dire la deuxième personne ?",
+      "options": ["火车已经开走了", "他们还有时间", "他们肯定要迟到", "火车改到 8 点 50 才开"],
+      "answer_idx": 1,
+      "explanation_zh": "第二个人说『还有时间』：火车 8:15 开，现在才 7:50，中间还隔着 25 分钟呢。其他选项把时间理解反了，或凭空加了『改点』。抓住两个时间点一对照，句意就清楚啦。"
+    },
+    {
+      "id": "asm_b2_001",
+      "level": "B2",
+      "skill": "词汇",
+      "question": "« Il pleut ; néanmoins, nous partirons. » Le mot « néanmoins » exprime quelle relation logique ?",
+      "options": ["转折 / 让步", "因果关系", "递进关系", "时间顺序"],
+      "answer_idx": 0,
+      "explanation_zh": "néanmoins 相当于 pourtant，意思是『然而、尽管如此』，表示转折让步，所以前半句说下雨、后半句仍然出发，逻辑就通了。因果关系要用 par conséquent，递进用 de plus——分清这些连接词，读文章会更有条理。"
+    },
+    {
+      "id": "asm_b2_002",
+      "level": "B2",
+      "skill": "语法",
+      "question": "Choisissez la bonne forme : « Il faut que tu ___ à l'heure. »",
+      "options": ["es", "seras", "sois", "étais"],
+      "answer_idx": 2,
+      "explanation_zh": "il faut que 后面要接虚拟式，这是法语里很经典的搭配。être 的虚拟式第二人称单数是 sois，所以是 que tu sois。es 是直陈式，seras 是将来时，étais 是未完成过去时——记住『il faut que + 虚拟式』这个小规律，就稳啦。"
+    },
+    {
+      "id": "asm_b2_003",
+      "level": "B2",
+      "skill": "理解",
+      "question": "« Ce film est précieux, quoique un peu long. » Quelle est l'attitude de l'auteur envers ce film ?",
+      "options": ["完全否定这部电影", "总体肯定，略有保留", "认为这部电影太短", "对这部电影毫无感觉"],
+      "answer_idx": 1,
+      "explanation_zh": "作者先用 précieux（宝贵的）给出肯定，再用 quoique un peu long（虽然有点长）做一点让步，整体态度是『大体认可、略有保留』。quoique 引出的只是小小的例外，并没有推翻前面的赞美。抓住这种先扬后抑的语气，读观点类文章就更准啦。"
+    },
+    {
+      "id": "asm_b2_004",
+      "level": "B2",
+      "skill": "理解",
+      "question": "« Les villes investissent dans les transports. Cela réduit les embouteillages. » Quel est le rôle de la deuxième phrase ?",
+      "options": ["提出一个反例", "转换到新的话题", "提出一个疑问", "说明前文带来的结果"],
+      "answer_idx": 3,
+      "explanation_zh": "第二句用 Cela（这）回指前面的『城市投资交通』，说明它带来的结果——缓解拥堵，所以作用是『说明前文带来的结果』。它并没有举反例、换话题或提问。留意 Cela 这种回指词，段落逻辑一下就清晰啦。"
+    }
+  ]
+}

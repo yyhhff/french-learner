@@ -284,9 +284,9 @@ function renderVocab(){
   document.getElementById('vocab').innerHTML = list.length
     ? list.map(c=>{
         const ids = findRulesForCard(c.word);
-        // 仅命中规则的词才显示"怎么读"按钮，未命中的不展示
+        // 仅命中规则的词才显示"怎么读"按钮，显示规则 title 而非词名
         const pronEntry = (state.pron.available && ids.length)
-          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看 ${esc(c.word)} 怎么读">${esc(c.word)} 🎵 怎么读</button>`
+          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看 ${esc(c.word)} 怎么读">${pronRuleLabel(c.word)} 🎵 怎么读</button>`
           : '';
         return `<div class="v">
         <div class="v-top">
@@ -1723,8 +1723,14 @@ function buildPronIndex(details){
   state.pron.detailsLoaded = true;
 }
 
-// 词卡的 word 可能是短语（"un café" / "chaud / froid"），拆词后逐个查
-// 匹配顺序：① pattern 子串匹配（规则含 patterns 字段）→ ② 例词精确匹配
+// 取词对应的规则 label（优先显示规则 title，fallback 到词名）
+function pronRuleLabel(word){
+  const ids = findRulesForCard(word);
+  if(!ids.length) return esc(word);
+  // 取第一条规则（pattern 优先于例词，通常是最相关的）
+  const r = state.pron.ruleById.get(ids[0]);
+  return r ? esc(r.title) : esc(word);
+}
 function findRulesForCard(word){
   if(!state.pron.detailsLoaded) return [];
   const ids = [];

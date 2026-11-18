@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 <div class="wrap">
@@ -29,11 +29,12 @@
     </div>
   </div>
 
-  <!-- 视图切换：对话 / 阅读 / 定级 -->
+  <!-- 视图切换：对话 / 阅读 / 定级 / 考级冲刺 -->
   <div class="view-tabs" role="tablist">
     <button class="view-tab on" id="tabChat" onclick="switchView('chat')">💬 对话陪练</button>
     <button class="view-tab" id="tabRead" onclick="switchView('read')">📖 分级阅读</button>
     <button class="view-tab" id="tabAssessment" onclick="switchView('assessment')">🎯 定级</button>
+    <button class="view-tab" id="tabExam" onclick="switchView('exam')">🏆 考级冲刺</button>
     <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
   </div>
 
@@ -153,6 +154,16 @@
     </div>
   </div>
 
+  <!-- 考级冲刺：原创模拟练习（练习反馈，随时可再练） -->
+  <div id="viewExam" class="view hidden">
+    <div class="ex-wrap">
+      <!-- 选卷 / 答题 / 成绩：由 app.js 填充 -->
+      <div id="exPapers"></div>
+      <div id="exQuiz" class="hidden"></div>
+      <div id="exResult" class="hidden"></div>
+    </div>
+  </div>
+
   <div class="foot">
     呀呀法语 YaYa · 让每一次开口，都变成温柔的进步
     <button class="reset" onclick="resetChat()">重置对话</button>
@@ -170,6 +181,6 @@
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=11" defer></script>
+<script src="app.js?v=12" defer></script>
 </body>
 </html>

@@ -342,3 +342,119 @@
     .asm-result-actions{flex-direction:column}
     .asm-result-actions button{width:100%}
   }
+
+  /* ===== 阶段4 考级冲刺：原创模拟练习 ===== */
+  .ex-wrap{max-width:760px;margin:0 auto}
+
+  /* 选卷 */
+  .ex-papers-head{text-align:center;padding:14px 10px 22px}
+  .ex-papers-emoji{font-size:42px;line-height:1}
+  .ex-papers-head h2{font-size:21px;font-weight:700;margin:12px 0 6px}
+  .ex-papers-head p{font-size:13px;color:var(--muted)}
+  .ex-paper-list{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .ex-paper-card{padding:20px 20px 18px;cursor:pointer;transition:.15s}
+  .ex-paper-card:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(60,50,30,.12);border-color:#F3C9B4}
+  .ex-paper-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .ex-type-pill{font-size:11.5px;font-weight:700;color:var(--teal);background:var(--teal-soft);
+    border:1px solid #BFE6D6;border-radius:99px;padding:3px 12px}
+  .ex-paper-meta{font-size:11.5px;color:var(--muted)}
+  .ex-paper-title{font-size:16px;font-weight:700;margin:14px 0 8px;line-height:1.5}
+  .ex-paper-desc{font-size:12.5px;color:var(--muted);line-height:1.7;min-height:44px}
+  .ex-paper-go{font-size:12.5px;color:var(--brand);font-weight:600;margin-top:14px}
+  .ex-empty-card{text-align:center;padding:46px 20px;color:var(--muted);font-size:13.5px}
+
+  /* 答题卡 */
+  .ex-quiz-card{padding:24px 26px 22px}
+  .ex-progress-top{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-bottom:9px;flex-wrap:wrap}
+  .ex-progress-top span:first-child{color:var(--ink);font-weight:600}
+  .ex-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden}
+  .ex-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),#5DCAA5);border-radius:99px;transition:width .35s ease}
+  .ex-q-title{font-size:14px;font-weight:700;margin:22px 0 14px;display:flex;align-items:center;gap:10px}
+  .ex-points{font-size:11.5px;font-weight:600;color:var(--amber);background:var(--amber-soft);border-radius:99px;padding:2px 10px}
+  .ex-prompt-fr{font-size:14.5px;line-height:1.8;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere;
+    background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+  .ex-prompt-zh{font-size:14px;line-height:1.8;color:var(--ink);background:var(--teal-soft);
+    border:1px solid #BFE6D6;border-radius:13px;padding:15px 17px}
+  .ex-hint{font-size:12px;color:var(--muted);margin:12px 0}
+  .ex-audio{display:flex;align-items:center;gap:10px;margin:12px 0;flex-wrap:wrap}
+  .ex-audio .spk{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 14px;
+    font-size:12.5px;color:var(--blue);cursor:pointer;font-family:inherit;transition:.15s}
+  .ex-audio .spk:hover{border-color:var(--blue);background:var(--blue-soft)}
+  .ex-audio .spk.speaking{background:var(--blue-soft)}
+  .ex-audio span{font-size:11.5px;color:var(--muted)}
+  .ex-opts{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .ex-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1.5px solid var(--line);
+    background:var(--surface);border-radius:13px;padding:12px 15px;font-size:14px;color:var(--ink);
+    cursor:pointer;font-family:inherit;transition:.15s}
+  .ex-opt:hover{border-color:#BFE6D6;background:#FBFFFC}
+  .ex-opt.on{border-color:var(--teal);background:var(--teal-soft)}
+  .ex-opt-key{width:26px;height:26px;border-radius:8px;background:var(--bg);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .ex-opt.on .ex-opt-key{background:var(--teal);color:#fff}
+  .ex-opt-text{line-height:1.5;overflow-wrap:anywhere}
+  .ex-textarea{width:100%;min-height:170px;border:1.5px solid var(--line);border-radius:13px;padding:14px 16px;
+    font-size:14px;line-height:1.7;color:var(--ink);background:var(--surface);font-family:inherit;resize:vertical;outline:none}
+  .ex-textarea:focus{border-color:var(--teal);background:#fff}
+  .ex-record-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+  .ex-record-btn{border:1px solid #BFE6D6;background:var(--teal-soft);color:#0F6E56;border-radius:10px;
+    padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .ex-record-btn:hover{background:#D3EEE2}
+  .ex-record-btn.rec{background:#D85A30;border-color:#D85A30;color:#fff}
+  .ex-record-status{font-size:11.5px;color:var(--muted)}
+  .ex-nav{display:flex;justify-content:space-between;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+  .ex-nav-btn{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 16px;
+    font-size:12.5px;color:var(--ink);cursor:pointer;font-family:inherit;transition:.15s}
+  .ex-nav-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
+  .ex-nav-btn:disabled{opacity:.45;cursor:default}
+  .ex-submit-row{text-align:center;margin-top:18px}
+  .ex-primary{border:none;background:var(--teal);color:#fff;border-radius:12px;padding:12px 28px;
+    font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(29,158,117,.22);transition:.15s}
+  .ex-primary:hover:not(:disabled){background:#158461;transform:translateY(-1px)}
+  .ex-primary:disabled{opacity:.6;cursor:default}
+  .ex-foot-note{text-align:center;font-size:11.5px;color:var(--muted);margin-top:12px}
+
+  /* 成绩报告 */
+  .ex-result-card{padding:32px 28px 26px}
+  .ex-result-head{text-align:center}
+  .ex-result-emoji{font-size:36px}
+  .ex-result-label{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .ex-total{font-size:15px;color:var(--ink);margin:6px 0}
+  .ex-total b{font-size:46px;font-weight:800;color:var(--teal);line-height:1.1}
+  .ex-total span{font-size:14px;color:var(--muted)}
+  .ex-bar-result{max-width:420px;margin:14px auto 0}
+  .ex-score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:24px}
+  .ex-score-cell{background:var(--bg);border:1px solid var(--line);border-radius:13px;padding:14px 16px;text-align:center}
+  .ex-score-cell span{display:block;font-size:11.5px;color:var(--muted)}
+  .ex-score-cell b{display:block;font-size:20px;color:var(--ink);margin-top:4px}
+  .ex-level-hint{text-align:center;font-size:14px;color:#0F6E56;background:var(--teal-soft);
+    border:1px solid #BFE6D6;border-radius:12px;padding:12px 16px;margin-top:18px;line-height:1.7}
+  .ex-summary{font-size:13px;color:var(--ink);line-height:1.8;margin-top:12px;text-align:center}
+  .ex-unscored-note{font-size:12.5px;color:var(--amber);background:var(--amber-soft);
+    border:1px solid #EFD9A8;border-radius:12px;padding:10px 14px;margin-top:14px;text-align:center}
+  .ex-items-title{font-size:13px;font-weight:700;margin:24px 0 12px}
+  .ex-items{display:flex;flex-direction:column;gap:10px}
+  .ex-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+  .ex-item.unscored{background:var(--bg)}
+  .ex-item-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ex-item-no{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .ex-item-type{font-size:11px;color:var(--blue);background:var(--blue-soft);border-radius:99px;padding:2px 9px}
+  .ex-item-score{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--teal)}
+  .ex-item-score.na{color:var(--amber);font-weight:600}
+  .ex-item-feedback{font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:8px}
+  .ex-disclaimer{font-size:11.5px;color:var(--muted);line-height:1.6;text-align:center;margin-top:22px}
+  .ex-disclaimer-result{margin-top:22px;padding:12px 14px;background:var(--bg);border:1px dashed var(--line);border-radius:10px}
+  .ex-result-actions{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+  .ex-ghost{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 24px;
+    font-size:13.5px;font-weight:600;color:var(--teal);cursor:pointer;font-family:inherit;transition:.15s}
+  .ex-ghost:hover{border-color:var(--teal);background:var(--teal-soft)}
+  .ex-result-foot{text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px}
+
+  @media(max-width:600px){
+    .ex-paper-list{grid-template-columns:1fr}
+    .ex-quiz-card{padding:20px 18px}
+    .ex-result-card{padding:24px 18px 22px}
+    .ex-prompt-fr{font-size:13.5px}
+    .ex-score-grid{gap:8px}
+    .ex-total b{font-size:38px}
+    .ex-result-actions button{width:100%}
+  }

@@ -1,0 +1,225 @@
+{
+  "papers": [
+    {
+      "id": "delf_b2_01",
+      "exam_type": "DELF B2",
+      "title": "DELF B2 风格模拟卷 · 第 1 套",
+      "description_zh": "原创模拟练习，围绕城市生活与环境议题，覆盖阅读、词汇语法、听力、写作与口语。",
+      "questions": [
+        {
+          "id": "delf_b2_01_q1",
+          "type": "choice",
+          "section": "阅读理解",
+          "prompt_fr": "Depuis quelques années, la mairie de Lyon encourage les habitants à transformer les petits espaces inutilisés en jardins partagés. Dans le quartier des Pentes, une ancienne cour bétonnée est devenue un potager collectif où voisins et enfants plantent ensemble tomates et fleurs. « Au début, on se croisait à peine dans l'ascenseur », raconte Sophie, une habitante. « Aujourd'hui, on échange des graines, des recettes et même des services. » La ville fournit la terre et l'eau, mais laisse les habitants décider des cultures. Certains craignaient que le projet ne divise le voisinage ; c'est le contraire qui s'est produit. Une enquête menée en 2024 montre que sept participants sur dix se sentent désormais plus attachés à leur quartier.\n\nSelon le texte, quel effet le jardin partagé a-t-il eu sur le quartier ?",
+          "audio_text": null,
+          "options": [
+            "Il a surtout permis de réduire les dépenses de la ville.",
+            "Il a renforcé les liens entre les habitants du quartier.",
+            "Il a remplacé la plupart des commerces du quartier.",
+            "Il a provoqué de vifs conflits entre voisins."
+          ],
+          "answer_idx": 1,
+          "points": 10,
+          "explanation_zh": "短文里藏着一组很温柔的对比：过去邻居们在电梯里几乎不打招呼，如今却互换种子、菜谱甚至互相帮忙；调查也显示七成参与者对街区更有归属感。所以花园带来的是『邻里关系更紧密』。D 恰好说反了——文中提到有人曾担心项目会分裂邻里，但结果恰恰相反；A（替城市省钱）和 C（取代商铺）文中都没提到。慢慢读，抓住 « Au début… Aujourd'hui… » 的对照，答案就浮出来啦～"
+        },
+        {
+          "id": "delf_b2_01_q2",
+          "type": "choice",
+          "section": "阅读理解",
+          "prompt_fr": "À Nantes, la municipalité a décidé de limiter la circulation des voitures dans le centre historique. Les livraisons restent autorisées avant 11 heures, et les riverains peuvent entrer avec un badge. Les commerçants, d'abord inquiets, reconnaissent aujourd'hui que la terrasse des cafés est devenue plus agréable et que le nombre de clients à pied a augmenté. La ville a installé des bornes de recharge pour les vélos électriques et prolongé deux lignes de tramway. Reste une difficulté : les habitants des communes voisines, qui n'ont pas encore de transport en commun direct, jugent la mesure peu pratique pour eux. La mairie prévoit d'ouvrir une navette gratuite l'an prochain pour répondre à cette critique.\n\nQuelle réserve le texte souligne-t-il à propos de cette mesure ?",
+          "audio_text": null,
+          "options": [
+            "Les commerçants ont perdu une partie de leur clientèle.",
+            "Les livraisons ne sont plus autorisées dans le centre.",
+            "Les habitants des communes voisines n'ont pas de transport direct.",
+            "Le tramway ne circule plus le week-end."
+          ],
+          "answer_idx": 2,
+          "points": 10,
+          "explanation_zh": "文中用 « Reste une difficulté » 轻轻点出唯一的保留意见：周边市镇还没有直达公共交通，居民觉得这项措施对他们不太方便，市政府也计划明年开免费接驳车来回应。A 说反了（步行顾客反而变多），B 也错（送货在 11 点前仍允许），D 文中完全没提。看到 Reste / toutefois / cependant 这类词，往往是作者准备转折的地方哦～"
+        },
+        {
+          "id": "delf_b2_01_q3",
+          "type": "choice",
+          "section": "词汇语法",
+          "prompt_fr": "« Il est indispensable que chaque quartier ___ équipé d'un espace vert. » Choisissez la forme qui convient.",
+          "audio_text": null,
+          "options": ["est", "sera", "était", "soit"],
+          "answer_idx": 3,
+          "points": 10,
+          "explanation_zh": "« Il est indispensable que… » 表达必要性，后面要跟虚拟式；再加上被动态 être + 过去分词 équipé，于是 être 的虚拟式就是 soit。est 是直陈式现在时，sera 是将来时，était 是未完成过去时，都不会跟在这个 que 后面。把『il est + 形容词 + que → 虚拟式』当成一组小搭档记下来，写议论文会稳很多～"
+        },
+        {
+          "id": "delf_b2_01_q4",
+          "type": "choice",
+          "section": "词汇语法",
+          "prompt_fr": "« La proposition ___ les riverains débattent depuis trois mois sera soumise au vote. » Choisissez le pronom relatif correct.",
+          "audio_text": null,
+          "options": ["dont", "que", "où", "laquelle"],
+          "answer_idx": 0,
+          "points": 10,
+          "explanation_zh": "动词 débattre 搭配介词 de（débattre de quelque chose），而 dont 正是用来替代『de + 名词』的关系代词，所以选 dont。que 代替直接宾语，où 指地点或时间，laquelle 一般要跟在介词后面（如 sur laquelle）。分清每个代词『接什么』，长句就不绕啦～"
+        },
+        {
+          "id": "delf_b2_01_q5",
+          "type": "choice",
+          "section": "听力理解",
+          "prompt_fr": "Vous entendez ce message sur un répondeur. Écoutez, puis répondez : qu'est-ce qui a changé pour l'atelier « Réparer plutôt que jeter » ?",
+          "audio_text": "Bonjour, vous êtes bien sur la messagerie de la Maison de quartier des Rives. Nous vous informons que l'atelier « Réparer plutôt que jeter », prévu samedi à dix heures, est finalement reporté au dimanche à quinze heures, la salle étant occupée par une réunion exceptionnelle. Les inscriptions restent valables, inutile de vous réinscrire. Pensez à apporter vos petits appareils et, si possible, vos outils. Pour toute question, rappelez le lundi à partir de neuf heures. Merci et à très bientôt !",
+          "options": [
+            "L'atelier est déplacé au dimanche à 15 heures.",
+            "L'atelier est définitivement annulé.",
+            "Il faut s'inscrire une nouvelle fois en ligne.",
+            "L'atelier change de salle mais garde le même horaire."
+          ],
+          "answer_idx": 0,
+          "points": 10,
+          "explanation_zh": "留言里说得很清楚：原定周六十点的工坊 « est finalement reporté au dimanche à quinze heures »，也就是改到周日十五点。B 不对，活动没有取消，只是改期；C 也不对，主持人特意说 « inutile de vous réinscrire »；D 里提到的场地被占用只是改期的原因，不是最终安排。听通知类留言，先抓住 reporté / déplacé / dorénavant 这些词，变化点就跑不掉啦～"
+        },
+        {
+          "id": "delf_b2_01_q6",
+          "type": "choice",
+          "section": "观点逻辑",
+          "prompt_fr": "« ___ la municipalité ait multiplié les espaces verts, les étés restent très chauds en centre-ville. » Quel connecteur convient ?",
+          "audio_text": null,
+          "options": ["Parce que", "Puisque", "Afin que", "Bien que"],
+          "answer_idx": 3,
+          "points": 10,
+          "explanation_zh": "前半句用了 ait multiplié（虚拟式），这是关键信号：bien que 表示『尽管』，后面必须接虚拟式，整句意思是『尽管市政府增加了绿地，市中心夏天依旧很热』，让步关系成立。parce que / puisque 表原因，后面要用直陈式 a multiplié；afin que 表目的，放进来句意也讲不通。看到从句里冒出虚拟式，先想想是不是该请出 bien que 吧～"
+        },
+        {
+          "id": "delf_b2_01_q7",
+          "type": "writing",
+          "section": "书面表达",
+          "prompt_zh": "假设你所在的城市打算把一条繁忙街道改成步行街，部分居民担心出行不便。请写一封 80 词以上的法语邮件给市长，表明你的立场，给出至少两个理由，并提出一个折中建议。注意信件格式（称呼、正文、结尾敬语）。",
+          "min_words": 80,
+          "points": 20,
+          "rubric_zh": "总分 20 分，请按四个维度独立给分后相加，四项合计 20 分：① 内容切题（6 分）：明确表明立场 2 分、给出至少两个相关理由 3 分、提出一个具体的折中建议 1 分；正文须达到 80 词，明显不足酌情扣 1–2 分。② 结构连贯（5 分）：邮件格式完整（称呼、正文、结尾敬语）2 分，段落分明、逻辑连接词使用得当 3 分。③ 语法准确（5 分）：时态、性数配合、关系代词、条件式或虚拟式等 B2 结构使用正确；少量不影响理解的小错误不扣分，错误较多酌情扣 1–3 分。④ 词汇丰富（4 分）：能使用与城市生活、环境相关的较丰富表达，避免通篇重复简单词。请只依据这四项给 0–20 的整数分，并写一句简体中文的温和鼓励式反馈，不打红叉、不排名、不说教。",
+          "model_answer_fr": "Madame la Maire,\n\nJ'habite rue des Tilleuls depuis huit ans et je soutiens pleinement le projet de piétonnisation de notre rue. Deux raisons me convainquent. D'une part, la circulation y est aujourd'hui très dense : sans voitures, les terrasses des commerces deviendront plus agréables et l'air que respirent nos enfants sera plus sain. D'autre part, une rue apaisée permettrait d'installer des bancs et des arbres, comme l'ont fait avec succès deux quartiers voisins.\n\nJe comprends toutefois les inquiétudes des habitants qui craignent des trajets plus longs. Aussi proposerais-je d'autoriser les livraisons avant dix heures et de maintenir une navette pour les personnes à mobilité réduite. Une expérimentation de six mois permettrait ensuite d'évaluer la mesure sereinement, avant toute décision définitive.\n\nJe vous remercie de l'attention portée à ce courrier et vous prie d'agréer, Madame la Maire, l'expression de mes salutations distinguées.\n\nCamille Bernard"
+        },
+        {
+          "id": "delf_b2_01_q8",
+          "type": "speaking",
+          "section": "口语表达",
+          "prompt_zh": "你要在社区会议上做一段约 1–2 分钟的法语口头发言：介绍你所在街区最需要改善的一个地方，说明为什么，并提出一个可行办法。系统会先用语音朗读法语题目，你用麦克风作答，转写成文本后提交。",
+          "prompt_fr": "Lors d'une réunion de quartier, présentez en une à deux minutes le lieu de votre quartier qui, selon vous, mériterait le plus d'être amélioré. Expliquez pourquoi et proposez une solution concrète et réaliste.",
+          "points": 20,
+          "rubric_zh": "总分 20 分，评分对象为口语转写后的文本，按四个维度相加，四项合计 20 分：① 内容切题（6 分）：明确指出一个具体地点 2 分、说明至少一条理由 2 分、提出一个可行的改善办法 2 分；内容过短或完全跑题酌情扣分。② 结构连贯（5 分）：有清晰的引入—展开—收束 3 分，恰当使用 d'abord / ensuite / enfin / pourtant 等连接词 2 分。③ 语法准确（5 分）：时态、性数配合与基本句型正确，能尝试使用条件式或虚拟式等 B2 结构可加分；转写造成的轻微口语痕迹不扣分。④ 词汇丰富（4 分）：能使用与城市生活、环境相关的具体词汇，避免反复使用同一个简单词。请只依据这四项给 0–20 的整数分，并写一句简体中文的温和鼓励式反馈，不打红叉、不排名，也不因转写偶有错字而苛责。"
+        }
+      ]
+    },
+    {
+      "id": "tcf_b2_01",
+      "exam_type": "TCF B2",
+      "title": "TCF B2 风格模拟卷 · 第 1 套",
+      "description_zh": "原创模拟练习，围绕职场与科技议题，覆盖阅读、词汇语法、听力、写作与口语。",
+      "questions": [
+        {
+          "id": "tcf_b2_01_q1",
+          "type": "choice",
+          "section": "阅读理解",
+          "prompt_fr": "Depuis 2023, l'entreprise Valoris a adopté le travail hybride : trois jours au bureau, deux jours à domicile. Un bilan interne publié en mars montre que la productivité est restée stable, tandis que le temps passé dans les transports a diminué de près de quarante pour cent. Les managers, eux, signalent une difficulté inattendue : les nouveaux employés mettent plus de temps à comprendre les habitudes de l'équipe, faute d'échanges informels. Pour y remédier, la direction a instauré un « café virtuel » de quinze minutes chaque lundi et désigne un tuteur pour chaque arrivant. « Le lien ne se décrète pas, il s'entretient », résume la directrice des ressources humaines.\n\nQuel problème le travail hybride a-t-il posé, d'après le bilan interne ?",
+          "audio_text": null,
+          "options": [
+            "La productivité a nettement baissé.",
+            "Les nouveaux employés mettent plus de temps à s'intégrer.",
+            "Les trajets domicile-bureau sont devenus plus longs.",
+            "Les managers ont refusé toute forme de télétravail."
+          ],
+          "answer_idx": 1,
+          "points": 10,
+          "explanation_zh": "报告特意用 « une difficulté inattendue » 引出问题：新人因为缺少非正式交流，要花更久才摸清团队习惯，公司才设置了周一的云端咖啡时间和带教人。A 与文中 « la productivité est restée stable » 相反；C 也说反了，通勤时间反而少了近四成；D 文中没有依据。读这类内部报告，留意 tandis que / faute de / pour y remédier 这些信号词，问题和对策就都找到啦～"
+        },
+        {
+          "id": "tcf_b2_01_q2",
+          "type": "choice",
+          "section": "阅读理解",
+          "prompt_fr": "La bibliothèque municipale de Rennes propose depuis peu un atelier hebdomadaire consacré aux outils d'intelligence artificielle. L'objectif n'est pas d'apprendre à coder, mais d'aider les participants à formuler une demande précise, à vérifier les réponses obtenues et à repérer les informations approximatives. « Beaucoup de gens croient que la machine comprend tout du premier coup », explique une bibliothécaire. « On leur montre au contraire qu'une bonne question se construit en plusieurs essais. » L'atelier attire surtout des retraités et des personnes en recherche d'emploi. La ville envisage de le déployer dans trois autres quartiers, à condition de former davantage de médiateurs numériques, encore peu nombreux aujourd'hui.\n\nQuelle compétence l'atelier cherche-t-il avant tout à développer ?",
+          "audio_text": null,
+          "options": [
+            "Apprendre à programmer en Python.",
+            "Mémoriser le plus d'informations possible.",
+            "Formuler une demande précise et vérifier les réponses.",
+            "Réparer les ordinateurs de la bibliothèque."
+          ],
+          "answer_idx": 2,
+          "points": 10,
+          "explanation_zh": "文中说得很明白：目标不是学编程，而是 « formuler une demande précise, vérifier les réponses obtenues et repérer les informations approximatives »，也就是把问题问清楚、再核对答案，C 正好概括。A 被首句直接否定了；B、D 都和工作坊内容无关。末句提到要培养更多数字辅导员才能推广，是另一个信息点，别和『教学目标』混在一起哦～"
+        },
+        {
+          "id": "tcf_b2_01_q3",
+          "type": "choice",
+          "section": "词汇语法",
+          "prompt_fr": "« Le nouveau logiciel ___ par toute l'équipe depuis janvier. » Choisissez la forme correcte.",
+          "audio_text": null,
+          "options": ["utilise", "est utilisé", "utilisera", "a utilisé"],
+          "answer_idx": 1,
+          "points": 10,
+          "explanation_zh": "句子的主语 le nouveau logiciel 是『被使用』的一方，所以要用被动态 être + 过去分词 utilisé，并和主语做性数配合（阳性单数）。其余三项都是主动态：utilise / utilisera / a utilisé 都会把软件说成『它在使用整个团队』，意思就拧了。看到 par + 施动者，先想想是不是该用被动态吧～"
+        },
+        {
+          "id": "tcf_b2_01_q4",
+          "type": "choice",
+          "section": "词汇语法",
+          "prompt_fr": "« La direction tient ___ ce que les comptes rendus soient envoyés le jour même. » Choisissez la préposition correcte.",
+          "audio_text": null,
+          "options": ["à", "de", "en", "par"],
+          "answer_idx": 0,
+          "points": 10,
+          "explanation_zh": "« tenir à ce que + 虚拟式 」是固定搭配，表示『坚持要求某事』，所以选 à，后面也确实跟着虚拟式 soient envoyés。de / en / par 都接不上这个结构。把『动词 + 介词 + que』当成一整块来背，比单独记介词更省力～"
+        },
+        {
+          "id": "tcf_b2_01_q5",
+          "type": "choice",
+          "section": "听力理解",
+          "prompt_fr": "Vous écoutez ce message du service informatique. Quelle nouvelle procédure est annoncée pour accéder à la messagerie ?",
+          "audio_text": "Bonjour, ici la messagerie du service informatique de Valoris. Suite à une mise à jour de sécurité, l'accès à votre messagerie professionnelle nécessitera, dès lundi, une validation en deux étapes. Concrètement, après avoir saisi votre mot de passe, vous recevrez un code à six chiffres sur votre téléphone. Ce code change à chaque connexion et n'est valable que trois minutes. Si vous travaillez habituellement depuis un site sans réseau mobile, prévenez-nous avant vendredi : nous vous remettrons une clé physique. Une notice sera envoyée ce soir par courriel. Merci de votre compréhension et bonne journée.",
+          "options": [
+            "Une validation en deux étapes avec un code temporaire.",
+            "Un mot de passe à changer chaque semaine.",
+            "Une clé physique obligatoire pour tout le monde.",
+            "Une connexion possible uniquement depuis le bureau."
+          ],
+          "answer_idx": 0,
+          "points": 10,
+          "explanation_zh": "留言开门见山：从周一起登录邮箱要 « une validation en deux étapes »——先输密码，再输入手机上收到的六位数临时码，而且每次连接都换、只有效三分钟，所以 A 对。B 说每周改密码，文中没提；C 把『无移动网络的人可领实体密钥』扩大成了『人人必须』；D 则凭空限制了地点。听通知类留言，先把 « dès / dorénavant / concrètement » 后面的新规则抓牢就够啦～"
+        },
+        {
+          "id": "tcf_b2_01_q6",
+          "type": "choice",
+          "section": "观点逻辑",
+          "prompt_fr": "« Certains collègues saluent la flexibilité du télétravail, tandis que d'autres redoutent l'effacement des frontières entre vie privée et vie professionnelle. » Quelle est la position de l'auteur ?",
+          "audio_text": null,
+          "options": [
+            "Il défend le télétravail sans aucune réserve.",
+            "Il condamne fermement le télétravail.",
+            "Il présente deux points de vue opposés sans prendre parti.",
+            "Il affirme que le télétravail n'a aucun effet sur l'équipe."
+          ],
+          "answer_idx": 2,
+          "points": 10,
+          "explanation_zh": "句里 tandis que 把两种态度并排摆出来：一边 « saluent la flexibilité »（称赞灵活），一边 « redoutent… »（担心工作与生活的界限被抹平），作者只是并列呈现，并没有站队。A、B 都把话说成了一边倒，D 则与文中实实在在的影响相反。读观点段落时，先找 tandis que / en revanche / pour sa part 这类『并列不同声音』的词，作者的立场就清楚啦～"
+        },
+        {
+          "id": "tcf_b2_01_q7",
+          "type": "writing",
+          "section": "书面表达",
+          "prompt_zh": "你所在的公司计划全面推行每周两天远程办公，部分同事担心团队协作变弱。请写一封 80 词以上的法语邮件给部门主管，说明你对这一安排的看法，至少给出两个理由，并提出一项有助于保持团队联系的具体措施。注意信件格式（称呼、正文、结尾敬语）。",
+          "min_words": 80,
+          "points": 20,
+          "rubric_zh": "总分 20 分，请按四个维度独立给分后相加，四项合计 20 分：① 内容切题（6 分）：明确表明看法 2 分、给出至少两个相关理由 3 分、提出一项具体的团队联系措施 1 分；正文须达到 80 词，明显不足酌情扣 1–2 分。② 结构连贯（5 分）：邮件格式完整（称呼、正文、结尾敬语）2 分，段落分明、逻辑连接词使用得当 3 分。③ 语法准确（5 分）：时态、性数配合、关系代词、条件式或虚拟式等 B2 结构使用正确；少量不影响理解的小错误不扣分，错误较多酌情扣 1–3 分。④ 词汇丰富（4 分）：能使用与远程办公、团队协作相关的较丰富表达，避免通篇重复简单词。请只依据这四项给 0–20 的整数分，并写一句简体中文的温和鼓励式反馈，不打红叉、不排名、不说教。",
+          "model_answer_fr": "Monsieur le Directeur,\n\nJ'ai pris connaissance du projet de généraliser deux jours de télétravail par semaine et je souhaite vous faire part de mon avis. Personnellement, j'y suis favorable, pour deux raisons. D'abord, la suppression de deux trajets hebdomadaires libérerait du temps que l'on pourrait consacrer aux dossiers les plus exigeants. Ensuite, plusieurs bilans internes montrent que le calme du domicile facilite la rédaction de documents longs.\n\nJe comprends cependant les collègues qui craignent un affaiblissement de l'esprit d'équipe. Pour y remédier, je proposerais de réserver le mercredi aux réunions en présentiel et de lancer, chaque vendredi, un court point collectif en visioconférence. Un binôme tournant entre présentiel et distance permettrait aussi aux nouveaux arrivants de ne pas rester isolés.\n\nRestant à votre disposition pour en discuter, je vous prie d'agréer, Monsieur le Directeur, l'expression de mes salutations distinguées.\n\nLéa Moreau"
+        },
+        {
+          "id": "tcf_b2_01_q8",
+          "type": "speaking",
+          "section": "口语表达",
+          "prompt_zh": "你要在一次团队会议上做约 1–2 分钟的法语口头发言：介绍一项你希望在工作中试用的新工具或新做法，说明它能解决什么问题，并回应同事们可能有的顾虑。系统会先用语音朗读法语题目，你用麦克风作答，转写成文本后提交。",
+          "prompt_fr": "Lors d'une réunion d'équipe, présentez en une à deux minutes un nouvel outil ou une nouvelle méthode que vous aimeriez expérimenter au travail. Expliquez quel problème cela résoudrait et répondez brièvement aux réserves que vos collègues pourraient exprimer.",
+          "points": 20,
+          "rubric_zh": "总分 20 分，评分对象为口语转写后的文本，按四个维度相加，四项合计 20 分：① 内容切题（6 分）：明确提出一项工具或做法 2 分、说明它要解决的具体问题 2 分、回应至少一条可能的顾虑 2 分。② 结构连贯（5 分）：有清楚的引入—展开—收束 3 分，恰当使用 d'abord / ensuite / enfin / cependant 等连接词 2 分。③ 语法准确（5 分）：时态、性数配合与基本句型正确，能使用条件式或虚拟式等 B2 结构可加分；转写造成的轻微口语痕迹不扣分。④ 词汇丰富（4 分）：能使用与工作、技术相关的具体词汇，避免反复使用同一个简单词。请只依据这四项给 0–20 的整数分，并写一句简体中文的温和鼓励式反馈，不打红叉、不排名，也不因转写偶有错字而苛责。"
+        }
+      ]
+    }
+  ]
+}

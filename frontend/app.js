@@ -284,9 +284,10 @@ function renderVocab(){
   document.getElementById('vocab').innerHTML = list.length
     ? list.map(c=>{
         const ids = findRulesForCard(c.word);
-        // 融入点①：所有词都有"🎵 怎么读"入口，显示词名让用户知道学哪个音
-        // 命中规则词的展开规则讲解，未命中的只显示听发音+提示
-        const pronEntry = `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看 ${esc(c.word)} 怎么读">${esc(c.word)} 🎵 怎么读</button>`;
+        // 仅命中规则的词才显示"怎么读"按钮，未命中的不展示
+        const pronEntry = (state.pron.available && ids.length)
+          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看 ${esc(c.word)} 怎么读">${esc(c.word)} 🎵 怎么读</button>`
+          : '';
         return `<div class="v">
         <div class="v-top">
           <span class="w">${esc(c.word)}</span>
@@ -1689,13 +1690,15 @@ function pronKey(s){
     .replace(/['’`]/g,'').trim();
 }
 
-// 用详情列表建两个进程内 Map：rule_id -> 详情；word_fr -> [rule_id]
+// 用详情列表建三个进程内 Map：rule_id -> 详情；word_fr -> [rule_id]；pattern 正则索引
 function buildPronIndex(details){
   const byId = new Map();
   const w2r = new Map();
+  const patternRules = []; // [{pattern: RegExp, ruleId: string}]
   (details||[]).forEach(r=>{
     if(!r || !r.id) return;
     byId.set(r.id, r);
+    // 例词精确索引
     (Array.isArray(r.examples)?r.examples:[]).forEach(ex=>{
       const k = pronKey(ex && ex.word_fr);
       if(!k) return;
@@ -1703,21 +1706,41 @@ function buildPronIndex(details){
       if(!arr){ arr = []; w2r.set(k, arr); }
       if(arr.indexOf(r.id)<0) arr.push(r.id);
     });
+    // pattern 正则索引：从 rules 的 patterns 字段编译
+    // patterns 格式如 ["ai","ay"] → 匹配词内包含该字母组合
+    if(Array.isArray(r.patterns)){
+      r.patterns.forEach(pat=>{
+        try{
+          // 简单模式：字母组合直接子串匹配
+          patternRules.push({pattern: new RegExp(pat.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i'), ruleId: r.id});
+        }catch(e){/* 编译失败忽略 */}
+      });
+    }
   });
   state.pron.ruleById = byId;
   state.pron.wordToRules = w2r;
+  state.pron.patternRules = patternRules;
   state.pron.detailsLoaded = true;
 }
 
-// 词卡的 word 可能是短语（"un café" / "chaud / froid"），拆词后逐个查反向索引
+// 词卡的 word 可能是短语（"un café" / "chaud / froid"），拆词后逐个查
+// 匹配顺序：① pattern 子串匹配（规则含 patterns 字段）→ ② 例词精确匹配
 function findRulesForCard(word){
   if(!state.pron.detailsLoaded) return [];
   const ids = [];
-  String(word||'').split(/[\/,\s·]+/u).forEach(tok=>{
+  const toks = String(word||'').split(/[\/,\s·]+/u);
+  toks.forEach(tok=>{
     const k = pronKey(tok);
     if(!k || PRON_SKIP_TOKENS.has(k)) return;
+    // ① 例词精确匹配（原有逻辑，优先）
     const arr = state.pron.wordToRules.get(k);
     if(arr) arr.forEach(id=>{ if(ids.indexOf(id)<0) ids.push(id); });
+    // ② pattern 子串匹配：遍历所有 pattern 正则
+    if(state.pron.patternRules && state.pron.patternRules.length){
+      state.pron.patternRules.forEach(pr=>{
+        if(pr.pattern.test(k) && ids.indexOf(pr.ruleId)<0) ids.push(pr.ruleId);
+      });
+    }
   });
   return ids;
 }

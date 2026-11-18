@@ -1,0 +1,668 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "ph_alpha_01",
+      "group": "字母表与读音概念",
+      "title": "字母有名字，也有读音",
+      "description_zh": "法语字母有自己的名字（比如 A 读作 /a/），但拼进单词后，它发出的音可能和名字不一样。学读音时，我们记的是『字母在词里发什么音』，不是字母名本身。慢慢来，先记住最常见的对应就好啦。",
+      "examples": [
+        { "word_fr": "Paris", "meaning_zh": "巴黎", "note_zh": "字母 a 在词里读 /a/", "phonetic": "/pa.ʁi/" },
+        { "word_fr": "été", "meaning_zh": "夏天", "note_zh": "字母 é 在词里读 /e/", "phonetic": "/e.te/" },
+        { "word_fr": "si", "meaning_zh": "如果；是的", "note_zh": "字母 i 在词里读 /i/", "phonetic": "/si/" },
+        { "word_fr": "oui", "meaning_zh": "是的", "note_zh": "ou 组合读作 /w/ 再滑向 i", "phonetic": "/wi/" }
+      ],
+      "audio_text": "Paris, été, si, oui",
+      "shadow_text_fr": "si",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["A组", "字母概念"]
+    },
+    {
+      "id": "ph_alpha_02",
+      "group": "字母表与读音概念",
+      "title": "字母 h 一般不发音",
+      "description_zh": "法语里的 h 几乎总是『哑巴』——写出来，但读的时候完全不出声。看到 h 开头，直接读后面的音就好，不要像中文那样哈气哦。比如 homme 直接读 /ɔm/，开头的 h 是隐形的。",
+      "examples": [
+        { "word_fr": "homme", "meaning_zh": "男人", "note_zh": "h 不发音，直接读 /ɔm/", "phonetic": "/ɔm/" },
+        { "word_fr": "heure", "meaning_zh": "小时；点钟", "note_zh": "h 不发音，读 /œʁ/", "phonetic": "/œʁ/" },
+        { "word_fr": "hôtel", "meaning_zh": "旅馆", "note_zh": "h 不发音，读 /o.tɛl/", "phonetic": "/o.tɛl/" },
+        { "word_fr": "herbe", "meaning_zh": "草", "note_zh": "h 不发音，读 /ɛʁb/", "phonetic": "/ɛʁb/" }
+      ],
+      "audio_text": "homme, heure, hôtel, herbe",
+      "shadow_text_fr": "homme",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["A组", "字母概念"]
+    },
+    {
+      "id": "ph_alpha_03",
+      "group": "字母表与读音概念",
+      "title": "字母 c 的软硬两种读法",
+      "description_zh": "字母 c 有两种读法：碰到 a、o、u 时读硬音 /k/（像『克』）；碰到 e、i、y 时读软音 /s/（像『斯』）。记住这个『看后面跟谁』的小规律，就能举一反三啦。",
+      "examples": [
+        { "word_fr": "café", "meaning_zh": "咖啡", "note_zh": "c 后跟 a，读硬音 /k/", "phonetic": "/ka.fe/" },
+        { "word_fr": "cinq", "meaning_zh": "五", "note_zh": "c 后跟 i，读软音 /s/", "phonetic": "/sɛ̃k/" },
+        { "word_fr": "cent", "meaning_zh": "一百", "note_zh": "c 后跟 e，读软音 /s/", "phonetic": "/sɑ̃/" },
+        { "word_fr": "cadeau", "meaning_zh": "礼物", "note_zh": "c 后跟 a，读硬音 /k/", "phonetic": "/ka.do/" }
+      ],
+      "audio_text": "café, cinq, cent, cadeau",
+      "shadow_text_fr": "café",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["A组", "字母概念"]
+    },
+    {
+      "id": "ph_alpha_04",
+      "group": "字母表与读音概念",
+      "title": "字母 g 的软硬两种读法",
+      "description_zh": "字母 g 和 c 很像，也分软硬：碰到 a、o、u 读硬音 /g/（像『哥』）；碰到 e、i、y 读软音 /ʒ/（像『日』的轻音）。慢慢读几遍，感觉就来了～",
+      "examples": [
+        { "word_fr": "gâteau", "meaning_zh": "蛋糕", "note_zh": "g 后跟 a，读硬音 /g/", "phonetic": "/ɡa.to/" },
+        { "word_fr": "giraffe", "meaning_zh": "长颈鹿", "note_zh": "g 后跟 i，读软音 /ʒ/", "phonetic": "/ʒi.ʁaf/" },
+        { "word_fr": "gel", "meaning_zh": "冰冻；凝胶", "note_zh": "g 后跟 e，读软音 /ʒ/", "phonetic": "/ʒɛl/" },
+        { "word_fr": "grand", "meaning_zh": "大的", "note_zh": "g 后跟 r，读硬音 /g/", "phonetic": "/ɡʁɑ̃/" }
+      ],
+      "audio_text": "gâteau, giraffe, gel, grand",
+      "shadow_text_fr": "gâteau",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["A组", "字母概念"]
+    },
+    {
+      "id": "ph_vowel_01",
+      "group": "基础元音",
+      "title": "元音 a 与 â：/a/ 和 /ɑ/",
+      "description_zh": "字母 a 通常读短音 /a/，嘴巴张大、舌头放平，像轻轻说『啊』。带帽子 ^ 的 â 读长音 /ɑ/，口型更靠后、更长一点。两者很像，先不用紧张，听到示范跟着模仿就好。",
+      "examples": [
+        { "word_fr": "papa", "meaning_zh": "爸爸", "note_zh": "a 读短音 /a/", "phonetic": "/pa.pa/" },
+        { "word_fr": "chat", "meaning_zh": "猫", "note_zh": "a 读 /a/；留意词末 t 不发音", "phonetic": "/ʃa/" },
+        { "word_fr": "pâte", "meaning_zh": "面团；酱", "note_zh": "â 读长音 /ɑ/，与 /a/ 不同", "phonetic": "/pɑt/" },
+        { "word_fr": "âne", "meaning_zh": "驴", "note_zh": "â 读长音 /ɑ/", "phonetic": "/ɑn/" }
+      ],
+      "audio_text": "papa, chat, pâte, âne",
+      "shadow_text_fr": "chat",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["B组", "基础元音"]
+    },
+    {
+      "id": "ph_vowel_02",
+      "group": "基础元音",
+      "title": "带符号的 e：é / è / ê / ë",
+      "description_zh": "字母 e 戴上不同『帽子』，读音不同：é（闭口 é）读 /e/，像说『诶』但嘴角向两边；è 和 ê 读 /ɛ/，嘴巴张得更开；ë 很少见，也读 /ɛ/。先记 é 和 è 这两个最常用的就好啦。",
+      "examples": [
+        { "word_fr": "été", "meaning_zh": "夏天", "note_zh": "é 读闭口 /e/", "phonetic": "/e.te/" },
+        { "word_fr": "père", "meaning_zh": "父亲", "note_zh": "è 读开口 /ɛ/", "phonetic": "/pɛʁ/" },
+        { "word_fr": "fête", "meaning_zh": "节日", "note_zh": "ê 读开口 /ɛ/", "phonetic": "/fɛt/" },
+        { "word_fr": "Noël", "meaning_zh": "圣诞节", "note_zh": "ë 读 /ɛ/", "phonetic": "/nɔ.ɛl/" }
+      ],
+      "audio_text": "été, père, fête, Noël",
+      "shadow_text_fr": "été",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["B组", "基础元音"]
+    },
+    {
+      "id": "ph_vowel_03",
+      "group": "基础元音",
+      "title": "元音 i 与 y：都读 /i/",
+      "description_zh": "字母 i 和 y 在法语里通常都读 /i/，舌头放平、嘴角向两边，像短促的『衣』。y 常出现在词中或词尾，把它当成 i 来读就对了。",
+      "examples": [
+        { "word_fr": "si", "meaning_zh": "如果", "note_zh": "i 读 /i/", "phonetic": "/si/" },
+        { "word_fr": "ici", "meaning_zh": "这里", "note_zh": "两个 i 都读 /i/", "phonetic": "/i.si/" },
+        { "word_fr": "style", "meaning_zh": "风格", "note_zh": "y 读 /i/", "phonetic": "/stil/" },
+        { "word_fr": "physique", "meaning_zh": "物理的", "note_zh": "y 读 /i/", "phonetic": "/fi.zik/" }
+      ],
+      "audio_text": "si, ici, style, physique",
+      "shadow_text_fr": "si",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["B组", "基础元音"]
+    },
+    {
+      "id": "ph_vowel_04",
+      "group": "基础元音",
+      "title": "元音 o：/o/ 和 /ɔ/",
+      "description_zh": "字母 o 有两种常见读法：在开音节（后面没有辅音挡着）读闭口 /o/，嘴唇撅圆；在闭音节（后面跟着辅音）读开口 /ɔ/，嘴巴更放松。先听示范感受圆唇，慢慢就分清啦。",
+      "examples": [
+        { "word_fr": "mot", "meaning_zh": "单词", "note_zh": "o 在开音节读 /o/，词末 t 不发音", "phonetic": "/mo/" },
+        { "word_fr": "porte", "meaning_zh": "门", "note_zh": "o 在闭音节读 /ɔ/，词末 e 不发音", "phonetic": "/pɔʁt/" },
+        { "word_fr": "photo", "meaning_zh": "照片", "note_zh": "分别含闭口 /o/ 与开口 /ɔ/", "phonetic": "/fɔ.to/" },
+        { "word_fr": "pomme", "meaning_zh": "苹果", "note_zh": "o 在闭音节读 /ɔ/", "phonetic": "/pɔm/" }
+      ],
+      "audio_text": "mot, porte, photo, pomme",
+      "shadow_text_fr": "mot",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["B组", "基础元音"]
+    },
+    {
+      "id": "ph_vowel_05",
+      "group": "基础元音",
+      "title": "元音 u：圆唇的 /y/",
+      "description_zh": "法语的 u 读 /y/，是中文里没有的音：舌头位置像读『衣 /i/』，但嘴唇要撅圆像吹口哨。这是中文学习者的大难点，先摆好『衣』的舌位，再把嘴唇收圆，慢慢练就好～",
+      "examples": [
+        { "word_fr": "tu", "meaning_zh": "你", "note_zh": "u 读圆唇 /y/", "phonetic": "/ty/" },
+        { "word_fr": "rue", "meaning_zh": "街道", "note_zh": "u 读 /y/，r 为小舌音", "phonetic": "/ʁy/" },
+        { "word_fr": "lune", "meaning_zh": "月亮", "note_zh": "u 读 /y/", "phonetic": "/lyn/" },
+        { "word_fr": "musée", "meaning_zh": "博物馆", "note_zh": "u 读 /y/", "phonetic": "/my.ze/" }
+      ],
+      "audio_text": "tu, rue, lune, musée",
+      "shadow_text_fr": "tu",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["B组", "基础元音"]
+    },
+    {
+      "id": "ph_vowel_06",
+      "group": "基础元音",
+      "title": "开口 e（è/ê）与闭口 e（é）",
+      "description_zh": "é 是闭口 /e/，嘴角向两边、口型小；è 和 ê 是开口 /ɛ/，嘴巴张得更开。对比着读：été（闭）和 père（开）。差别就在嘴巴开合的大小，多听两遍就抓住啦。",
+      "examples": [
+        { "word_fr": "été", "meaning_zh": "夏天", "note_zh": "é 闭口 /e/", "phonetic": "/e.te/" },
+        { "word_fr": "père", "meaning_zh": "父亲", "note_zh": "è 开口 /ɛ/", "phonetic": "/pɛʁ/" },
+        { "word_fr": "café", "meaning_zh": "咖啡", "note_zh": "é 闭口 /e/", "phonetic": "/ka.fe/" },
+        { "word_fr": "très", "meaning_zh": "很；非常", "note_zh": "è 开口 /ɛ/", "phonetic": "/tʁɛ/" }
+      ],
+      "audio_text": "été, père, café, très",
+      "shadow_text_fr": "très",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["B组", "基础元音"]
+    },
+    {
+      "id": "ph_cons_01",
+      "group": "基础辅音",
+      "title": "字母组合 qu 读 /k/",
+      "description_zh": "qu 几乎总是读 /k/，后面的 u 只是『帮衬』，不单独发音（像『克』）。看到 qu 直接读 /k/ 就对了。比如 qui 读 /ki/，不用读出 u 的音哦。",
+      "examples": [
+        { "word_fr": "qui", "meaning_zh": "谁", "note_zh": "qu 读 /k/，u 不发音", "phonetic": "/ki/" },
+        { "word_fr": "quel", "meaning_zh": "哪个", "note_zh": "qu 读 /k/", "phonetic": "/kɛl/" },
+        { "word_fr": "quatre", "meaning_zh": "四", "note_zh": "qu 读 /k/", "phonetic": "/katʁ/" },
+        { "word_fr": "question", "meaning_zh": "问题", "note_zh": "qu 读 /k/，词尾 tion 读 /sjɔ̃/", "phonetic": "/kɛs.tjɔ̃/" }
+      ],
+      "audio_text": "qui, quel, quatre, question",
+      "shadow_text_fr": "qui",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_cons_02",
+      "group": "基础辅音",
+      "title": "字母组合 gu 读 /g/",
+      "description_zh": "gu 读硬音 /g/（像『哥』），u 同样不单独发音，作用是让 g 保持硬音（不然 g 碰到 e/i 会变软音 /ʒ/）。比如 guerre 读 /ɡɛʁ/，guitare 读 /ɡi.taʁ/。",
+      "examples": [
+        { "word_fr": "guerre", "meaning_zh": "战争", "note_zh": "gu 读 /g/", "phonetic": "/ɡɛʁ/" },
+        { "word_fr": "guitare", "meaning_zh": "吉他", "note_zh": "gu 读 /g/，u 不发音", "phonetic": "/ɡi.taʁ/" },
+        { "word_fr": "guide", "meaning_zh": "向导；指南", "note_zh": "gu 读 /g/", "phonetic": "/ɡid/" },
+        { "word_fr": "baguette", "meaning_zh": "法棍面包", "note_zh": "gu 读 /g/", "phonetic": "/ba.ɡɛt/" }
+      ],
+      "audio_text": "guerre, guitare, guide, baguette",
+      "shadow_text_fr": "guitare",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_cons_03",
+      "group": "基础辅音",
+      "title": "字母组合 ch 读 /ʃ/",
+      "description_zh": "ch 读 /ʃ/，像让人安静时的『嘘——』音，嘴唇微微撅起。和中文『诗』有点像，但舌位更靠前。慢慢吹气读 'ʃ'，就找到感觉啦。",
+      "examples": [
+        { "word_fr": "chat", "meaning_zh": "猫", "note_zh": "ch 读 /ʃ/，词末 t 不发音", "phonetic": "/ʃa/" },
+        { "word_fr": "chaise", "meaning_zh": "椅子", "note_zh": "ch 读 /ʃ/", "phonetic": "/ʃɛz/" },
+        { "word_fr": "chien", "meaning_zh": "狗", "note_zh": "ch 读 /ʃ/，词尾 ien 读 /jɛ̃/", "phonetic": "/ʃjɛ̃/" },
+        { "word_fr": "cher", "meaning_zh": "贵的；亲爱的", "note_zh": "ch 读 /ʃ/", "phonetic": "/ʃɛʁ/" }
+      ],
+      "audio_text": "chat, chaise, chien, cher",
+      "shadow_text_fr": "chat",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_cons_04",
+      "group": "基础辅音",
+      "title": "字母组合 gn 读 /ɲ/",
+      "description_zh": "gn 读 /ɲ/，像中文『娘』的开头那个音（舌面顶住上颚）。它常出现在 -gnon、-gne 里。比如 agneau（羊羔）读 /a.ɲo/，montagne（山）读 /mɔ̃.taɲ/，都是同一个音。",
+      "examples": [
+        { "word_fr": "agneau", "meaning_zh": "羊羔", "note_zh": "gn 读 /ɲ/", "phonetic": "/a.ɲo/" },
+        { "word_fr": "ligne", "meaning_zh": "线条", "note_zh": "gn 读 /ɲ/", "phonetic": "/liɲ/" },
+        { "word_fr": "montagne", "meaning_zh": "山", "note_zh": "gn 读 /ɲ/，an 读鼻化 /ɑ̃/", "phonetic": "/mɔ̃.taɲ/" },
+        { "word_fr": "champagne", "meaning_zh": "香槟", "note_zh": "gn 读 /ɲ/", "phonetic": "/ʃɑ̃.paɲ/" }
+      ],
+      "audio_text": "agneau, ligne, montagne, champagne",
+      "shadow_text_fr": "agneau",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_cons_05",
+      "group": "基础辅音",
+      "title": "字母组合 ph 读 /f/",
+      "description_zh": "ph 读 /f/，和字母 f 一样，上齿轻咬下唇送气（像『夫』）。这类词多来自希腊语，比如 photo（照片）、téléphone（电话），看到 ph 放心读 /f/ 就好。",
+      "examples": [
+        { "word_fr": "photo", "meaning_zh": "照片", "note_zh": "ph 读 /f/", "phonetic": "/fɔ.to/" },
+        { "word_fr": "téléphone", "meaning_zh": "电话", "note_zh": "ph 读 /f/", "phonetic": "/te.le.fɔn/" },
+        { "word_fr": "physique", "meaning_zh": "物理的", "note_zh": "ph 读 /f/", "phonetic": "/fi.zik/" },
+        { "word_fr": "alphabet", "meaning_zh": "字母表", "note_zh": "ph 读 /f/", "phonetic": "/al.fa.bɛ/" }
+      ],
+      "audio_text": "photo, téléphone, physique, alphabet",
+      "shadow_text_fr": "photo",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_cons_06",
+      "group": "基础辅音",
+      "title": "字母组合 th 读 /t/",
+      "description_zh": "th 读 /t/，和字母 t 一样（不像英语 th 咬舌）。法语里要干脆地读出『特』的开头，比如 thé（茶）读 /te/，不要读成英语 'think' 那样哦。",
+      "examples": [
+        { "word_fr": "thé", "meaning_zh": "茶", "note_zh": "th 读 /t/", "phonetic": "/te/" },
+        { "word_fr": "théâtre", "meaning_zh": "剧院", "note_zh": "th 读 /t/", "phonetic": "/te.atʁ/" },
+        { "word_fr": "bibliothèque", "meaning_zh": "图书馆", "note_zh": "th 读 /t/", "phonetic": "/bi.bli.jɔ.tɛk/" },
+        { "word_fr": "mathématiques", "meaning_zh": "数学", "note_zh": "th 读 /t/", "phonetic": "/ma.te.ma.tik/" }
+      ],
+      "audio_text": "thé, théâtre, bibliothèque, mathématiques",
+      "shadow_text_fr": "thé",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_cons_07",
+      "group": "基础辅音",
+      "title": "辅音 r：小舌音 /ʁ/",
+      "description_zh": "法语的 r 是小舌音 /ʁ/，用喉咙后部轻轻震动发出，不像中文或英语的舌尖 r。初学者可以先从『漱口』的感觉找起，轻轻哈气带出摩擦音就好，不必强求一下子标准。",
+      "examples": [
+        { "word_fr": "rue", "meaning_zh": "街道", "note_zh": "r 读小舌音 /ʁ/", "phonetic": "/ʁy/" },
+        { "word_fr": "Paris", "meaning_zh": "巴黎", "note_zh": "r 读小舌音 /ʁ/", "phonetic": "/pa.ʁi/" },
+        { "word_fr": "bonjour", "meaning_zh": "你好", "note_zh": "r 读小舌音 /ʁ/，词末 r 要发出来", "phonetic": "/bɔ̃.ʒuʁ/" },
+        { "word_fr": "frère", "meaning_zh": "兄弟", "note_zh": "r 读小舌音 /ʁ/，词末 e 不发音", "phonetic": "/fʁɛʁ/" }
+      ],
+      "audio_text": "rue, Paris, bonjour, frère",
+      "shadow_text_fr": "rue",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["C组", "基础辅音"]
+    },
+    {
+      "id": "ph_comb_01",
+      "group": "元音字母组合",
+      "title": "ai / ay 读 /ɛ/",
+      "description_zh": "字母组合 ai 和 ay 通常读 /ɛ/，嘴巴张开、舌头放平，像短促的『哎』。这是超高频的组合，先记住 maison（房子）和 chaise（椅子），就能举一反三大批词啦。",
+      "examples": [
+        { "word_fr": "maison", "meaning_zh": "房子", "note_zh": "ai 在词中读 /ɛ/；词末 s 不发音", "phonetic": "/mɛ.zɔ̃/" },
+        { "word_fr": "chaise", "meaning_zh": "椅子", "note_zh": "ai 读 /ɛ/，词末 e 不发音", "phonetic": "/ʃɛz/" },
+        { "word_fr": "lait", "meaning_zh": "牛奶", "note_zh": "ai 读 /ɛ/，词末 t 不发音", "phonetic": "/lɛ/" },
+        { "word_fr": "vrai", "meaning_zh": "真的", "note_zh": "ai 读 /ɛ/", "phonetic": "/vʁɛ/" }
+      ],
+      "audio_text": "maison, chaise, lait, vrai",
+      "shadow_text_fr": "maison",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["D组", "元音组合"]
+    },
+    {
+      "id": "ph_comb_02",
+      "group": "元音字母组合",
+      "title": "au / eau 读 /o/",
+      "description_zh": "au 和 eau 都读闭口 /o/，嘴唇撅圆。要特别留意和 ou 区分：au=/o/（如 aujourd'hui 今天），ou=/u/（如 oui 是的）——这是中文学习者最容易混的一对，跟着示范对比读几遍吧～",
+      "examples": [
+        { "word_fr": "aujourd'hui", "meaning_zh": "今天", "note_zh": "au 读 /o/；注意与 ou=/u/ 对比", "phonetic": "/o.ʒuʁ.dɥi/" },
+        { "word_fr": "beau", "meaning_zh": "美丽的", "note_zh": "eau 读 /o/", "phonetic": "/bo/" },
+        { "word_fr": "eau", "meaning_zh": "水", "note_zh": "eau 读 /o/", "phonetic": "/o/" },
+        { "word_fr": "château", "meaning_zh": "城堡", "note_zh": "eau 读 /o/，词末 eau 里只有 /o/ 一个音", "phonetic": "/ʃa.to/" }
+      ],
+      "audio_text": "aujourd'hui, beau, eau, château",
+      "shadow_text_fr": "beau",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["D组", "元音组合"]
+    },
+    {
+      "id": "ph_comb_03",
+      "group": "元音字母组合",
+      "title": "ou 读 /u/",
+      "description_zh": "ou 读 /u/，嘴唇撅得很圆、像轻轻吹口哨，和中文『乌』很像。再强调一次：ou=/u/（oui 是的），au=/o/（beau 美的），一个圆唇一个更开，对比记忆最牢。",
+      "examples": [
+        { "word_fr": "oui", "meaning_zh": "是的", "note_zh": "ou 读 /u/，和 i 连成 /wi/；对比 au=/o/", "phonetic": "/wi/" },
+        { "word_fr": "tout", "meaning_zh": "全部", "note_zh": "ou 读 /u/，词末 t 不发音", "phonetic": "/tu/" },
+        { "word_fr": "jour", "meaning_zh": "白天", "note_zh": "ou 读 /u/，r 为小舌音", "phonetic": "/ʒuʁ/" },
+        { "word_fr": "nous", "meaning_zh": "我们", "note_zh": "ou 读 /u/，词末 s 不发音", "phonetic": "/nu/" }
+      ],
+      "audio_text": "oui, tout, jour, nous",
+      "shadow_text_fr": "oui",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["D组", "元音组合"]
+    },
+    {
+      "id": "ph_comb_04",
+      "group": "元音字母组合",
+      "title": "oi 读 /wa/",
+      "description_zh": "oi 读 /wa/，像先说短的『乌』再快速滑到『啊』。比如 moi（我）、toi（你）、roi（国王）。读的时候两个音要连得紧凑，不要拆成两段哦。",
+      "examples": [
+        { "word_fr": "moi", "meaning_zh": "我", "note_zh": "oi 读 /wa/", "phonetic": "/mwa/" },
+        { "word_fr": "toi", "meaning_zh": "你", "note_zh": "oi 读 /wa/", "phonetic": "/twa/" },
+        { "word_fr": "roi", "meaning_zh": "国王", "note_zh": "oi 读 /wa/", "phonetic": "/ʁwa/" },
+        { "word_fr": "voix", "meaning_zh": "声音", "note_zh": "oi 读 /wa/，词末 x 不发音", "phonetic": "/vwa/" }
+      ],
+      "audio_text": "moi, toi, roi, voix",
+      "shadow_text_fr": "moi",
+      "shadow_mode": "syllable",
+      "tier": "starter",
+      "tags": ["D组", "元音组合"]
+    },
+    {
+      "id": "ph_comb_05",
+      "group": "元音字母组合",
+      "title": "eu / œu 读 /ø/ 或 /œ/",
+      "description_zh": "eu 和 œu 在开音节读圆唇的 /ø/（如 peu 少、deux 二），在闭音节读 /œ/（如 peur 害怕、cœur 心）。口型像说『诶』但把嘴唇收圆，多听示范感受这个圆唇音。",
+      "examples": [
+        { "word_fr": "peu", "meaning_zh": "少", "note_zh": "eu 读圆唇 /ø/", "phonetic": "/pø/" },
+        { "word_fr": "deux", "meaning_zh": "二", "note_zh": "eu 读 /ø/，词末 x 不发音", "phonetic": "/dø/" },
+        { "word_fr": "peur", "meaning_zh": "害怕", "note_zh": "eu 在闭音节读 /œ/", "phonetic": "/pœʁ/" },
+        { "word_fr": "cœur", "meaning_zh": "心", "note_zh": "œu 读 /œ/", "phonetic": "/kœʁ/" }
+      ],
+      "audio_text": "peu, deux, peur, cœur",
+      "shadow_text_fr": "peu",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["D组", "元音组合"]
+    },
+    {
+      "id": "ph_comb_06",
+      "group": "元音字母组合",
+      "title": "ei 读 /ɛ/",
+      "description_zh": "ei 通常读 /ɛ/，和 ai 的读音一样，嘴巴张开、像短促的『哎』。记住 neige（雪）、seize（十六），看到 ei 就放心读 /ɛ/ 吧。",
+      "examples": [
+        { "word_fr": "neige", "meaning_zh": "雪", "note_zh": "ei 读 /ɛ/", "phonetic": "/nɛʒ/" },
+        { "word_fr": "seize", "meaning_zh": "十六", "note_zh": "ei 读 /ɛ/", "phonetic": "/sɛz/" },
+        { "word_fr": "reine", "meaning_zh": "王后", "note_zh": "ei 读 /ɛ/", "phonetic": "/ʁɛn/" },
+        { "word_fr": "peine", "meaning_zh": "痛苦；困难", "note_zh": "ei 读 /ɛ/", "phonetic": "/pɛn/" }
+      ],
+      "audio_text": "neige, seize, reine, peine",
+      "shadow_text_fr": "neige",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["D组", "元音组合"]
+    },
+    {
+      "id": "ph_ccomb_01",
+      "group": "辅音字母组合",
+      "title": "动词词尾 -er 读 /e/",
+      "description_zh": "以 -er 结尾的动词（如 parler 说、manger 吃），词尾 er 读闭口 /e/，不读『儿』。这是法语最常见的动词结尾，记住它，一大堆动词都会读啦。",
+      "examples": [
+        { "word_fr": "parler", "meaning_zh": "说话", "note_zh": "词尾 er 读 /e/", "phonetic": "/paʁ.le/" },
+        { "word_fr": "manger", "meaning_zh": "吃", "note_zh": "词尾 er 读 /e/，an 读鼻化 /ɑ̃/", "phonetic": "/mɑ̃.ʒe/" },
+        { "word_fr": "aimer", "meaning_zh": "爱", "note_zh": "词尾 er 读 /e/", "phonetic": "/e.me/" },
+        { "word_fr": "travailler", "meaning_zh": "工作", "note_zh": "词尾 er 读 /e/", "phonetic": "/tʁa.vaje/" }
+      ],
+      "audio_text": "parler, manger, aimer, travailler",
+      "shadow_text_fr": "parler",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["E组", "辅音组合"]
+    },
+    {
+      "id": "ph_ccomb_02",
+      "group": "辅音字母组合",
+      "title": "字母组合 ss 读 /s/",
+      "description_zh": "ss 读清音 /s/（像『斯』）。它常出现在两个元音之间，让前面的元音读短音。比如 classe（班级）、poisson（鱼），ss 都干脆地读 /s/。",
+      "examples": [
+        { "word_fr": "classe", "meaning_zh": "班级", "note_zh": "ss 读 /s/，词末 e 不发音", "phonetic": "/klas/" },
+        { "word_fr": "passe", "meaning_zh": "通过", "note_zh": "ss 读 /s/", "phonetic": "/pas/" },
+        { "word_fr": "messe", "meaning_zh": "弥撒", "note_zh": "ss 读 /s/", "phonetic": "/mɛs/" },
+        { "word_fr": "poisson", "meaning_zh": "鱼", "note_zh": "ss 读 /s/，oi 读 /wa/", "phonetic": "/pwa.sɔ̃/" }
+      ],
+      "audio_text": "classe, passe, messe, poisson",
+      "shadow_text_fr": "classe",
+      "shadow_mode": "word",
+      "tier": "starter",
+      "tags": ["E组", "辅音组合"]
+    },
+    {
+      "id": "ph_ccomb_03",
+      "group": "辅音字母组合",
+      "title": "名词词尾 -tion 读 /sjɔ̃/",
+      "description_zh": "名词词尾 -tion 读 /sjɔ̃/，其中 on 是鼻化元音 /ɔ̃/（气流从鼻腔走，不要加 n 的收尾）。这个后缀非常常见，比如 nation（国家）、question（问题），记住它就赚到啦。",
+      "examples": [
+        { "word_fr": "nation", "meaning_zh": "国家；民族", "note_zh": "tion 读 /sjɔ̃/，鼻化音气流走鼻腔", "phonetic": "/na.sjɔ̃/" },
+        { "word_fr": "question", "meaning_zh": "问题", "note_zh": "tion 读 /sjɔ̃/", "phonetic": "/kɛs.tjɔ̃/" },
+        { "word_fr": "information", "meaning_zh": "信息", "note_zh": "tion 读 /sjɔ̃/", "phonetic": "/ɛ̃.fɔʁ.ma.sjɔ̃/" },
+        { "word_fr": "éducation", "meaning_zh": "教育", "note_zh": "tion 读 /sjɔ̃/", "phonetic": "/e.dy.ka.sjɔ̃/" }
+      ],
+      "audio_text": "nation, question, information, éducation",
+      "shadow_text_fr": "nation",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["E组", "辅音组合"]
+    },
+    {
+      "id": "ph_ccomb_04",
+      "group": "辅音字母组合",
+      "title": "双写辅音 cc 的读法",
+      "description_zh": "cc 有两种常见读法：在 e、i、y 前读 /ks/（如 accent 口音、accident 事故）；在 a、o、u 前只读 /k/（如 accord 协议、occuper 占据）。先记住最常见的 accent、accident 就好～",
+      "examples": [
+        { "word_fr": "accent", "meaning_zh": "口音；重音", "note_zh": "cc 在 e 前读 /ks/", "phonetic": "/ak.sɑ̃/" },
+        { "word_fr": "accident", "meaning_zh": "事故", "note_zh": "cc 在 i 前读 /ks/", "phonetic": "/ak.si.dɑ̃/" },
+        { "word_fr": "occuper", "meaning_zh": "占据", "note_zh": "cc 在 u 前只读 /k/", "phonetic": "/ɔ.ky.pe/" },
+        { "word_fr": "accord", "meaning_zh": "同意；协议", "note_zh": "cc 在 o 前只读 /k/", "phonetic": "/a.kɔʁ/" }
+      ],
+      "audio_text": "accent, accident, occuper, accord",
+      "shadow_text_fr": "accent",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["E组", "辅音组合"]
+    },
+    {
+      "id": "ph_ccomb_05",
+      "group": "辅音字母组合",
+      "title": "字母 x 的两种读音 /ks/ 和 /gz/",
+      "description_zh": "字母 x 常见两种读音：多数时候读 /ks/（如 taxi 出租车、six 六），在 ex- 开头且后面跟元音时常读 /gz/（如 examen 考试）。另外词末的 x 一般不发音（如 deux 二、voix 声音）。",
+      "examples": [
+        { "word_fr": "taxi", "meaning_zh": "出租车", "note_zh": "x 读 /ks/", "phonetic": "/tak.si/" },
+        { "word_fr": "six", "meaning_zh": "六", "note_zh": "x 读 /ks/", "phonetic": "/sis/" },
+        { "word_fr": "examen", "meaning_zh": "考试", "note_zh": "x 读 /gz/", "phonetic": "/ɛɡ.za.mɛ̃/" },
+        { "word_fr": "deux", "meaning_zh": "二", "note_zh": "词末 x 不发音，读 /dø/", "phonetic": "/dø/" }
+      ],
+      "audio_text": "taxi, six, examen, deux",
+      "shadow_text_fr": "taxi",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["E组", "辅音组合"]
+    },
+    {
+      "id": "ph_nasal_01",
+      "group": "鼻化元音",
+      "title": "鼻化元音 an / en 读 /ɑ̃/",
+      "description_zh": "an、am、en、em 常读鼻化元音 /ɑ̃/。关键提示：这是鼻化音，气流要从鼻腔走，嘴巴保持张开的口型，不要像中文『安』那样最后加一个 n 的收尾——声音是『闷在鼻子里』的。比如 temps（时间）读 /tɑ̃/。",
+      "examples": [
+        { "word_fr": "temps", "meaning_zh": "时间；天气", "note_zh": "en 读鼻化 /ɑ̃/，气流走鼻腔、不加 n", "phonetic": "/tɑ̃/" },
+        { "word_fr": "dans", "meaning_zh": "在……里", "note_zh": "an 读鼻化 /ɑ̃/", "phonetic": "/dɑ̃/" },
+        { "word_fr": "grand", "meaning_zh": "大的", "note_zh": "an 读鼻化 /ɑ̃/，词末 d 不发音", "phonetic": "/ɡʁɑ̃/" },
+        { "word_fr": "enfant", "meaning_zh": "孩子", "note_zh": "en 与 an 都读鼻化 /ɑ̃/", "phonetic": "/ɑ̃.fɑ̃/" }
+      ],
+      "audio_text": "temps, dans, grand, enfant",
+      "shadow_text_fr": "enfant",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["F组", "鼻化元音"]
+    },
+    {
+      "id": "ph_nasal_02",
+      "group": "鼻化元音",
+      "title": "鼻化元音 in / ien 读 /ɛ̃/、/jɛ̃/",
+      "description_zh": "in、im、ain、ein 读鼻化元音 /ɛ̃/（如 vin 葡萄酒）；ien 读 /jɛ̃/（如 bien 好、rien 没什么）。同样是鼻化音，气流走鼻腔，不要读出 n 的收尾。口型比 /ɑ̃/ 更闭、更靠前。",
+      "examples": [
+        { "word_fr": "vin", "meaning_zh": "葡萄酒", "note_zh": "in 读鼻化 /ɛ̃/，不加 n 收尾", "phonetic": "/vɛ̃/" },
+        { "word_fr": "matin", "meaning_zh": "早晨", "note_zh": "in 读鼻化 /ɛ̃/", "phonetic": "/ma.tɛ̃/" },
+        { "word_fr": "bien", "meaning_zh": "好", "note_zh": "ien 读鼻化 /jɛ̃/", "phonetic": "/bjɛ̃/" },
+        { "word_fr": "rien", "meaning_zh": "没什么", "note_zh": "ien 读鼻化 /jɛ̃/", "phonetic": "/ʁjɛ̃/" }
+      ],
+      "audio_text": "vin, matin, bien, rien",
+      "shadow_text_fr": "vin",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["F组", "鼻化元音"]
+    },
+    {
+      "id": "ph_nasal_03",
+      "group": "鼻化元音",
+      "title": "鼻化元音 on / om 读 /ɔ̃/",
+      "description_zh": "on、om 读鼻化元音 /ɔ̃/，嘴唇要撅圆，气流从鼻腔走，别加 n 收尾。比如 bon（好）读 /bɔ̃/、maison（房子）里的 son 读 /zɔ̃/。圆唇加鼻腔共鸣，跟着示范试试～",
+      "examples": [
+        { "word_fr": "bon", "meaning_zh": "好的", "note_zh": "on 读鼻化 /ɔ̃/，气流走鼻腔", "phonetic": "/bɔ̃/" },
+        { "word_fr": "maison", "meaning_zh": "房子", "note_zh": "on 读鼻化 /ɔ̃/，ai 读 /ɛ/", "phonetic": "/mɛ.zɔ̃/" },
+        { "word_fr": "nom", "meaning_zh": "名字", "note_zh": "om 读鼻化 /ɔ̃/", "phonetic": "/nɔ̃/" },
+        { "word_fr": "garçon", "meaning_zh": "男孩", "note_zh": "on 读鼻化 /ɔ̃/，ç 读 /s/", "phonetic": "/ɡaʁ.sɔ̃/" }
+      ],
+      "audio_text": "bon, maison, nom, garçon",
+      "shadow_text_fr": "bon",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["F组", "鼻化元音"]
+    },
+    {
+      "id": "ph_nasal_04",
+      "group": "鼻化元音",
+      "title": "鼻化元音 un / um 读 /œ̃/",
+      "description_zh": "un、um 传统读鼻化元音 /œ̃/（如 un 一、brun 棕色）。不过现代法语里它常和 /ɛ̃/ 合并，读成 /ɛ̃/ 也很自然——前端比对会把两者当同一个音，放心读就好。同样是鼻腔出气，别加 n 收尾。",
+      "examples": [
+        { "word_fr": "un", "meaning_zh": "一个", "note_zh": "un 读鼻化 /œ̃/（也常读 /ɛ̃/）", "phonetic": "/œ̃/" },
+        { "word_fr": "brun", "meaning_zh": "棕色的", "note_zh": "un 读鼻化 /œ̃/", "phonetic": "/bʁœ̃/" },
+        { "word_fr": "lundi", "meaning_zh": "星期一", "note_zh": "un 读鼻化 /œ̃/", "phonetic": "/lœ̃.di/" },
+        { "word_fr": "parfum", "meaning_zh": "香水", "note_zh": "um 读鼻化 /œ̃/", "phonetic": "/paʁ.fœ̃/" }
+      ],
+      "audio_text": "un, brun, lundi, parfum",
+      "shadow_text_fr": "un",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["F组", "鼻化元音"]
+    },
+    {
+      "id": "ph_final_01",
+      "group": "词末辅音规则",
+      "title": "词末辅音一般不发音",
+      "description_zh": "这是中文学习者最容易踩的坑：法语单词末尾的辅音字母通常不发音。比如 maison 的 s、chat 的 t、lait 的 t，写出来却读不出来。中文习惯逐字母读，这里一定要改过来——看到词末辅音，轻轻『吞掉』它就好。",
+      "examples": [
+        { "word_fr": "maison", "meaning_zh": "房子", "note_zh": "词末 s 不发音，读 /mɛ.zɔ̃/", "phonetic": "/mɛ.zɔ̃/" },
+        { "word_fr": "chat", "meaning_zh": "猫", "note_zh": "词末 t 不发音，读 /ʃa/", "phonetic": "/ʃa/" },
+        { "word_fr": "lait", "meaning_zh": "牛奶", "note_zh": "词末 t 不发音，读 /lɛ/", "phonetic": "/lɛ/" },
+        { "word_fr": "vous", "meaning_zh": "您；你们", "note_zh": "词末 s 不发音，读 /vu/", "phonetic": "/vu/" }
+      ],
+      "audio_text": "maison, chat, lait, vous",
+      "shadow_text_fr": "maison",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["G组", "词末规则"]
+    },
+    {
+      "id": "ph_final_02",
+      "group": "词末辅音规则",
+      "title": "词末字母 e 通常不发音",
+      "description_zh": "单词末尾的字母 e（叫『哑音 e』）通常不发音，比如 porte（门）读 /pɔʁt/、table（桌子）读 /tabl/。但它有重要作用：让前面的辅音读出来（对比 chat /ʃa/ 和 chatte /ʃat/）。先记住『词末 e 不出声』就好。",
+      "examples": [
+        { "word_fr": "porte", "meaning_zh": "门", "note_zh": "词末 e 不发音，读 /pɔʁt/", "phonetic": "/pɔʁt/" },
+        { "word_fr": "chatte", "meaning_zh": "母猫", "note_zh": "词末 e 不发音，让 t 读出来", "phonetic": "/ʃat/" },
+        { "word_fr": "table", "meaning_zh": "桌子", "note_zh": "词末 e 不发音，读 /tabl/", "phonetic": "/tabl/" },
+        { "word_fr": "livre", "meaning_zh": "书", "note_zh": "词末 e 不发音，读 /livʁ/", "phonetic": "/livʁ/" }
+      ],
+      "audio_text": "porte, chatte, table, livre",
+      "shadow_text_fr": "porte",
+      "shadow_mode": "word",
+      "tier": "core",
+      "tags": ["G组", "词末规则"]
+    },
+    {
+      "id": "ph_final_03",
+      "group": "词末辅音规则",
+      "title": "联诵：词末辅音遇元音要连读",
+      "description_zh": "联诵（liaison）是法语的连读魔法：当一个词以不发音的辅音结尾，下一个词以元音开头时，这个辅音会『活过来』并和后面的元音连读。比如 les amis（朋友们），s 本来不发音，联诵后读 /le.za.mi/，中间多出一个 /z/ 音。这是法语流畅度的关键哦。",
+      "examples": [
+        { "word_fr": "les amis", "meaning_zh": "朋友们", "note_zh": "s 与元音联诵读 /z/", "phonetic": "/le.za.mi/" },
+        { "word_fr": "un homme", "meaning_zh": "一个男人", "note_zh": "n 与元音联诵读 /n/", "phonetic": "/œ̃.nɔm/" },
+        { "word_fr": "vous avez", "meaning_zh": "您有", "note_zh": "s 与元音联诵读 /z/", "phonetic": "/vu.za.ve/" },
+        { "word_fr": "les enfants", "meaning_zh": "孩子们", "note_zh": "s 与元音联诵读 /z/", "phonetic": "/le.zɑ̃.fɑ̃/" }
+      ],
+      "audio_text": "les amis, un homme, vous avez, les enfants",
+      "shadow_text_fr": "les amis",
+      "shadow_mode": "phrase",
+      "tier": "core",
+      "tags": ["G组", "词末规则"]
+    },
+    {
+      "id": "ph_final_04",
+      "group": "词末辅音规则",
+      "title": "连音：辅音与后面元音连成一体",
+      "description_zh": "连音（enchaînement）和联诵不同：它是把上一个词末尾『本来就要发音』的辅音，和下一个词开头的元音连起来读，中间不停顿。比如 il est（他是）读 /i.lɛ/，末尾 l 和 est 的元音连在一起。让法语听起来像一串连绵的音，而不是一个个蹦字。",
+      "examples": [
+        { "word_fr": "il est", "meaning_zh": "他是", "note_zh": "词末 l 与元音连音读 /i.lɛ/", "phonetic": "/i.lɛ/" },
+        { "word_fr": "elle a", "meaning_zh": "她有", "note_zh": "词末 l 与元音连音读 /ɛ.la/", "phonetic": "/ɛ.la/" },
+        { "word_fr": "il a", "meaning_zh": "他有", "note_zh": "词末 l 与元音连音读 /i.la/", "phonetic": "/i.la/" },
+        { "word_fr": "on a", "meaning_zh": "我们有", "note_zh": "词末 n 与元音连音读 /ɔ̃.na/", "phonetic": "/ɔ̃.na/" }
+      ],
+      "audio_text": "il est, elle a, il a, on a",
+      "shadow_text_fr": "il est",
+      "shadow_mode": "phrase",
+      "tier": "core",
+      "tags": ["G组", "词末规则"]
+    },
+    {
+      "id": "ph_except_01",
+      "group": "高频例外与易错",
+      "title": "词末 -e 的例外：有时读 /ə/",
+      "description_zh": "前面说过词末 e 通常不发音，但也有例外：在 je（我）、le（这个）、de（的）、que（that）这类单音节小词里，词末 e 要轻轻读成 /ə/（类似中文『呃』的轻音）。记住这几个高频小词就行，不用死记硬背规则。",
+      "examples": [
+        { "word_fr": "je", "meaning_zh": "我", "note_zh": "词末 e 读轻音 /ə/", "phonetic": "/ʒə/" },
+        { "word_fr": "le", "meaning_zh": "这个（阳性定冠词）", "note_zh": "词末 e 读轻音 /ə/", "phonetic": "/lə/" },
+        { "word_fr": "de", "meaning_zh": "的；从", "note_zh": "词末 e 读轻音 /ə/", "phonetic": "/də/" },
+        { "word_fr": "que", "meaning_zh": "that；什么", "note_zh": "词末 e 读轻音 /ə/", "phonetic": "/kə/" }
+      ],
+      "audio_text": "je, le, de, que",
+      "shadow_text_fr": "je",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["H组", "例外易错"]
+    },
+    {
+      "id": "ph_except_02",
+      "group": "高频例外与易错",
+      "title": "嘘音 h：不发音但『挡住』联诵",
+      "description_zh": "有些词开头的 h 是『嘘音 h』（h aspiré），它本身不发音，但像一堵墙：不允许联诵，也不让前面的词和它连读。比如 les haricots（豆子），h 不发音，但 s 不和后面的元音联诵，读 /le.a.ʁi.ko/ 而不是 /le.za.ʁi.ko/。这类词不多，遇到时留意就好。",
+      "examples": [
+        { "word_fr": "haricot", "meaning_zh": "豆子", "note_zh": "嘘音 h，不发音、不联诵", "phonetic": "/a.ʁi.ko/" },
+        { "word_fr": "huit", "meaning_zh": "八", "note_zh": "嘘音 h，不发音、不联诵", "phonetic": "/ɥit/" },
+        { "word_fr": "haine", "meaning_zh": "仇恨", "note_zh": "嘘音 h，不发音、不联诵", "phonetic": "/ɛn/" },
+        { "word_fr": "harpe", "meaning_zh": "竖琴", "note_zh": "嘘音 h，不发音、不联诵", "phonetic": "/aʁp/" }
+      ],
+      "audio_text": "haricot, huit, haine, harpe",
+      "shadow_text_fr": "huit",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["H组", "例外易错"]
+    },
+    {
+      "id": "ph_except_03",
+      "group": "高频例外与易错",
+      "title": "数字的特殊读法（cinq、six、huit、neuf）",
+      "description_zh": "法语数字有一些特别读音，要单独记：cinq（五）读 /sɛ̃k/，six（六）读 /sis/，huit（八）读 /ɥit/，neuf（九）读 /nœf/。它们的词末辅音在单独读时要发出来，和前面『词末辅音不发音』的通则不同——这就是数字的小脾气，记牢这几个就好。",
+      "examples": [
+        { "word_fr": "cinq", "meaning_zh": "五", "note_zh": "词末 q 发音，读 /sɛ̃k/", "phonetic": "/sɛ̃k/" },
+        { "word_fr": "six", "meaning_zh": "六", "note_zh": "词末 x 发音，读 /sis/", "phonetic": "/sis/" },
+        { "word_fr": "huit", "meaning_zh": "八", "note_zh": "读 /ɥit/，嘘音 h 不发音", "phonetic": "/ɥit/" },
+        { "word_fr": "neuf", "meaning_zh": "九", "note_zh": "词末 f 发音，读 /nœf/", "phonetic": "/nœf/" }
+      ],
+      "audio_text": "cinq, six, huit, neuf",
+      "shadow_text_fr": "cinq",
+      "shadow_mode": "syllable",
+      "tier": "core",
+      "tags": ["H组", "例外易错"]
+    }
+  ]
+}

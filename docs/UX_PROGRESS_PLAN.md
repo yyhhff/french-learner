@@ -7,12 +7,16 @@
 
 ## 0. 总指挥事实核实（先纠正两处，确保方案建立在真实代码上）
 
-两位角色的方案与任务背景描述有两处出入，我逐行读源码核实，结论如下——后续所有设计以此为准：
+两位角色的方案与任务背景描述有若干处出入，我逐行读源码核实，结论如下——后续所有设计以此为准：
 
 | 项 | 我之前口径（错） | 核实后事实（对） | 证据 |
 |---|---|---|---|
 | 对话是否落库 | "只存内存、刷新即丢" | **对话已落库**：`app.py:174/182` 调 `db.add_dialogue_turn()` 写 `dialogue_turns` 表；但**无任何读回端点**（检索 `api/chat/history`/`list_dialogue` 为零命中），前端刷新后 `state.chatLog` 归零、只能拿 `GET /api/scenes/{id}` 的固定种子对话 | `backend/app.py:174,182`、`backend/db.py:75,302-332` |
-| 演示假值 | "xp=2300 / streak=13" | `seed.py` 与前端 `FALLBACK_PROFILE` **一致写死 xp=1280 / streak=12**；`FALLBACK_PROFILE.stats` 另写死 due=8/本周新词46/掌握1024/正确率0.87 | `backend/seed.py:15-19`、`frontend/app.js:63-67` |
+| 演示假值 | "xp=2300 / streak=13 是写死的目标值" | `seed.py` 写死基数 xp=1280 / streak=12，前端 `FALLBACK_PROFILE` 也写死 1280/12；但界面实际显示的 **2300/13 是 `get_profile()` 从库里读出的演示运行副作用**：1280 + 每次 chat +20（约 51 次对话）、12 + 1 次跨天；不是产品设定目标，也不是纯写死常量。`FALLBACK.stats` 另写死 due=8/掌握1024/正确率0.87，与库值不一致 | `backend/seed.py:15-19`、`frontend/app.js:63-67`、`app.py:193`、`db.py:350-378` |
+
+**xp/streak 假值如何产生（架构师追查写入链）**：唯一写入链是 `app.py:193` 每次 chat 调 `db.update_user_activity(user_id, xp_delta=20)`（注释"每轮+10，本轮共2轮"），`update_user_activity()`（`db.py:350-378`）做 `xp += delta`、streak 同日不变/跨天+1/断档重置1。故 2300 = 1280(seed 假基数) + 20×约 51 次历史对话，13 = 12(seed) + 1 次跨天。**这两个数字没有一个是真实学习产出，全是演示副作用被 `get_profile()` 原样当成进度读出**。前端 FALLBACK 的 1280/12 又与库里真实值 2300/13 不一致，是无人维护的演示残留。
+
+**由此得出一条关键迁移结论**：清零**不能只改 seed 常量**——seed 仅在空库时灌一次（幂等），已入库的假值不会因改常量消失，必须**显式迁移 users 表当前行**（见 §5.5）。
 
 **修正后的核心诊断**：数据在服务端**写了但读不回**、初始值用**假数据**、没有"读回→聚合→可视化→驱动下一步"的回路。这比"完全没存"更可惜——底层数据基础已具备大半，改造成本低。
 
@@ -141,7 +145,8 @@
 - 复用 `srs.schedule()` 与 `review_logs.next_due`，不重写算法。
 - 新增 `db.list_due_reviews(user_id, now, limit, offset)`：`SELECT ... FROM review_logs r JOIN word_cards c ON r.card_id=c.id WHERE c.user_id=? AND r.next_due<=? ORDER BY r.next_due, r.id LIMIT ? OFFSET ?`，出参复用 WordCard + review_state。
 - 端点 `GET /api/review/due`（limit?, offset?）→ `{items: DueCard[], total, today_count}`【待冻结】；默认 limit=10、无倒计时、无红点施压。复习成功走既有 `POST /api/cards/{id}/review`（契约不变），`srs.schedule()` 自动推进 next_due。
-- 修正 `get_profile().stats.due_cards_count` 补 user_id 过滤，与新队列口径一致。
+- 修正 `get_profile().stats.due_cards_count` 补 user_id 过滤（`db.py:394-396` 现为 `WHERE next_due <= ?`，mastered/agg 都带 user_id、唯独它漏了；单用户无碍，多用户演进会串数），与新队列口径一致。
+- **复用/新增边界（架构师明确）**：复用 = `review_logs` 六字段 + `word_cards`(UNIQUE) + `srs.schedule()` + `POST /api/cards/{id}/review` 写入路径，**零新增字段/表、不重写算法、不引入 FSRS**；新增 = 仅查询与触达层（`list_due_reviews` / `count_due_reviews` / `GET /api/review/due` / 前端到期入口）。`GET /api/review/due` 默认 20 条温和分页、不主动推送打扰（仅用户进入复习入口时拉取）。
 
 ### 5.3 成就系统
 - **判定源**：只从已落库真实事件判定，不从前端上报（防伪造）。事件源 = add_dialogue_turn 计数、create_card 计数、review_logs 达标记、attempts 完成、streak 值。
@@ -155,10 +160,35 @@
 - **i+1 衔接**：`GET /api/profile` 增 `skill_profile` 字段（或独立 `GET /api/profile/skills`）；recommend 保留原 cefr_level 驱动逻辑，画像仅作**同档内篇目排序权重**（弱维度优先）——零回归且更个性化。
 
 ### 5.5 首次引导与状态迁移（关键：不能让假数据继续骗人）
-- **新用户（空库）**：seed 的 `users.xp=1280/streak=12` 改为 0，或明确标记 is_demo 只展示"开始你的第一段对话"。用户第一次看到的必须是真实 0 起点。
-- **老用户（已有假数据的本机库）**：一次性迁移 `migrate_demo_progress()`【待冻结】：仅当检测到纯演示值（xp==1280 且 streak==12 且无真实事件流水）时清零并写迁移标记；有真实行为的库绝不重置。"宁可清零重来，不可假数续命"。
-- **前端状态**：state 增 `progress` 子树（skills/achievements/due/history），启动并行拉 4 端点；FALLBACK_PROFILE 降级为"网络不可用时空壳"，标注"离线暂不可查看进度"，不再拿 1280/12 冒充。
+- **触发**：一次性标志 `profile_initialized`【待冻结，建议 users 加列 DEFAULT 0；或复用 skill_events 首条判断以免改 users 表】，首次真实用户进入时执行。
+- **迁移动作（服务端，幂等）**：
+  1. `users.xp/streak_days/last_active_date` 归零：`xp=0, streak=0, last_active_date=NULL`。理由：现有 xp 全是演示副作用，无一是本用户真实产出，整体清零最干净，避免"部分真部分假"无法区分。
+  2. 演示数据隔离：`dialogue_turns`/`word_cards`/`review_logs` 的 seed 行二选一——(a) 首次引导删除演示行（推荐，语义干净）；(b) 保留但前端标"示例"水印。分界建议给 seed 行加 `is_demo` 标记【待冻结】，避免按 id 硬切。
+  3. 写 `profile_initialized=1`，后续不再触发。
+- **迁移伪码【待冻结】**：
+  ```
+  if not user.profile_initialized:
+      with tx:
+          UPDATE users SET xp=0, streak_days=0, last_active_date=NULL, profile_initialized=1 WHERE id=?
+          DELETE FROM dialogue_turns WHERE user_id=? AND is_demo=1
+          DELETE FROM review_logs    WHERE user_id=? AND is_demo=1
+          DELETE FROM word_cards     WHERE user_id=? AND is_demo=1
+  ```
+- **新用户（空库）**：seed 的 `users.xp=1280/streak=12` 改为 0，或标记 is_demo 只展示"开始你的第一段对话"。用户第一次看到的必须是真实 0 起点。**注意改 seed 常量对已有库无效，必须配合上面的显式迁移。**
+- **清零后真实值如何计算**：xp 复用 `update_user_activity` 从 0 起算（P1 可细化为对话 +10 / 复习完成 +5 / 成就 +20【待冻结，分值以 PM 为准】）；streak 由 last_active_date 跨天 +1 从 0/1 起算；本周新词/掌握数/正确率继续由 `get_profile()` 实时聚合，自然归零后随真实复习增长。
+- **前端状态**：state 增 `progress` 子树（skills/achievements/due/history），启动并行拉 4 端点；**`FALLBACK_PROFILE` 的 1280/12 必须改为 0/0 或"未初始化"态——这是本次最易漏掉的一处**，否则接口未就绪时又用假值兜底，前功尽弃。标注"离线暂不可查看进度"，不再拿假值冒充。
 - **对账**：定级/考级本地缓存（placement_result）保留，但以服务端 attempts 为准——启动发现本地有结果而服务端无对应 attempt 时清掉本地标记。
+- **文案**：首次引导明确"全新学习档案，从今天开始记录"，避免用户误以为丢进度。
+
+### 5.6 复用 vs 新增总表（架构师物理边界，可直接进冻结契约）
+
+| 能力 | 复用现有 | 需新增 |
+|---|---|---|
+| 复习调度 | `review_logs` 全字段、`srs.schedule`、`POST /api/cards/{id}/review`、`word_cards` UNIQUE | `list_due_reviews`/`count_due_reviews`、`GET /api/review/due`、前端到期入口 |
+| 对话历史 | `dialogue_turns` 表及写入 | `GET /api/chat/history`；前端 chatLog 改从接口恢复 |
+| xp/streak | users 三字段、`update_user_activity` | `profile_initialized` 标志、迁移逻辑、前端 fallback 改 0 |
+| 成就 | — | `achievements` 表(UNIQUE user_id,code) + INSERT OR IGNORE、`GET /api/achievements` |
+| 水平画像 | `attempts`(placement/exam)、`review_logs`、对话/生词行为 | `skill_events` + `skill_profile` 两表、`GET /api/profile/skills`、增量更新 + rebuild |
 
 ## 6. 零回归与风险
 

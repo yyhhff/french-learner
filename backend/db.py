@@ -173,6 +173,20 @@ CREATE TABLE IF NOT EXISTS attempts (
 
 CREATE INDEX IF NOT EXISTS idx_attempts_user_kind ON attempts (user_id, kind, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_attempts_kind ON attempts (kind);
+
+-- ===== 读音规则学习增量：规则级掌握度（旧表结构一字不改）=====
+CREATE TABLE IF NOT EXISTS pronunciation_progress (
+    user_id           INTEGER NOT NULL,
+    rule_id           TEXT    NOT NULL,
+    stage             TEXT    NOT NULL CHECK (stage IN ('seen', 'learned', 'confident')),
+    practice_count    INTEGER NOT NULL DEFAULT 0,
+    last_practiced_at TEXT,
+    self_assessed     INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, rule_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pron_progress_user ON pronunciation_progress (user_id);
+CREATE INDEX IF NOT EXISTS idx_pron_progress_user_stage ON pronunciation_progress (user_id, stage);
 """
 
 
@@ -888,5 +902,92 @@ def set_user_cefr_level(user_id: int, level: str) -> None:
             "UPDATE users SET cefr_level = ? WHERE id = ?", (level, user_id)
         )
         conn.commit()
+    finally:
+        conn.close()
+
+
+# ================================================================ 读音规则学习增量：规则级掌握度
+# 契约 PRONUNCIATION_CONTRACT.md v1.0 §2.1 / §3.3 / §3.4；所有 SQL 显式带 user_id。
+
+def _row_to_progress_item(row: sqlite3.Row) -> dict:
+    """ProgressItem 出参：self_assessed 由库内 0/1 转 bool。"""
+    return {
+        "rule_id": row["rule_id"],
+        "stage": row["stage"],
+        "practice_count": row["practice_count"],
+        "last_practiced_at": row["last_practiced_at"],
+        "self_assessed": bool(row["self_assessed"]),
+    }
+
+
+def get_progress(user_id: int = DEFAULT_USER_ID) -> dict:
+    """读取当前用户全部进度：统计 + 明细（total_rules 由 app 层按规则缓存补）。"""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT * FROM pronunciation_progress WHERE user_id = ? ORDER BY rule_id ASC",
+            (user_id,),
+        ).fetchall()
+        counts = {"seen": 0, "learned": 0, "confident": 0}
+        for row in rows:
+            counts[row["stage"]] = counts.get(row["stage"], 0) + 1
+        return {
+            "user_id": user_id,
+            "seen_count": counts["seen"],
+            "learned_count": counts["learned"],
+            "confident_count": counts["confident"],
+            "learned_total": counts["learned"] + counts["confident"],
+            "items": [_row_to_progress_item(row) for row in rows],
+        }
+    finally:
+        conn.close()
+
+
+def upsert_progress(
+    user_id: int,
+    rule_id: str,
+    stage: str | None = None,
+    self_assessed: int | None = None,
+) -> dict:
+    """幂等 upsert 某规则的掌握状态，返回更新后的 ProgressItem。
+
+    ★裁决④：practice_count 服务端 +1 累加（新记录从 1 起），不接受客户端目标值；
+    self_assessed 只增不减（已有 1 传 0 保留 1，None 表示缺省保留旧值）；
+    last_practiced_at 每次由服务端 now_iso() 写入。
+    """
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT * FROM pronunciation_progress WHERE user_id = ? AND rule_id = ?",
+            (user_id, rule_id),
+        ).fetchone()
+        ts = now_iso()
+        if row is None:
+            final_stage = "seen" if stage is None else stage
+            final_self = 1 if self_assessed else 0
+            conn.execute(
+                "INSERT INTO pronunciation_progress "
+                "(user_id, rule_id, stage, practice_count, last_practiced_at, self_assessed) "
+                "VALUES (?, ?, ?, 1, ?, ?)",
+                (user_id, rule_id, final_stage, ts, final_self),
+            )
+        else:
+            final_stage = row["stage"] if stage is None else stage
+            if self_assessed is None:
+                final_self = row["self_assessed"]
+            else:
+                final_self = 1 if (row["self_assessed"] or self_assessed) else 0
+            conn.execute(
+                "UPDATE pronunciation_progress SET stage = ?, "
+                "practice_count = practice_count + 1, last_practiced_at = ?, self_assessed = ? "
+                "WHERE user_id = ? AND rule_id = ?",
+                (final_stage, ts, final_self, user_id, rule_id),
+            )
+        conn.commit()
+        row = conn.execute(
+            "SELECT * FROM pronunciation_progress WHERE user_id = ? AND rule_id = ?",
+            (user_id, rule_id),
+        ).fetchone()
+        return _row_to_progress_item(row)
     finally:
         conn.close()

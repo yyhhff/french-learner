@@ -88,7 +88,7 @@ CREATE INDEX IF NOT EXISTS idx_pron_progress_user_stage ON pronunciation_progres
 
 ### 2.2 规则 JSON `data/input/pronunciation_rules.json` Schema【逐字来自 PRONUNCIATION_PLAN §6.4】
 
-**文件**：`french-learner/data/input/pronunciation_rules.json`，UTF-8，中文/法语直接写字符（`ensure_ascii=false` 风格），顶层对象含 `rules` 数组（39 条）。
+**文件**：`french-learner/data/input/pronunciation_rules.json`，UTF-8，中文/法语直接写字符（`ensure_ascii=false` 风格），顶层对象含 `rules` 数组（39 条）。**落盘文件另含可选元数据键 `version`（当前值 `1`）**：后端加载器**只读 `payload["rules"]`，不依赖 `version`**（该键为内容版本标记，不参与契约字段校验）。
 
 > **字段名锁定**：以下字段名来自 content 实际产出并经架构师确认，**逐字照用**。绝不允许改用 `word` / `highlight` / `read_aloud` 等旧名（PRONUNCIATION_PLAN §6.4 / §9）。
 
@@ -211,7 +211,7 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
   "code": 0,
   "data": [
     { "id": "ph_comb_02", "group": "元音字母组合", "title": "ai / ay 读 /ɛ/", "tier": "starter" },
-    { "id": "ph_vowel_01", "group": "基础元音", "title": "a 读 /a/", "tier": "starter" }
+    { "id": "ph_vowel_01", "group": "基础元音", "title": "元音 a 与 â：/a/ 和 /ɑ/", "tier": "starter" }
   ],
   "message": "ok"
 }
@@ -236,7 +236,7 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | `group` | string | `"元音字母组合"` | 分组纯组名 |
 | `title` | string | `"ai / ay 读 /ɛ/"` | 规则标题 |
 | `description_zh` | string | 见 §2.2 示例 | 中文讲解 |
-| `examples` | `ExampleItem[]` | 见下 | 2–4 条例词 |
+| `examples` | `ExampleItem[]` | 见下 | ★裁决①：恰好 4 条例词（全库 156 槽位全配） |
 | `audio_text` | string | `"maison, chaise, lait"` | TTS 示范文本（只听不比对） |
 | `shadow_text_fr` | string | `"maison"` | 跟读比对目标 |
 | `shadow_mode` | string | `"word"` | `syllable`/`word`/`phrase` |
@@ -345,7 +345,7 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | 请求体非 JSON 对象 | 40001 | 400 | 复用 `json_body()` |
 | DB 写入/回读异常 | 50001 | 500 | 内部错误 |
 
-> **幂等口径（细化）**：`upsert` 保证同一 `(user_id, rule_id)` 只有一行，重复同一请求结果一致；`practice_count`/`self_assessed` 为覆盖式（客户端负责计算目标值）。`self_assessed` 语义与 `practice_count` 覆盖 vs 累加的选择见 §7 待裁决（本契约按覆盖实现，不阻塞 P0）。
+> **幂等口径（★裁决④，已终裁）**：`upsert` 保证同一 `(user_id, rule_id)` 只有一行，重复请求不产生重复行；`practice_count` **由服务端 +1 累加、不接受客户端传目标值**（防多端/重复提交丢计数，新记录从 1 起），`stage`/`self_assessed` 按提供值更新（`self_assessed` 只增不减）。此口径与 §3.4 请求体表、行为步骤、§6、§8 完全一致。
 
 ### 3.5 错误码统一口径（全 4 端点）
 
@@ -403,7 +403,7 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | `RuleDetail` | `id`, `group`, `title`, `description_zh`, `examples`, `audio_text`, `shadow_text_fr`, `shadow_mode`, `tier`, `tags` |
 | `ProgressItem` | `rule_id`, `stage`, `practice_count`, `last_practiced_at`, `self_assessed` |
 | `ProgressView` | `user_id`, `total_rules`, `seen_count`, `learned_count`, `confident_count`, `learned_total`, `items` |
-| `ProgressUpdateBody` | `rule_id`, `stage`?, `practice_count`?, `self_assessed`? |
+| `ProgressUpdateBody` | `rule_id`, `stage`?, `self_assessed`?（★裁决④：不含 `practice_count`，客户端传值一律忽略） |
 | 规则单条（源文件 §6.4） | `id`, `group`, `title`, `description_zh`, `examples`(`word_fr`,`meaning_zh`,`note_zh`,`phonetic`), `audio_text`, `shadow_text_fr`, `shadow_mode`, `tier`, `tags` |
 
 **禁用旧字段别名**：`word`、`highlight`、`read_aloud`（以及 §6.4 未定义的任何别名）一律不得出现在 JSON、请求/响应、表结构中。
@@ -446,8 +446,8 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | 3 | 规则详情 | `GET /rules/ph_comb_02` 含全部 10 字段、`examples[].word_fr/meaning_zh/note_zh/phonetic` 齐全、`audio_text` 与 `shadow_text_fr` 分离；不存在 → `40401` |
 | 4 | 音位口径 | 全库 JSON 中 `/ɑ̃/` 写法保留、`/ɑ/` 独立，二者未混写；易混等价集不含 `/ɑ̃/` |
 | 5 | 进度读取 | 空库 `GET /progress` → `total_rules=39`、各计数 0、`items=[]`；有记录时 `self_assessed` 为 `bool` |
-| 6 | 进度 upsert 幂等 | 同一 `(user_id,rule_id)` 连 POST 2 次仍 1 行；第二次按覆盖更新；`last_practiced_at` 更新为 `now_iso()` |
-| 7 | 进度校验 | 缺 `rule_id`/空白 → `40001`；不存在 `rule_id` → `40401`；`stage` 非法 / `practice_count` 为 bool 或负数 / `self_assessed` 非 0-1 → `40001`；请求体非对象 → `40001` |
+| 6 | 进度 upsert 幂等与累加 | 同一 `(user_id,rule_id)` 连 POST 2 次仍 1 行；`practice_count` 由服务端从 1 起 +1 累加（第 2 次=2，客户端传值被忽略）；`last_practiced_at` 更新为 `now_iso()` |
+| 7 | 进度校验 | 缺 `rule_id`/空白 → `40001`；不存在 `rule_id` → `40401`；`stage` 非法 / `self_assessed` 非 0-1 → `40001`；客户端传 `practice_count`（任意值）一律忽略不报错、服务端仍 +1；请求体非对象 → `40001` |
 | 8 | 隐私红线 | `pronunciation_progress` 表无音频/转写列；`POST /progress` 请求体含未知字段 `audio`/`transcript` 一律忽略且不落库 |
 | 9 | 零回归 | 现有 21 端点逐条请求路径/入参/出参不变；`health.version="1.0.0"`；`requirements.txt` 两行 |
 | 10 | 零运行时 IO | 启动后重命名/删除 `pronunciation_rules.json`，4 端点仍从缓存正常返回（无 `open()` 请求路径） |

@@ -121,7 +121,7 @@
   /* right panel */
   .panel{margin-bottom:16px}
   .panel .body{padding:14px 16px}
-  .vocab{display:flex;flex-direction:column;gap:10px}
+  .vocab{display:flex;flex-direction:column;gap:10px;max-height:480px;overflow-y:auto}
   .v{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);transition:border-color .15s}
   .v:hover{border-color:#BFE6D6}
   .v .v-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}

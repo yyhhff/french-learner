@@ -284,10 +284,9 @@ function renderVocab(){
   document.getElementById('vocab').innerHTML = list.length
     ? list.map(c=>{
         const ids = findRulesForCard(c.word);
-        // 融入点①：仅当该词能在 word_fr 反向索引命中规则时，挂一个轻量入口，不打断原词卡布局
-        const pronEntry = (state.pron.available && ids.length)
-          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看这个词怎么读">🎵 怎么读</button>`
-          : '';
+        // 融入点①：所有词都有"🎵 怎么读"入口，显示词名让用户知道学哪个音
+        // 命中规则词的展开规则讲解，未命中的只显示听发音+提示
+        const pronEntry = `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看 ${esc(c.word)} 怎么读">${esc(c.word)} 🎵 怎么读</button>`;
         return `<div class="v">
         <div class="v-top">
           <span class="w">${esc(c.word)}</span>
@@ -1838,8 +1837,33 @@ function openPronCard(ruleId, hitIds, hitWord){
 function openPronCardForWord(btn){
   const word = btn.getAttribute('data-word') || '';
   const ids = findRulesForCard(word);
-  if(!ids.length) return;
-  openPronCard(ids[0], ids, word);
+  if(ids.length){
+    openPronCard(ids[0], ids, word);
+    return;
+  }
+  // 未命中规则：显示最小卡片，听发音 + 提示
+  openPronCardForNoRule(word);
+}
+function openPronCardForNoRule(word){
+  pronCurrentRuleId = null;
+  pronHitWord = word;
+  const ov = document.getElementById('pronOverlay');
+  if(!ov) return;
+  ov.classList.remove('hidden');
+  const box = document.getElementById('pronCardContent');
+  if(!box) return;
+  box.innerHTML = `
+    <div class="pron-card-head">
+      <div class="pron-card-kicker">🎵 ${esc(word)} 的读音</div>
+      <h3 class="pron-card-title">${esc(word)} 怎么读</h3>
+    </div>
+    <div class="pron-card-body">
+      <div class="pron-desc">这条读音规则暂未收录，先听听标准发音吧～</div>
+      <div class="pron-listen">
+        <button class="pron-listen-btn" onclick="speak(this)" data-text="${esc(word)}">🔊 听 ${esc(word)}</button>
+        <span class="pron-muted">再听一次也可以</span>
+      </div>
+    </div>`;
 }
 function switchPronCard(ruleId){
   if(!state.pron.ruleById.has(ruleId)) return;

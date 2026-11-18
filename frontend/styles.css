@@ -458,3 +458,100 @@
     .ex-total b{font-size:38px}
     .ex-result-actions button{width:100%}
   }
+
+  /* ===== 零基础读音规则学习 P0：融入式（词卡入口 / 规则卡 / 小册子） ===== */
+  /* 词卡侧栏常驻入口 + 首次温和气泡 */
+  .pron-book-entry{width:100%;border:1px solid #BFE6D6;background:var(--teal-soft);color:#0F6E56;
+    border-radius:11px;padding:9px 12px;font-size:12.5px;font-weight:600;cursor:pointer;
+    font-family:inherit;transition:.15s;margin-bottom:12px;text-align:center}
+  .pron-book-entry:hover{background:#D3EEE2}
+  .pron-first-tip{position:relative;background:var(--amber-soft);border:1px solid #EFD9A8;border-radius:12px;
+    padding:10px 30px 10px 12px;font-size:11.5px;color:#95620E;line-height:1.6;margin-bottom:12px;animation:pop .35s ease both}
+  .pron-tip-close{position:absolute;top:6px;right:9px;border:none;background:none;font-size:17px;
+    color:#B98A34;cursor:pointer;line-height:1}
+  /* 词卡轻量读音入口：不打断原词卡布局 */
+  .v .pron-word-entry{margin-top:8px;border:1px solid #F3C9B4;background:var(--brand-soft);color:var(--brand);
+    border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .v .pron-word-entry:hover{background:#FBE0D3}
+
+  /* 规则卡浮层：叠在小册子之上，关闭后露出小册子 */
+  .pron-overlay{z-index:60}
+  .pron-box{position:relative;background:var(--surface);border-radius:20px;width:100%;max-width:480px;
+    max-height:88vh;overflow-y:auto;padding:26px 24px 24px;box-shadow:0 20px 60px rgba(60,50,30,.22)}
+  .pron-close{position:absolute;top:12px;right:14px;border:none;background:none;font-size:22px;
+    color:var(--muted);cursor:pointer;line-height:1;z-index:2}
+  .pron-card-head{padding-right:22px}
+  .pron-card-kicker{font-size:11.5px;color:var(--teal);font-weight:700;display:flex;align-items:center;gap:8px}
+  .pron-tier{font-size:10.5px;font-weight:600;color:var(--amber);background:var(--amber-soft);
+    border-radius:99px;padding:2px 9px}
+  .pron-card-title{font-size:21px;font-weight:700;line-height:1.4;margin-top:8px;overflow-wrap:anywhere}
+  .pron-hit-note{font-size:11.5px;color:var(--muted);margin-top:6px}
+  .pron-rule-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 0;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+  .pron-rule-tab{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:5px 12px;
+    font-size:11.5px;color:var(--muted);cursor:pointer;font-family:inherit;transition:.15s}
+  .pron-rule-tab:hover{border-color:var(--brand);color:var(--brand)}
+  .pron-rule-tab.on{background:var(--brand-soft);border-color:#F3C9B4;color:var(--brand);font-weight:600}
+  .pron-card-body{margin-top:16px}
+  .pron-desc{font-size:13.5px;line-height:1.8;color:var(--ink);background:var(--teal-soft);
+    border:1px solid #BFE6D6;border-radius:13px;padding:13px 15px}
+  .pron-listen{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .pron-listen-btn{border:none;background:var(--brand);color:#fff;border-radius:11px;padding:10px 15px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;
+    box-shadow:0 6px 14px rgba(232,121,74,.2)}
+  .pron-listen-btn:hover{background:#D9693E}
+  .pron-listen-btn.speaking{animation:spkPulse .8s ease-in-out infinite}
+  .pron-replay{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 12px;
+    font-size:11.5px;color:var(--muted);cursor:pointer;font-family:inherit;transition:.15s}
+  .pron-replay:hover{border-color:var(--brand);color:var(--brand)}
+  .pron-sub-title{font-size:12px;font-weight:700;color:var(--muted);margin:20px 0 10px}
+  .pron-examples{display:flex;flex-direction:column;gap:9px}
+  .pron-ex{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .pron-ex-top{display:flex;align-items:center;gap:8px}
+  .pron-ex-word{font-size:15px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+  .pron-ex-spk{border:none;background:none;cursor:pointer;font-size:13px;color:var(--blue);padding:0}
+  .pron-ex-spk.speaking{animation:spkPulse .8s ease-in-out infinite}
+  .pron-ex-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;font-size:12px;color:var(--teal)}
+  .pron-ex-ipa{font-size:11.5px;color:var(--muted);font-family:"Times New Roman",serif}
+  .pron-ex-note{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .pron-muted{font-size:12px;color:var(--muted)}
+  .pron-progress-sec{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line)}
+  .pron-progress-line{font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .pron-progress-hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .pron-stage-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .pron-stage-btn{border:1px solid var(--line);background:var(--bg);border-radius:11px;padding:10px 4px;
+    font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit;transition:.15s}
+  .pron-stage-btn:hover{transform:translateY(-2px)}
+  .pron-stage-btn.seen.on{background:var(--blue-soft);border-color:#C7DAF4;color:var(--blue)}
+  .pron-stage-btn.learned.on{background:var(--teal-soft);border-color:#BFE6D6;color:#0F6E56}
+  .pron-stage-btn.confident.on{background:var(--amber-soft);border-color:#EFD9A8;color:var(--amber)}
+  /* 掌握微标四态 */
+  .pron-badge{display:inline-block;font-size:10.5px;font-weight:600;border-radius:99px;padding:2px 9px;white-space:nowrap}
+  .pron-badge.none{color:var(--muted);background:var(--bg);border:1px solid var(--line)}
+  .pron-badge.seen{color:var(--blue);background:var(--blue-soft)}
+  .pron-badge.learned{color:#0F6E56;background:var(--teal-soft)}
+  .pron-badge.confident{color:var(--amber);background:var(--amber-soft)}
+
+  /* 小册子浮层 */
+  .pron-book-box{position:relative;background:var(--surface);border-radius:20px;width:100%;max-width:560px;
+    max-height:88vh;display:flex;flex-direction:column;padding:24px 22px 18px;
+    box-shadow:0 20px 60px rgba(60,50,30,.22)}
+  .pron-book-head{padding-right:26px;font-size:16px;font-weight:700;color:var(--ink)}
+  .pron-book-scroll{overflow-y:auto;margin-top:16px;flex:1}
+  .pron-book-empty{text-align:center;font-size:13px;color:var(--muted);line-height:1.9;padding:40px 12px}
+  .pron-book-group{margin-bottom:18px}
+  .pron-book-group-h{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--teal);
+    padding-bottom:7px;border-bottom:1px solid var(--line)}
+  .pron-book-group-h small{font-size:10.5px;font-weight:400;color:var(--muted)}
+  .pron-book-items{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+  .pron-book-item{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:9px 11px;border-radius:10px;cursor:pointer;transition:.15s}
+  .pron-book-item:hover{background:var(--brand-soft)}
+  .pron-book-item-title{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+  .pron-book-foot{text-align:center;font-size:11.5px;color:var(--muted);padding-top:12px;margin-top:6px;
+    border-top:1px dashed var(--line)}
+  @media(max-width:600px){
+    .pron-box,.pron-book-box{padding:22px 16px 18px}
+    .pron-card-title{font-size:19px}
+    .pron-stage-row{gap:5px}
+    .pron-stage-btn{font-size:11px}
+  }

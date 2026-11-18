@@ -120,6 +120,17 @@ const state = {
     readIds:[],         // 已读 id 集合，供 recommend exclude_ids
     available:true,
     loaded:false
+  },
+  // 零基础读音规则学习 P0：融入式，不新增 Tab；端点失败只降级读音入口，不动其余功能
+  pron:{
+    summaries:[],       // GET /rules 摘要四字段（小册子索引用）
+    detailsLoaded:false,// 是否已并发拉全详情、建好索引
+    ruleById:new Map(), // rule_id -> RuleDetail
+    wordToRules:new Map(), // 归一化 word_fr -> [rule_id]
+    progress:null,      // GET /progress 的 ProgressView
+    progressFetched:false,
+    available:true,     // 规则端点是否可用（失败则词卡不显示读音入口）
+    bookOpen:false
   }
 };
 let toastTimer = null;
@@ -271,7 +282,13 @@ function renderVocab(){
   document.getElementById('vocabTitle').textContent = '本场景生词';
   document.getElementById('vocabSub').textContent = state.online?'自动收卡':'本地词表';
   document.getElementById('vocab').innerHTML = list.length
-    ? list.map(c=>`<div class="v">
+    ? list.map(c=>{
+        const ids = findRulesForCard(c.word);
+        // 融入点①：仅当该词能在 word_fr 反向索引命中规则时，挂一个轻量入口，不打断原词卡布局
+        const pronEntry = (state.pron.available && ids.length)
+          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看这个词怎么读">🎵 怎么读</button>`
+          : '';
+        return `<div class="v">
         <div class="v-top">
           <span class="w">${esc(c.word)}</span>
           ${c.pos?`<span class="v-pos">${esc(c.pos)}</span>`:''}
@@ -280,7 +297,9 @@ function renderVocab(){
         </div>
         <div class="mean">${esc(c.meaning||'')}</div>
         ${c.example?`<div class="v-ex">例：${esc(c.example)}</div>`:''}
-      </div>`).join('')
+        ${pronEntry}
+      </div>`;
+      }).join('')
     : '<div class="vocab-empty">还没有生词，聊几句自动收卡～</div>';
 }
 
@@ -757,6 +776,10 @@ function switchView(name){
   if(at) at.classList.toggle('on', view==='assessment');
   const et = document.getElementById('tabExam');
   if(et) et.classList.toggle('on', view==='exam');
+  // 进入词卡（对话）视图时确保进度加载一次；init 已加载则不重复请求
+  if(view==='chat' && !state.pron.progressFetched){
+    loadPronProgress().then(updatePronBookEntry);
+  }
   // 首次进入阅读视图才拉端点，避免启动多打请求；失败也只是这里降级
   if(view==='read' && !state.read.loaded){
     state.read.loaded = true;
@@ -1230,7 +1253,12 @@ function setOffline(){
 
 /* ---------- 初始化 ---------- */
 async function init(){
-  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeReview(); });
+  document.addEventListener('keydown', e=>{
+    if(e.key!=='Escape') return;
+    closeReview();
+    closePronCard();
+    closePronBook();
+  });
 
   // 先健康检查：网络不通即进入离线演示模式
   try {
@@ -1269,6 +1297,8 @@ async function init(){
   updateReadVocabBadge();
   const firstId = state.scenes[0].id;
   await selectScene(firstId);
+  // 读音规则 P0：静默加载（失败只降级读音入口，不影响上面已完成的界面）
+  loadPronData();
 }
 
 init();
@@ -1636,4 +1666,326 @@ function backExamToPapers(){
   examState.index = 0;
   examState.submitting = false;
   initExam();
+}
+
+/* ============================================================
+   零基础读音规则学习 P0 —— 融入式（不新增第 5 个 Tab）
+   端点：GET /api/pronunciation/rules（摘要四字段）
+         GET /api/pronunciation/rules/{id}（详情，首次并发拉全部建索引）
+         GET /api/pronunciation/progress（ProgressView）
+         POST /api/pronunciation/progress {rule_id, stage, self_assessed?}
+   约束：复用 speak()/TTS；不碰 ASR 链路（buildAsrHints/transcribeExamAudio 等）；
+         P0 无 🎙 跟读、无评分；practice_count 由服务端 +1，前端不传。
+   ============================================================ */
+const PRON_STAGE_LABEL = { seen:'已见过', learned:'已学会', confident:'能自己读' };
+const PRON_GROUP_ORDER = ['字母表与读音概念','基础元音','基础辅音','元音字母组合','辅音字母组合','鼻化元音','词末辅音规则','高频例外与易错'];
+const PRON_TIP_KEY = 'pron_tip_shown'; // localStorage 仅存这个 UI 展示标记，不存学习进度
+// 词卡短语里常见的功能词/冠词，建映射时跳过，避免 "à"/"la" 之类误命中
+const PRON_SKIP_TOKENS = new Set(['le','la','les','un','une','des','du','de','d','l','s','a','y','et','ou','en','au','aux','ce','cet','cette','mon','ma','mes','ton','ta','tes','son','sa','ses','dans','sur','avec','pour','par']);
+
+// 归一化：小写 + 去重音 + 去省文符，让 maison / Maison 命中同一条规则
+function pronKey(s){
+  return String(s==null?'':s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/['’`]/g,'').trim();
+}
+
+// 用详情列表建两个进程内 Map：rule_id -> 详情；word_fr -> [rule_id]
+function buildPronIndex(details){
+  const byId = new Map();
+  const w2r = new Map();
+  (details||[]).forEach(r=>{
+    if(!r || !r.id) return;
+    byId.set(r.id, r);
+    (Array.isArray(r.examples)?r.examples:[]).forEach(ex=>{
+      const k = pronKey(ex && ex.word_fr);
+      if(!k) return;
+      let arr = w2r.get(k);
+      if(!arr){ arr = []; w2r.set(k, arr); }
+      if(arr.indexOf(r.id)<0) arr.push(r.id);
+    });
+  });
+  state.pron.ruleById = byId;
+  state.pron.wordToRules = w2r;
+  state.pron.detailsLoaded = true;
+}
+
+// 词卡的 word 可能是短语（"un café" / "chaud / froid"），拆词后逐个查反向索引
+function findRulesForCard(word){
+  if(!state.pron.detailsLoaded) return [];
+  const ids = [];
+  String(word||'').split(/[\/,\s·]+/u).forEach(tok=>{
+    const k = pronKey(tok);
+    if(!k || PRON_SKIP_TOKENS.has(k)) return;
+    const arr = state.pron.wordToRules.get(k);
+    if(arr) arr.forEach(id=>{ if(ids.indexOf(id)<0) ids.push(id); });
+  });
+  return ids;
+}
+
+/* ---------- 数据加载与缓存（失败只降级读音入口） ---------- */
+async function loadPronSummaries(){
+  try{
+    const data = await apiRequest('/api/pronunciation/rules');
+    if(data==null) return;
+    state.pron.summaries = Array.isArray(data) ? data : [];
+    state.pron.available = true;
+  }catch(e){
+    state.pron.available = false;
+  }
+}
+
+async function loadPronDetails(){
+  if(state.pron.detailsLoaded || !state.pron.summaries.length) return;
+  const ids = state.pron.summaries.map(r=>r && r.id).filter(Boolean);
+  // 首次需要时并发拉全部详情，缓存复用，不每个词都请求
+  const results = await Promise.allSettled(ids.map(id=>
+    apiRequest('/api/pronunciation/rules/'+encodeURIComponent(id))));
+  const details = [];
+  results.forEach(r=>{
+    if(r.status==='fulfilled' && r.value && r.value.id) details.push(r.value);
+  });
+  if(details.length) buildPronIndex(details);
+  else state.pron.available = false; // 详情全失败：词卡不显示读音入口，其余功能不受影响
+}
+
+async function loadPronProgress(){
+  try{
+    const data = await apiRequest('/api/pronunciation/progress');
+    state.pron.progress = (data && typeof data==='object') ? data : null;
+  }catch(e){
+    state.pron.progress = null;
+  }
+  state.pron.progressFetched = true;
+}
+
+async function loadPronData(){
+  // 摘要/详情 与 进度 并行加载，任何一种失败都不影响另一种
+  await Promise.all([
+    (async()=>{
+      await loadPronSummaries();
+      if(state.pron.available) await loadPronDetails();
+    })(),
+    loadPronProgress()
+  ]);
+  updatePronBookEntry();
+  renderVocab();          // 数据到位后刷新词卡，挂上读音入口
+  maybeShowPronTip();     // 可发现性①：首次提示（仅一次）
+  if(state.pron.bookOpen) renderPronBook();
+}
+
+/* ---------- 可发现性：侧栏常驻 / 首次气泡 / 空态引导 ---------- */
+function pronTotalRules(){
+  return state.pron.summaries.length
+    || Number(state.pron.progress && state.pron.progress.total_rules)
+    || 39;
+}
+function pronLearnedTotal(){
+  const p = state.pron.progress;
+  if(!p) return 0;
+  const n = Number(p.learned_total);
+  if(Number.isFinite(n)) return n;
+  return (Number(p.learned_count)||0) + (Number(p.confident_count)||0);
+}
+function updatePronBookEntry(){
+  const el = document.getElementById('pronBookEntry');
+  if(el) el.textContent = '📖 读音小册子 · 已学 '+pronLearnedTotal()+'/'+pronTotalRules();
+}
+function maybeShowPronTip(){
+  const tip = document.getElementById('pronFirstTip');
+  if(!tip || !state.pron.available) return;
+  let shown = false;
+  try{ shown = localStorage.getItem(PRON_TIP_KEY)==='1'; }catch(e){}
+  if(!shown) tip.classList.remove('hidden');
+}
+function dismissPronTip(){
+  const tip = document.getElementById('pronFirstTip');
+  if(tip) tip.classList.add('hidden');
+  try{ localStorage.setItem(PRON_TIP_KEY,'1'); }catch(e){}
+}
+
+/* ---------- 掌握微标 ---------- */
+function pronStageOf(ruleId){
+  const p = state.pron.progress;
+  const items = p && Array.isArray(p.items) ? p.items : [];
+  const it = items.find(x=>x && x.rule_id===ruleId);
+  return it ? it.stage : null;
+}
+function pronBadgeHTML(ruleId){
+  const s = pronStageOf(ruleId);
+  return '<span class="pron-badge '+(s||'none')+'">'+(PRON_STAGE_LABEL[s]||'未见过')+'</span>';
+}
+
+/* ---------- 规则卡浮层（词卡与小册子共用同一组件） ---------- */
+let pronCurrentRuleId = null;
+let pronHitIds = [];    // 一个词命中多条规则时，列出可点选项，不自动弹
+let pronHitWord = '';
+
+function openPronCard(ruleId, hitIds, hitWord){
+  const r = state.pron.ruleById.get(ruleId);
+  if(!r){ notify('这条规则暂时没准备好，稍后再试～'); return; }
+  pronCurrentRuleId = ruleId;
+  pronHitIds = (Array.isArray(hitIds) && hitIds.length) ? hitIds.slice() : [ruleId];
+  pronHitWord = hitWord || '';
+  renderPronCard();
+  const ov = document.getElementById('pronOverlay');
+  if(ov){
+    ov.classList.remove('hidden');
+    ov.scrollTop = 0;
+  }
+  unlockAudio();
+}
+function openPronCardForWord(btn){
+  const word = btn.getAttribute('data-word') || '';
+  const ids = findRulesForCard(word);
+  if(!ids.length) return;
+  openPronCard(ids[0], ids, word);
+}
+function switchPronCard(ruleId){
+  if(!state.pron.ruleById.has(ruleId)) return;
+  pronCurrentRuleId = ruleId;
+  renderPronCard();
+}
+function closePronCard(){
+  const ov = document.getElementById('pronOverlay');
+  if(ov) ov.classList.add('hidden');
+}
+
+// 进度区单独抽成片段，POST 成功后只替换这一块（局部更新，不整页刷新）
+function pronProgressHTML(ruleId){
+  const st = pronStageOf(ruleId);
+  return `
+    <div class="pron-progress-line">现在的掌握度：${pronBadgeHTML(ruleId)}</div>
+    <div class="pron-progress-hint">点一下记下来，慢慢来就好～</div>
+    <div class="pron-stage-row">
+      <button class="pron-stage-btn seen ${st==='seen'?'on':''}" onclick="postPronProgress('${esc(ruleId)}','seen')">👀 见过</button>
+      <button class="pron-stage-btn learned ${st==='learned'?'on':''}" onclick="postPronProgress('${esc(ruleId)}','learned')">🌱 学会了</button>
+      <button class="pron-stage-btn confident ${st==='confident'?'on':''}" onclick="postPronProgress('${esc(ruleId)}','confident')">✨ 能自己读</button>
+    </div>`;
+}
+function renderPronCard(){
+  const box = document.getElementById('pronCardContent');
+  const r = state.pron.ruleById.get(pronCurrentRuleId);
+  if(!box || !r) return;
+  const hits = pronHitIds.filter(id=>state.pron.ruleById.has(id));
+  const hitChips = hits.length>1
+    ? '<div class="pron-rule-tabs">'+hits.map(id=>{
+        const rr = state.pron.ruleById.get(id);
+        return '<button class="pron-rule-tab '+(id===pronCurrentRuleId?'on':'')
+          +'" onclick="switchPronCard(\''+esc(id)+'\')">'+esc((rr && rr.title)||id)+'</button>';
+      }).join('')+'</div>'
+    : '';
+  const audio = String(r.audio_text||'');
+  const examples = (Array.isArray(r.examples)?r.examples:[]).map(ex=>`
+    <div class="pron-ex">
+      <div class="pron-ex-top">
+        <span class="pron-ex-word">${esc(ex.word_fr)}</span>
+        <button class="pron-ex-spk" onclick="speak(this)" data-text="${esc(ex.word_fr)}" title="听这个词">🔊</button>
+      </div>
+      <div class="pron-ex-meta"><span>${esc(ex.meaning_zh||'')}</span>${ex.phonetic?'<span class="pron-ex-ipa">'+esc(ex.phonetic)+'</span>':''}</div>
+      ${ex.note_zh?'<div class="pron-ex-note">'+esc(ex.note_zh)+'</div>':''}
+    </div>`).join('');
+  box.innerHTML = `
+    <div class="pron-card-head">
+      <div class="pron-card-kicker">🎵 ${esc(r.group||'读音规则')}${r.tier?'<span class="pron-tier">'+(r.tier==='starter'?'入门':'进阶')+'</span>':''}</div>
+      <h3 class="pron-card-title">${esc(r.title||'')}</h3>
+      ${pronHitWord?'<div class="pron-hit-note">这个词用的就是这条规则～</div>':''}
+    </div>
+    ${hitChips}
+    <div class="pron-card-body">
+      <div class="pron-desc">${esc(r.description_zh||'')}</div>
+      <div class="pron-listen">
+        <button class="pron-listen-btn" onclick="speak(this)" data-text="${esc(audio)}" title="听标准示范">🔊 这条规则是～先听一遍</button>
+        <button class="pron-replay" onclick="speak(this)" data-text="${esc(audio)}" title="再听一次">↻ 再听一次也可以</button>
+      </div>
+      <div class="pron-sub-title">看看这些词</div>
+      <div class="pron-examples">${examples || '<div class="pron-muted">这条规则暂时没有例词，先听一遍示范吧～</div>'}</div>
+      <div class="pron-progress-sec">${pronProgressHTML(pronCurrentRuleId)}</div>
+    </div>`;
+}
+function updatePronCardProgressUI(){
+  const sec = document.querySelector('#pronCardContent .pron-progress-sec');
+  if(sec) sec.innerHTML = pronProgressHTML(pronCurrentRuleId);
+}
+
+// 服务端返回 ProgressItem：写入内存进度并重算计数（practice_count 服务端 +1，前端不传）
+function applyPronProgressItem(item){
+  if(!item || !item.rule_id) return;
+  if(!state.pron.progress){
+    state.pron.progress = { user_id:1, total_rules:pronTotalRules(),
+      seen_count:0, learned_count:0, confident_count:0, learned_total:0, items:[] };
+  }
+  const p = state.pron.progress;
+  const items = Array.isArray(p.items) ? p.items : [];
+  const i = items.findIndex(x=>x && x.rule_id===item.rule_id);
+  if(i>=0) items[i] = item; else items.push(item);
+  p.items = items;
+  p.seen_count = items.filter(x=>x.stage==='seen').length;
+  p.learned_count = items.filter(x=>x.stage==='learned').length;
+  p.confident_count = items.filter(x=>x.stage==='confident').length;
+  p.learned_total = p.learned_count + p.confident_count; // 已学 = learned + confident，排除 seen
+}
+
+async function postPronProgress(ruleId, stage){
+  const body = { rule_id:ruleId, stage:stage };
+  // "能自己读"即自评达标：self_assessed 只增不减，由服务端保证
+  if(stage==='confident') body.self_assessed = true;
+  let res;
+  try{
+    res = await apiRequest('/api/pronunciation/progress', {method:'POST', body:body});
+  }catch(e){
+    notify('记录没成功，再试一次就好～');
+    return;
+  }
+  if(res==null) return; // 业务错误已由 apiRequest 温和提示
+  applyPronProgressItem(res);
+  if(pronCurrentRuleId===ruleId) updatePronCardProgressUI();
+  updatePronBookEntry();
+  if(state.pron.bookOpen) renderPronBook();
+  notify(stage==='confident' ? '记下啦，这条你越来越熟了～' : '记下啦，慢慢来就好～');
+}
+
+/* ---------- 小册子索引（可发现性关键：侧栏常驻入口） ---------- */
+function openPronBook(){
+  state.pron.bookOpen = true;
+  renderPronBook();
+  const ov = document.getElementById('pronBookOverlay');
+  if(ov){ ov.classList.remove('hidden'); ov.scrollTop = 0; }
+}
+function closePronBook(){
+  state.pron.bookOpen = false;
+  const ov = document.getElementById('pronBookOverlay');
+  if(ov) ov.classList.add('hidden');
+}
+function renderPronBook(){
+  const box = document.getElementById('pronBookContent');
+  if(!box) return;
+  const head = document.getElementById('pronBookHead');
+  if(head) head.textContent = '📖 读音小册子 · 已学 '+pronLearnedTotal()+'/'+pronTotalRules();
+  const sums = state.pron.summaries;
+  if(!sums.length){
+    // 空态引导：给一个低门槛起点
+    box.innerHTML = '<div class="pron-book-empty">小册子还没准备好，稍后再来看看～<br>从最常用的 ai / au 开始，三条就好～ 🌱</div>';
+    return;
+  }
+  const groups = [];
+  sums.forEach(s=>{
+    const g = (s && s.group) || '其他';
+    let grp = groups.find(x=>x.name===g);
+    if(!grp){ grp = {name:g, items:[]}; groups.push(grp); }
+    grp.items.push(s);
+  });
+  groups.sort((a,b)=>{
+    const ia = PRON_GROUP_ORDER.indexOf(a.name), ib = PRON_GROUP_ORDER.indexOf(b.name);
+    return (ia<0?99:ia) - (ib<0?99:ib);
+  });
+  box.innerHTML = groups.map(grp=>`
+    <div class="pron-book-group">
+      <div class="pron-book-group-h">${esc(grp.name)}<small>${grp.items.length} 条</small></div>
+      <div class="pron-book-items">${grp.items.map(s=>`
+        <div class="pron-book-item" onclick="openPronCard('${esc(s.id)}')">
+          <span class="pron-book-item-title">${esc(s.title||s.id)}</span>
+          ${pronBadgeHTML(s.id)}
+        </div>`).join('')}</div>
+    </div>`).join('');
 }

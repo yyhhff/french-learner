@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=11">
+<link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
 <div class="wrap">
@@ -77,7 +77,16 @@
     <aside>
       <div class="card panel">
         <div class="card-h"><h2 id="vocabTitle">本场景生词</h2><span id="vocabSub">自动收卡</span></div>
-        <div class="body"><div class="vocab" id="vocab"></div></div>
+        <div class="body">
+          <!-- 可发现性②：小册子入口常驻词卡侧栏，随时可见可进 -->
+          <button class="pron-book-entry" id="pronBookEntry" onclick="openPronBook()">📖 读音小册子 · 已学 0/39</button>
+          <!-- 可发现性①：第一次进入词卡页面的一次性温和气泡（可关闭、仅一次） -->
+          <div id="pronFirstTip" class="pron-first-tip hidden">
+            <button class="pron-tip-close" onclick="dismissPronTip()" title="关闭">×</button>
+            生词旁有个小喇叭，点一下能听标准读音、还能跟着读～
+          </div>
+          <div class="vocab" id="vocab"></div>
+        </div>
       </div>
       <div class="card panel">
         <div class="card-h"><h2>记忆小账本</h2><span>SM-2 智能调度</span></div>
@@ -178,9 +187,27 @@
   </div>
 </div>
 
+<!-- 读音规则卡浮层（P0：讲解 + 例词 + 🔊 示范 + 三档进度；无 🎙 跟读，P1 再加） -->
+<div id="pronOverlay" class="overlay pron-overlay hidden" onclick="if(event.target===this)closePronCard()">
+  <div class="pron-box">
+    <button class="pron-close" onclick="closePronCard()" title="关闭">×</button>
+    <div id="pronCardContent"></div>
+  </div>
+</div>
+
+<!-- 读音小册子浮层（39 条按组索引，掌握微标；点条目复用上面的规则卡浮层） -->
+<div id="pronBookOverlay" class="overlay hidden" onclick="if(event.target===this)closePronBook()">
+  <div class="pron-book-box">
+    <button class="pron-close" onclick="closePronBook()" title="关闭">×</button>
+    <div class="pron-book-head" id="pronBookHead">📖 读音小册子</div>
+    <div class="pron-book-scroll" id="pronBookContent"></div>
+    <div class="pron-book-foot">从最常用的 ai / au 开始，三条就好～ 🌱</div>
+  </div>
+</div>
+
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=12" defer></script>
+<script src="app.js?v=13" defer></script>
 </body>
 </html>

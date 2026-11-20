@@ -116,6 +116,23 @@ except Exception as exc:  # noqa: BLE001
 # ---------------------------------------------------------------- 静态托管（最后 mount）
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+
+@app.middleware("http")
+async def static_revalidate_cache(request: Request, call_next):
+    """前端静态资源一律协商缓存（TASK-0068 缺陷修复）。
+
+    StaticFiles 响应原本无 Cache-Control，浏览器对 ES modules 启发式缓存旧文件，
+    改前端代码后用户需手动清缓存才能生效（发音教练重叠缺陷即因此未及时修复）。
+    no-cache = 每次协商（etag 命中 304），开发零摩擦且线上性能无损；仅限前端路径。
+    """
+    response = await call_next(request)
+    p = request.url.path
+    if p == "/" or p.startswith(("/js/", "/styles.css", "/index.html", "/review.html")):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 if FRONTEND_DIR.is_dir():
     app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="static")
 else:

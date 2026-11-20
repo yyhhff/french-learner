@@ -9,6 +9,11 @@ import { loadReadLevels } from './reading.js';
 function switchView(name){
   // 六个视图：chat / read / assessment / exam / growth / roadmap；其他值一律按 chat 处理（保留原默认行为）
   const view = (name==='read'||name==='assessment'||name==='exam'||name==='growth'||name==='roadmap') ? name : 'chat';
+  // 发音教练视图由 pron_coach.js 自管（TASK-0067）；从它切回六视图时必须兜底隐藏，否则两视图重叠（TASK-0068 验收缺陷）
+  const pv = document.getElementById('viewProncoach');
+  if(pv) pv.classList.add('hidden');
+  const pt = document.getElementById('tabProncoach');
+  if(pt) pt.classList.remove('on');
   document.getElementById('viewChat').classList.toggle('hidden', view!=='chat');
   document.getElementById('viewRead').classList.toggle('hidden', view!=='read');
   const av = document.getElementById('viewAssessment');

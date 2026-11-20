@@ -141,6 +141,14 @@ async def scene_detail(scene_id: str):
     return ok(data)
 
 
+def _record_skill_events(events: list) -> None:
+    """TASK-0055：画像事件只写流水不更新画像（懒计算）；失败不阻塞主流程。"""
+    try:
+        db.record_skill_events(db.DEFAULT_USER_ID, events)
+    except Exception:  # noqa: BLE001 — 画像是增益功能，任何异常都不影响提交本身
+        pass
+
+
 @app.post("/api/chat")
 async def chat(request: Request):
     body = await json_body(request)
@@ -192,6 +200,13 @@ async def chat(request: Request):
     )
     # 每轮 +10 XP，本轮共 2 轮
     db.update_user_activity(user_id, xp_delta=20)
+
+    # TASK-0055 口语信号（弱信号 α=0.15）：流利度按"开口即练习"，语法按是否被重述纠错
+    _record_skill_events([
+        ("speaking", 70 if not is_correction else 55, "chat", scene_id),
+        ("fluency", 65, "chat", scene_id),
+        ("grammar", 65 if not is_correction else 45, "chat", scene_id),
+    ])
 
     return ok(result.to_dict())
 
@@ -260,6 +275,13 @@ async def review(id: str, request: Request):
     new_state, next_due, interval_days = srs.schedule(rating, state)
     db.update_review(card_id, new_state, next_due)
 
+    # TASK-0055 记忆/词汇信号（α=0.25/0.20）： rating 3/4 视为记起，1/2 视为模糊
+    good = rating >= 3
+    _record_skill_events([
+        ("memory", 75 if good else 40, "review", str(card_id)),
+        ("vocabulary", 70 if good else 45, "review", str(card_id)),
+    ])
+
     return ok({"next_due": next_due, "interval_days": interval_days})
 
 
@@ -269,6 +291,19 @@ async def profile():
     if data is None:
         raise ApiError(50001, 500, "用户档案不存在")
     return ok(data)
+
+
+@app.get("/api/profile/skills")
+async def profile_skills():
+    """TASK-0055 水平画像（懒计算）：读时全量重放事件流 → EWMA → 快照。
+
+    §5.4：画像是"练习侧写"非官方 CEFR 判定；不改 cefr_level 本体。
+    """
+    items = db.rebuild_skill_profile(db.DEFAULT_USER_ID)
+    return ok({
+        "items": items,
+        "event_count": db.count_skill_events(db.DEFAULT_USER_ID),
+    })
 
 
 # ---------------------------------------------------------------- 本地 ASR 代理
@@ -502,6 +537,15 @@ async def input_text_complete(text_id: str):
         cefr_level=detail.get("cefr_level"),
         title=detail.get("title"),
     )
+    if first_time:
+        # TASK-0055 阅读信号（α=0.30/0.20）：篇目 CEFR 越高 event_score 越高
+        _READING_SCORE = {"A1": 55, "A2": 62, "B1": 70, "B2": 78, "C1": 85}
+        lvl = detail.get("cefr_level") or "A2"
+        rscore = _READING_SCORE.get(lvl, 62)
+        _record_skill_events([
+            ("reading", rscore, "input", text_id),
+            ("vocabulary", max(40, rscore - 8), "input", text_id),
+        ])
     return ok({
         "first_time": first_time,
         "read_count": db.count_read_texts(db.DEFAULT_USER_ID),
@@ -649,6 +693,11 @@ async def assessment_submit(request: Request):
         db.add_attempt(user_id, "placement", result["score"], detail)
         db.set_user_cefr_level(user_id, result["level"])
         persisted = True
+        # TASK-0055 定级锚点（强信号 α=0.80）：rate 映射 0-100，一次定级锚定全部 7 维基线
+        _record_skill_events([
+            (dim, round(result["rate"] * 100, 1), "placement", f"attempt:{result['level']}")
+            for dim in db.SKILL_DIMS
+        ])
 
     return ok({
         "score": result["score"],
@@ -748,6 +797,36 @@ async def exam_submit(request: Request):
     }
     # 允许重复交卷：每次都写一条新的 attempts(kind='exam')，无判重跳过
     db.add_attempt(db.DEFAULT_USER_ID, "exam", result["total_score"], detail)
+
+    # TASK-0055 考级信号（较强 α=0.60）：按试卷 section 聚合得分率映射维度（只算 scored 题）
+    _EXAM_SECTION_DIMS = {
+        "听力理解": ["listening"],
+        "阅读理解": ["reading"],
+        "词汇语法": ["vocabulary", "grammar"],
+        "观点逻辑": ["reading", "grammar"],
+        "书面表达": ["grammar"],
+        "口语表达": ["speaking", "fluency"],
+    }
+    q_section = {q["id"]: q.get("section") for q in questions}
+    sec_score: dict = {}
+    for it in result["items"]:
+        if not it.get("scored"):
+            continue
+        sec = q_section.get(it["id"])
+        if sec not in _EXAM_SECTION_DIMS:
+            continue
+        agg = sec_score.setdefault(sec, {"s": 0, "m": 0})
+        agg["s"] += it["score"]
+        agg["m"] += it["max_score"]
+    exam_events = []
+    for sec, agg in sec_score.items():
+        if agg["m"] <= 0:
+            continue
+        pct = round(agg["s"] / agg["m"] * 100, 1)
+        for dim in _EXAM_SECTION_DIMS[sec]:
+            exam_events.append((dim, pct, "exam", paper_id))
+    _record_skill_events(exam_events)
+
     return ok(result)
 
 

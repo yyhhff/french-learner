@@ -122,10 +122,10 @@ const state = {
     readIds:[],         // 已读 id 集合，供 recommend exclude_ids
     reportedIds:[],     // TASK-0052：本会话已上报"读完"的 id（防重复 POST；服务端另有 UNIQUE 幂等）
     _dwellTimer:null,   // 短文（不溢出）的 8 秒停留计时器
-    available:true,
-    loaded:false
+    available:true,     // 阅读 TTS 端点可用（失败降级）
+    loaded:false        // 阅读页是否已初始化加载过
   },
-  // 零基础读音规则学习 P0：融入式，不新增 Tab；端点失败只降级读音入口，不动其余功能
+  skillProfile:null,    // TASK-0055 水平画像（GET /api/profile/skills，懒计算）
   pron:{
     summaries:[],       // GET /rules 摘要四字段（小册子索引用）
     detailsLoaded:false,// 是否已并发拉全详情、建好索引
@@ -1156,6 +1156,8 @@ async function renderGrowth(){
   // 进入时静默刷新一次 profile，失败则用已有缓存（离线也不展示假值）
   if(state.online){
     try { const p = await apiRequest('/api/profile'); if(p) state.profile = p; } catch(e){}
+    // TASK-0055 水平画像（懒计算端点，读时重放 EWMA）；失败静默，画像是增益功能
+    try { const sk = await apiRequest('/api/profile/skills'); if(sk) state.skillProfile = sk; } catch(e){}
   }
   const s = (state.profile||FALLBACK_PROFILE).stats||{};
   const num = v => fmtNum(v||0);
@@ -1184,7 +1186,54 @@ async function renderGrowth(){
         <div class="g-note">每一篇都算数，慢慢读就好 🌱</div>`
           : `<div class="g-note g-empty">读完第一篇短文，这里就会留下小脚印</div>`}
       </div>
-    </div>`;
+    </div>
+    ${skillCardHTML()}`;
+}
+
+/* TASK-0055 五维画像卡：7 维采集 → 5 维展示（词汇=vocabulary+memory、口语=speaking+fluency 融合）。
+   趋势箭头只有 ↑/→（PM §E：不施压，down 也显示 →）；文案禁"未达标/只有"。 */
+function skillCardHTML(){
+  const sk = state.skillProfile;
+  const rows = sk && Array.isArray(sk.items) ? sk.items : [];
+  const by = {};
+  rows.forEach(r => { by[r.skill] = r; });
+  const blend = (a, wa, b, wb) => {
+    const va = by[a], vb = by[b];
+    if(va && vb) return va.score*wa + vb.score*wb;
+    if(va) return va.score;
+    if(vb) return vb.score;
+    return null;
+  };
+  const trendOf = (a, b, wa, wb) => {
+    // 融合维趋势取主导维（权重更大者）；单维则取自身
+    const d = (wa >= wb) ? a : b;
+    return (by[d] || by[a] || by[b] || {}).trend || 'flat';
+  };
+  const dims = [
+    { key:'vocab',  name:'词汇',     score: blend('vocabulary',0.7,'memory',0.3),   trend: trendOf('vocabulary','memory',0.7,0.3) },
+    { key:'gram',   name:'语法写作', score: by.grammar ? by.grammar.score : null,   trend: (by.grammar||{}).trend || 'flat' },
+    { key:'listen', name:'听力',     score: by.listening ? by.listening.score : null, trend: (by.listening||{}).trend || 'flat' },
+    { key:'read',   name:'阅读',     score: by.reading ? by.reading.score : null,   trend: (by.reading||{}).trend || 'flat' },
+    { key:'speak',  name:'口语',     score: blend('speaking',0.6,'fluency',0.4),    trend: trendOf('speaking','fluency',0.6,0.4) },
+  ];
+  const arrow = t => t === 'up' ? '↑' : '→';
+  const hasData = dims.some(d => d.score !== null);
+  const body = hasData
+    ? `<div class="sk-rows">` + dims.map(d => {
+        const v = d.score === null ? null : Math.round(d.score);
+        const w = v === null ? 0 : Math.max(4, Math.min(100, v));
+        return `<div class="sk-row">
+          <span class="sk-name">${d.name}</span>
+          <div class="sk-bar"><i style="width:${w}%"></i></div>
+          <span class="sk-trend">${v === null ? '—' : v + ' ' + arrow(d.trend)}</span>
+        </div>`;
+      }).join('') + `</div>
+      <div class="g-note">你在慢慢往前走，这一维最近有进步的会轻轻 ↑ 一下（练习侧写，不是考试）</div>`
+    : `<div class="g-note g-empty">完成一次定级、对话或阅读，画像会慢慢成形 🌱</div>`;
+  return `<div class="growth-card skill-card">
+    <div class="g-title">🌟 水平画像</div>
+    ${body}
+  </div>`;
 }
 
 /* ============================================================

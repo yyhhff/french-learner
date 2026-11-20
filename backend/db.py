@@ -199,6 +199,29 @@ CREATE TABLE IF NOT EXISTS pronunciation_progress (
 
 CREATE INDEX IF NOT EXISTS idx_pron_progress_user ON pronunciation_progress (user_id);
 CREATE INDEX IF NOT EXISTS idx_pron_progress_user_stage ON pronunciation_progress (user_id, stage);
+
+-- ===== TASK-0055 水平画像 v1：事件流水（增量） + 画像快照（懒计算可全量重建）=====
+CREATE TABLE IF NOT EXISTS skill_events (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    skill      TEXT    NOT NULL,
+    delta      REAL    NOT NULL,          -- event_score，0-100
+    source     TEXT    NOT NULL,          -- placement/exam/chat/review/input
+    source_id  TEXT,
+    created_at TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_skill_events_user ON skill_events (user_id, skill, id);
+
+CREATE TABLE IF NOT EXISTS skill_profile (
+    user_id        INTEGER NOT NULL,
+    skill          TEXT    NOT NULL,
+    level_estimate TEXT,
+    score          REAL    NOT NULL DEFAULT 0,
+    prev_score     REAL,
+    trend          TEXT    NOT NULL DEFAULT 'flat',
+    updated_at     TEXT,
+    PRIMARY KEY (user_id, skill)
+);
 """
 
 
@@ -1006,6 +1029,143 @@ def add_attempt(user_id: int, kind: str, score: int, detail: dict) -> dict:
             "SELECT * FROM attempts WHERE id = ?", (cur.lastrowid,)
         ).fetchone()
         return row_to_attempt(row)
+    finally:
+        conn.close()
+
+
+# ================================================================ TASK-0055 水平画像 v1
+# §5.4：提交侧只写事件流水（skill_events），画像懒计算（读 /api/profile/skills 时全量重放
+# EWMA 并 upsert 快照 skill_profile），算法调整后 rebuild 即自愈，防数据污染。
+# 7 维采集：vocabulary/grammar/listening/reading/speaking/fluency/memory；
+# 前端五维展示：词汇/语法写作/听力/阅读/口语（vocabulary+memory、speaking+fluency 前端加权融合）。
+
+SKILL_DIMS = (
+    "vocabulary", "grammar", "listening", "reading",
+    "speaking", "fluency", "memory",
+)
+
+# EWMA 平滑系数 α：来源可信度越高 α 越大（exam 高、chat 弱）
+SKILL_ALPHA = {
+    "placement": 0.80,
+    "exam": 0.60,
+    "input": 0.30,
+    "review": 0.25,
+    "chat": 0.15,
+}
+
+
+def _score_to_level(score: float) -> str:
+    """score(0-100) → 档位估计；仅画像展示用，不改 cefr_level 本体（不动定级/考级契约）。"""
+    if score < 40:
+        return "A1"
+    if score < 55:
+        return "A2"
+    if score < 70:
+        return "B1"
+    if score < 85:
+        return "B2"
+    return "C1"
+
+
+def record_skill_events(
+    user_id: int,
+    events: list,   # [(skill, event_score, source, source_id|None), ...]
+) -> int:
+    """提交侧批量写事件流水；非法 skill/source 静默跳过（画像永不阻塞主流程）。"""
+    rows = []
+    for skill, event_score, source, source_id in events:
+        if skill not in SKILL_DIMS or source not in SKILL_ALPHA:
+            continue
+        try:
+            s = float(event_score)
+        except (TypeError, ValueError):
+            continue
+        if not 0 <= s <= 100:
+            continue
+        rows.append((user_id, skill, s, source, source_id, now_iso()))
+    if not rows:
+        return 0
+    conn = get_conn()
+    try:
+        conn.executemany(
+            "INSERT INTO skill_events (user_id, skill, delta, source, source_id, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            rows,
+        )
+        conn.commit()
+        return len(rows)
+    finally:
+        conn.close()
+
+
+def rebuild_skill_profile(user_id: int = DEFAULT_USER_ID) -> list:
+    """全量重放 skill_events → EWMA 增量 → upsert skill_profile 快照。
+
+    trend v1 简化：最终 score 与"最后一次事件前"的 score 比较，±2 阈值判 up/down/flat。
+    """
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT skill, delta, source FROM skill_events "
+            "WHERE user_id = ? ORDER BY skill, id",
+            (user_id,),
+        ).fetchall()
+        per_skill: dict = {}
+        for r in rows:
+            per_skill.setdefault(r["skill"], []).append((r["delta"], r["source"]))
+        if not per_skill:
+            return []
+        for skill, evs in per_skill.items():
+            score = None
+            prev = None
+            for delta, source in evs:
+                alpha = SKILL_ALPHA[source]
+                prev = score
+                score = delta if score is None else (1 - alpha) * score + alpha * delta
+            trend = "flat"
+            if prev is not None:
+                if score - prev >= 2:
+                    trend = "up"
+                elif prev - score >= 2:
+                    trend = "down"
+            conn.execute(
+                "INSERT INTO skill_profile (user_id, skill, level_estimate, score, prev_score, trend, updated_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(user_id, skill) DO UPDATE SET "
+                "level_estimate=excluded.level_estimate, score=excluded.score, "
+                "prev_score=excluded.prev_score, trend=excluded.trend, updated_at=excluded.updated_at",
+                (user_id, skill, _score_to_level(score), round(score, 1), prev, trend, now_iso()),
+            )
+        conn.commit()
+        out = conn.execute(
+            "SELECT skill, level_estimate, score, prev_score, trend, updated_at "
+            "FROM skill_profile WHERE user_id = ? ORDER BY skill",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in out]
+    finally:
+        conn.close()
+
+
+def get_skill_profile(user_id: int = DEFAULT_USER_ID) -> list:
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT skill, level_estimate, score, prev_score, trend, updated_at "
+            "FROM skill_profile WHERE user_id = ? ORDER BY skill",
+            (user_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def count_skill_events(user_id: int = DEFAULT_USER_ID) -> int:
+    conn = get_conn()
+    try:
+        return conn.execute(
+            "SELECT COUNT(*) FROM skill_events WHERE user_id = ?", (user_id,)
+        ).fetchone()[0]
     finally:
         conn.close()
 

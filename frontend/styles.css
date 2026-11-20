@@ -9,8 +9,9 @@
     background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
   .wrap{width:100%;height:100vh;margin:0 auto;padding:20px 24px 24px;display:flex;flex-direction:column}
   /* 主视图吃掉视口剩余高度：卡片满高，滚动只发生在卡片内部，页面自身不溢出 */
-  .view{flex:1;min-height:0}
-  #viewChat,#viewRead{display:flex;flex-direction:column}
+  .view{flex:1;min-height:0;overflow-y:auto}
+  /* chat/read 内部已有满高锁链（grid minmax(0,1fr)+叶子内滚），显式 hidden 防 1px 溢出抖滚动条 */
+  #viewChat,#viewRead{display:flex;flex-direction:column;overflow:hidden}
   .hidden{display:none !important}
 
   /* top bar */
@@ -194,7 +195,7 @@
     transition:.3s;z-index:80;max-width:86vw;text-align:center}
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
-  .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:26px}
+  .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:26px;flex-shrink:0}
   /* TASK-0054 页脚重温引导入口：低调小链接，不抢视觉 */
   .ob-again{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;
     margin-left:8px;padding:2px 6px;border-radius:8px;font-family:inherit;opacity:.75;transition:opacity .15s}
@@ -543,6 +544,17 @@
   .g-nums b{display:block;font-size:19px;color:var(--ink);line-height:1.2}
   .g-note{margin-top:8px;font-size:11.5px;color:var(--muted)}
   .g-empty{margin-top:2px}
+
+  /* ===== TASK-0055 五维水平画像卡 ===== */
+  .skill-card{grid-column:1 / -1}   /* 画像卡独占一行 */
+  .sk-rows{display:flex;flex-direction:column;gap:10px;margin:4px 0 2px}
+  .sk-row{display:flex;align-items:center;gap:12px}
+  .sk-name{width:56px;flex-shrink:0;font-size:12px;color:var(--ink);text-align:right}
+  .sk-bar{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+  .sk-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#E8A87C);
+    border-radius:99px;transition:width .5s ease}
+  .sk-trend{width:44px;flex-shrink:0;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .skill-card .g-note{margin-top:10px}
 
   /* TASK-0029：逐词点击 + 连读教学 */
   .v-tok{cursor:pointer;border-bottom:1px dashed #C9C6BC;transition:color .15s,border-color .15s}

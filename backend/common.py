@@ -82,9 +82,9 @@ ROADMAP_DEFS = [
     },
     {
         "version": "v3.2", "title": "发音教练", "theme": "跟读打分",
-        "status": "planned", "date": None,
+        "status": "done", "date": "2026-11-20",
         "desc": "跟着念一遍，哪儿没发出来温柔告诉你。",
-        "features": ["跟读录音三维评分", "词级命中反馈", "发音挑战任务"],
+        "features": ["跟读录音三维评分", "词级命中反馈", "三池选句（挑战任务待 v3.0）"],
     },
     {
         "version": "v3.3", "title": "语法的针脚", "theme": "显性语法微卡",

@@ -24,7 +24,8 @@ set "LANE=%~1"
 if "%LANE%"=="" goto :usage
 
 set "BRANCH=feature/%LANE%"
-set "WTROOT=..\_worktrees"
+REM 脚本在 scripts/ 下运行：..\.. 才是 tool_box 根，worktree 放仓库外避免污染主仓
+set "WTROOT=..\..\_worktrees"
 set "WTDIR=%WTROOT%\%LANE%"
 
 echo.

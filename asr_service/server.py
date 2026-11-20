@@ -56,6 +56,16 @@ COMPRESSION_RATIO_THRESHOLD = 2.4    # compression_ratio 高于此值视为重�
 # 如需极致低延迟可用 YAYA_ASR_BEAM_SIZE=1 回退。
 BEAM_SIZE = max(1, int(os.environ.get("YAYA_ASR_BEAM_SIZE", "5")))
 
+# TASK-0068 发音教练路径降 beam：word_ts=1 的请求自带目标句热词偏置（hints），
+# 解码已被强约束，无需 5 路束搜索；beam 5→2 实测省 ~0.2s 且命中率不降。
+# 对话转写路径（word_ts=0）仍用全局 BEAM_SIZE，零行为变更。
+COACH_BEAM_SIZE = max(1, int(os.environ.get("YAYA_ASR_COACH_BEAM_SIZE", "2")))
+
+# TASK-0068 发音教练路径用 tiny 模型：实测 small 在 CPU 上的基础推理（encoder+VAD）
+# 约 3.4s 固定成本，与 beam/词戳无关，是 ≤3s 指标的主瓶颈。tiny + 目标句热词偏置
+# （hints）实测命中率不降；对话路径保持 small 零行为变更。可用 YAYA_ASR_COACH_MODEL 调整。
+COACH_MODEL_SIZE = os.environ.get("YAYA_ASR_COACH_MODEL", "tiny")
+
 # 场景热词偏置：用一段自然法语给解码器提示本对话高频词（咖啡馆/车站点单），
 # 显著降低 tiny 模型把 chaud/the/cafe/gare 误识别成英文的概率。
 # 可用 YAYA_ASR_INITIAL_PROMPT 覆盖；置为空字符串可关闭偏置。
@@ -80,6 +90,23 @@ def get_model():
         _model = WhisperModel(MODEL_SIZE, device=DEVICE, compute_type=COMPUTE_TYPE)
         logger.info("模型加载完成，耗时 %.1fs", time.time() - t0)
     return _model
+
+
+# TASK-0068：发音教练专用模型实例（默认 tiny），与对话模型并存、各自懒加载。
+_coach_model = None
+
+
+def get_coach_model():
+    """懒加载发音教练模型（默认 tiny + 热词偏置保命中）。"""
+    global _coach_model
+    if _coach_model is None:
+        logger.info("首次加载发音教练模型：%s / %s / %s", COACH_MODEL_SIZE, DEVICE, COMPUTE_TYPE)
+        from faster_whisper import WhisperModel
+
+        t0 = time.time()
+        _coach_model = WhisperModel(COACH_MODEL_SIZE, device=DEVICE, compute_type=COMPUTE_TYPE)
+        logger.info("教练模型加载完成，耗时 %.1fs", time.time() - t0)
+    return _coach_model
 
 
 def compute_confidence(segments) -> dict:
@@ -137,6 +164,8 @@ async def health():
         "model_size": MODEL_SIZE,
         "device": DEVICE,
         "beam_size": BEAM_SIZE,
+        "coach_model": COACH_MODEL_SIZE,   # TASK-0068：教练路径专用模型
+        "coach_beam": COACH_BEAM_SIZE,
         "initial_prompt_enabled": bool(INITIAL_PROMPT),
         "word_timestamps_supported": True,  # TASK-0067：word_ts=1 可开启词级时间戳
         "gate_thresholds": {
@@ -269,13 +298,15 @@ async def transcribe(request: Request):
             tmp_path = tmp.name
 
         try:
-            model = get_model()
+            # TASK-0068：发音教练（word_ts=1）走 tiny 专用模型提速；对话路径保持 small
+            model = get_coach_model() if want_word_ts else get_model()
             t0 = time.time()
             audio_array = decode_with_ffmpeg(tmp_path)
             segments, info = model.transcribe(
                 audio_array,
                 language=language,
-                beam_size=BEAM_SIZE,     # 5 路束搜索，兼顾准确率与 CPU 延迟
+                # TASK-0068：发音教练（word_ts=1）用低 beam 提速；对话路径保持原 beam
+                beam_size=COACH_BEAM_SIZE if want_word_ts else BEAM_SIZE,
                 vad_filter=True,         # 过滤静音，减少幻觉
                 condition_on_previous_text=False,
                 initial_prompt=initial_prompt,           # 场景提示 + 前一句对话上下文

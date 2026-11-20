@@ -138,6 +138,7 @@ async def health():
         "device": DEVICE,
         "beam_size": BEAM_SIZE,
         "initial_prompt_enabled": bool(INITIAL_PROMPT),
+        "word_timestamps_supported": True,  # TASK-0067：word_ts=1 可开启词级时间戳
         "gate_thresholds": {
             "log_prob": LOG_PROB_THRESHOLD,
             "no_speech_prob": NO_SPEECH_THRESHOLD,
@@ -257,6 +258,9 @@ async def transcribe(request: Request):
         ctx_m = re.search(r'name="context"\r\n\r\n([^\r\n]*)', body.decode("utf-8", "ignore"))
         context = (ctx_m.group(1).strip()[:200] if ctx_m else "")
         initial_prompt = " ".join(x for x in (INITIAL_PROMPT, context) if x) or None
+        # TASK-0067 v3.2 发音教练：word_ts=1 时开启词级时间戳（默认 0，旧路径零变更）
+        wts_m = re.search(r'name="word_ts"\r\n\r\n([^\r\n]+)', body.decode("latin-1", "ignore"))
+        want_word_ts = bool(wts_m and wts_m.group(1).strip() == "1")
 
         # faster-whisper 通过 PyAV 解码；写临时文件更稳
         suffix = Path(filename).suffix or ".webm"
@@ -279,6 +283,7 @@ async def transcribe(request: Request):
                 temperature=0,                            # 贪心解码，结果确定可复现
                 no_speech_threshold=NO_SPEECH_THRESHOLD,
                 compression_ratio_threshold=COMPRESSION_RATIO_THRESHOLD,
+                word_timestamps=want_word_ts,   # TASK-0067：仅发音教练路径开启词级时间戳
             )
             # segments 是惰性迭代器，先物化一次，再用同一批结果算文本与置信度
             segs = list(segments)
@@ -288,16 +293,17 @@ async def transcribe(request: Request):
             text = result["text"]
             elapsed = time.time() - t0
             logger.info(
-                "转写完成：lang=%s %.1fs corrected=%s conf=%.3f low=%s text=%r raw=%r",
+                "转写完成：lang=%s %.1fs corrected=%s conf=%.3f low=%s word_ts=%s text=%r raw=%r",
                 info.language,
                 elapsed,
                 result["corrected"],
                 conf["confidence"],
                 conf["low_confidence"],
+                want_word_ts,
                 text,
                 raw_text,
             )
-            return {
+            response = {
                 "ok": True,
                 "text": text,                     # 修正后文本（供主流程使用）
                 "raw_text": result["raw_text"],   # 原始转写（供前端提示/排查）
@@ -308,6 +314,19 @@ async def transcribe(request: Request):
                 "confidence": conf["confidence"],       # 0-1 转写置信度
                 "low_confidence": conf["low_confidence"],  # 低置信标记（供前端触发重录）
             }
+            # TASK-0067：词级时间戳只在 word_ts=1 时输出；Word 对象可能缺字段，容错取值。
+            if want_word_ts:
+                words = []
+                for seg in segs:
+                    for w in getattr(seg, "words", None) or []:
+                        words.append({
+                            "word": getattr(w, "word", "") or "",
+                            "start": round(float(getattr(w, "start", 0.0) or 0.0), 3),
+                            "end": round(float(getattr(w, "end", 0.0) or 0.0), 3),
+                            "probability": round(float(getattr(w, "probability", 0.0) or 0.0), 3),
+                        })
+                response["words"] = words
+            return response
         finally:
             try:
                 os.unlink(tmp_path)

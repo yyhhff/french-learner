@@ -33,6 +33,7 @@ from routers import (
     feedback,
     input as input_router,
     pron,
+    pron_coach,
     profile,
     roadmap,
     translate,
@@ -85,6 +86,7 @@ for _router in (
     assessment_router.router,
     exam_router.router,
     pron.router,
+    pron_coach.router,
 ):
     app.include_router(_router)
 

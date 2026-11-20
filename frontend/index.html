@@ -155,7 +155,7 @@
       <div id="asmIntro" class="card asm-intro-card">
         <div class="asm-intro-emoji">🎯</div>
         <h2>快速测一测</h2>
-        <p>约 3 分钟，12 道选择题，随时可重测。<br>一份轻松的小自测，帮你找到更贴合自己的起点 🌱</p>
+        <p>约 3 分钟，24 道选择题，随时可重测。<br>一份轻松的小自测，帮你找到更贴合自己的起点 🌱</p>
         <button class="asm-primary" id="asmStartBtn" onclick="startAssessment()">开始测一测</button>
       </div>
 
@@ -200,6 +200,14 @@
   <div class="ob-box">
     <button class="ob-skip" onclick="closeOnboarding(true)" title="跳过引导，随便逛逛">先随便逛逛</button>
     <div id="obContent"></div>
+  </div>
+</div>
+
+<!-- TASK-0065 v2.2 零基础台阶路径（定级落 A1 自动弹出；三步复用现有读音/阅读/跟读组件） -->
+<div id="a1PathOverlay" class="overlay hidden" onclick="if(event.target===this)closeA1Path()">
+  <div class="a1p-box">
+    <button class="a1p-skip" onclick="closeA1Path()" title="稍后再说">稍后再说</button>
+    <div id="a1PathContent"></div>
   </div>
 </div>
 

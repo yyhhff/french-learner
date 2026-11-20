@@ -780,7 +780,7 @@ def update_review(
 # 三张新表 + 复用 word_cards / create_card；所有出参严格对齐 §5.2 Schema。
 
 CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
-INPUT_LEVELS = ("A2", "B1", "B2")
+INPUT_LEVELS = ("A1", "A2", "B1", "B2")  # v2.2：放行 A1 零基础语料可见性
 
 
 def _cefr_index(level) -> int:
@@ -846,7 +846,7 @@ _WORD_ORDER_SQL = "ORDER BY (line_seq IS NULL) ASC, line_seq ASC, word ASC"
 
 
 def list_input_levels() -> list:
-    """LevelInfo[]，只返回有语料的 A2/B1/B2，按 CEFR 顺序。"""
+    """LevelInfo[]，只返回有语料的 A1/A2/B1/B2，按 CEFR 顺序。"""
     conn = get_conn()
     try:
         rows = conn.execute(

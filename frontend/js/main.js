@@ -1,5 +1,6 @@
 // Wave 0 入口：装配所有模块，发布函数到 window（保 inline onclick），执行顶层副作用。
 import { apiRequest } from './api.js';
+import { a1PathDone, a1PathFinish, a1PathGo, a1PathNext, closeA1Path, openA1Path } from './views/a1-path.js';
 import { FALLBACK_PROFILE, FALLBACK_SCENES, buildFallbackCards, capitalize, esc, fmtNum, normalizeTurn, notify, setMicStatus, state, userTurn } from './store.js';
 import { answerAssessment, goAssessmentRecommend, initAssessment, jumpAssessmentLevel, nextAssessment, prevAssessment, renderAssessmentQuestion, renderAssessmentResult, showAssessmentPane, startAssessment, submitAssessment } from './views/assessment.js';
 import { browserRecognizeFallback, buildAsrContext, buildAsrHints, checkAsr, fallbackSpeak, pickMimeType, playCurrentAudio, speak, toggleMic, transcribeAudio, unlockAudio } from './views/audio.js';
@@ -20,6 +21,7 @@ async function init(){
     closeReview();
     closePronCard();
     closePronBook();
+    closeA1Path();
     closeRetention();
     closeFeedback();
   });
@@ -86,6 +88,12 @@ async function init(){
 
 // 发布全部顶层函数到 window：原单文件脚本里 function 声明天然是全局的，
 // 内联 onclick="fn()" 依赖此行为，ES module 需显式挂载。
+window.a1PathDone = a1PathDone;
+window.a1PathFinish = a1PathFinish;
+window.a1PathGo = a1PathGo;
+window.a1PathNext = a1PathNext;
+window.closeA1Path = closeA1Path;
+window.openA1Path = openA1Path;
 window.achievementCardHTML = achievementCardHTML;
 window.answerAssessment = answerAssessment;
 window.answerExamChoice = answerExamChoice;

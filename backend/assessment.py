@@ -1,4 +1,4 @@
-"""阶段0 CEFR 定级：题库加载、判分定级、中文解读（ARCHITECTURE_PLACEMENT.md v1.1）。
+"""阶段0 CEFR 定级：题库加载、判分定级、中文解读（ARCHITECTURE_PLACEMENT.md v1.2 / v2.2 A1 四档）。
 
 零外部依赖：解读由本地中文模板生成，不调用 GLM、不发任何网络请求。
 所有阈值/文案集中在本模块，app.py 只做路由与校验。
@@ -15,13 +15,16 @@ logger = logging.getLogger("yaya.assessment")
 INPUT_FILE = Path(__file__).resolve().parent.parent / "data" / "input" / "assessment_questions.json"
 
 # 常量（§4.1 / §8.3，禁止在 app.py 散落魔数）
-LEVELS = ("A2", "B1", "B2")
+# v2.2 四档：A1/A2/B1/B2 各 6 题（词汇/语法/理解各 2），加权满分 6*6=36。
+LEVELS = ("A1", "A2", "B1", "B2")
 SKILLS = ("词汇", "语法", "理解")
 SKILL_ORDER = ["词汇", "语法", "理解"]
-WEIGHT = {"A2": 1, "B1": 2, "B2": 3}
+WEIGHT = {"A1": 0, "A2": 1, "B1": 2, "B2": 3}
+MAX_WEIGHTED = 36  # 6 题 * (0+1+2+3)，仅供前端进度条；判定级不用总分
 
 # §5 中文解读模板（逐字）
 INTERPRETATION_BY_LEVEL = {
+    "A1": "欢迎来到法语的世界！从最基础的招呼和自我介绍开始，先把读音和高频词练熟，你就已经迈出最棒的一步啦。",
     "A2": "你已经掌握了基础法语，能应对简单日常交流；接下来可以扩充词汇量，练习过去时和简单描述，继续保持就很棒。",
     "B1": "你的法语基础扎实，能就熟悉话题展开交流；建议加强复合时态与虚拟式入门，并提升听说流利度，离进阶不远啦。",
     "B2": "你的法语水平已经相当不错，能较自如地表达观点；接下来可挑战更复杂的阅读与原声听力，向更高阶稳步前进。",
@@ -106,14 +109,19 @@ def public_questions(questions: list) -> list:
     return [{key: q[key] for key in PUBLIC_FIELDS} for q in questions]
 
 
-def level_from_counts(c_a2: int, c_b1: int, c_b2: int) -> str:
-    """§4.3 定级：分组下限优先于总分；取满足的最高等级，保底 A2。"""
-    score = c_a2 * WEIGHT["A2"] + c_b1 * WEIGHT["B1"] + c_b2 * WEIGHT["B2"]
-    if score >= 20 and c_a2 >= 3 and c_b1 >= 3 and c_b2 >= 3:
+def level_from_counts(c_a1: int, c_a2: int, c_b1: int, c_b2: int) -> str:
+    """v1.2 §4.3 四档定级：分组下限优先；最高档需本级与其下各级均 >=4，保底 A1。
+
+    每档 6 题，门槛 4/6（约 67%）。低档未达标时不因高档答对而跳级
+    （防零基础蒙对个别 B 档题却落高档）；全档未达标落 A1。
+    """
+    if c_b2 >= 4 and c_b1 >= 4 and c_a2 >= 4 and c_a1 >= 4:
         return "B2"
-    if score >= 10 and c_a2 >= 3 and c_b1 >= 3:
+    if c_b1 >= 4 and c_a2 >= 4 and c_a1 >= 4:
         return "B1"
-    return "A2"
+    if c_a2 >= 4 and c_a1 >= 4:
+        return "A2"
+    return "A1"
 
 
 def weak_skill(flags: list) -> str:
@@ -159,7 +167,7 @@ def grade(answers: list, questions: list) -> dict:
     return {
         "score": score,
         "weighted_score": weighted_score,
-        "level": level_from_counts(counts["A2"], counts["B1"], counts["B2"]),
+        "level": level_from_counts(counts["A1"], counts["A2"], counts["B1"], counts["B2"]),
         "rate": round(score / total, 4) if total else 0.0,
         "weak_skill": weak_skill(correct_flags),
         "correct_flags": correct_flags,

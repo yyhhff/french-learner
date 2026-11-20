@@ -39,7 +39,7 @@ function showOnboardingStep(n){
     html = `
       <div class="ob-emoji">🎯</div>
       <div class="ob-title">先看看你现在在哪一级</div>
-      <p class="ob-desc">12 道小题，几分钟就好。<br>也可以先去对话和阅读里逛逛，随时回来测都行。</p>
+      <p class="ob-desc">24 道小题，几分钟就好。<br>也可以先去对话和阅读里逛逛，随时回来测都行。</p>
       <div class="ob-go">
         <button class="ob-btn primary" onclick="goOnboardingTarget('assessment')">去测一测</button>
         <button class="ob-btn" onclick="showOnboardingStep(3)">先不了</button>

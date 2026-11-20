@@ -22,7 +22,7 @@ logger = logging.getLogger("yaya.seed_input")
 INPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "input"
 INPUT_FILE = INPUT_DIR / "texts.json"
 
-VALID_LEVELS = {"A2", "B1", "B2"}
+VALID_LEVELS = {"A1", "A2", "B1", "B2"}  # v2.2：放行 A1 零基础语料
 VALID_FORMATS = {"dialogue", "monologue"}
 
 

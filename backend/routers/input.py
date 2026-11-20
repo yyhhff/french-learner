@@ -63,8 +63,8 @@ async def input_texts(
     offset: str | None = None,
 ):
     if level is not None and level != "":
-        if level not in ("A2", "B1", "B2"):
-            raise ApiError(40001, 400, "level 必须是 A2/B1/B2")
+        if level not in ("A1", "A2", "B1", "B2"):
+            raise ApiError(40001, 400, "level 必须是 A1/A2/B1/B2")
     else:
         level = None
     size = _parse_int_param(limit, "limit", 20, 1, 50)
@@ -173,7 +173,8 @@ async def input_recommend(
     if current not in db.CEFR_ORDER:
         current = "A1"
     idx = max(0, db.CEFR_ORDER.index(current))
-    target = db.CEFR_ORDER[min(idx + 1, len(db.CEFR_ORDER) - 1)]
+    # v2.2：A1 零基础留在 A1 台阶语料，不跳到 A2（否则零基础推荐断档）
+    target = "A1" if current == "A1" else db.CEFR_ORDER[min(idx + 1, len(db.CEFR_ORDER) - 1)]
 
     candidates = [t for t in db.get_all_input_texts() if t["id"] not in excluded]
     if not candidates:

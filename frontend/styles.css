@@ -214,6 +214,25 @@
     font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
   .ob-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
   .ob-btn:hover{transform:translateY(-1px)}
+  /* ===== TASK-0065 v2.2 零基础台阶路径（A1 三步薄引导） ===== */
+  .a1p-box{position:relative;background:var(--surface);border-radius:20px;width:100%;max-width:420px;
+    padding:30px 28px;text-align:center;box-shadow:var(--shadow);animation:pop .35s ease both}
+  .a1p-skip{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);
+    font-size:11.5px;cursor:pointer;font-family:inherit}
+  .a1p-skip:hover{color:var(--ink)}
+  .a1p-emoji{font-size:40px;margin-bottom:10px}
+  .a1p-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:10px}
+  .a1p-desc{font-size:12.5px;color:var(--muted);line-height:1.85;margin:0 0 20px}
+  .a1p-go{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .a1p-btn{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:9px 18px;
+    font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
+  .a1p-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .a1p-btn:hover{transform:translateY(-1px)}
+  .a1p-dots{display:flex;gap:7px;justify-content:center;margin-top:18px}
+  .a1p-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block}
+  .a1p-dots i.on{background:var(--brand)}
+  .a1p-dots i.done{background:var(--teal)}
+  .a1-path-hint{text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px}
   .ob-entries{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
   .ob-entry{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 8px;
     font-size:10.5px;color:var(--muted);flex:1 1 0;min-width:0}

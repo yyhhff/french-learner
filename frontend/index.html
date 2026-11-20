@@ -185,9 +185,16 @@
   </div>
 </div>
 
+<!-- TASK-0053 首次引导（≤3 步，每步可跳过；localStorage 一次性标志，可在定级页随时回来） -->
+<div id="obOverlay" class="overlay hidden" onclick="if(event.target===this)closeOnboarding(true)">
+  <div class="ob-box">
+    <button class="ob-skip" onclick="closeOnboarding(true)" title="跳过引导，随便逛逛">先随便逛逛</button>
+    <div id="obContent"></div>
+  </div>
+</div>
+
 <!-- 复习浮层 -->
-<div id="reviewOverlay" class="overlay hidden" onclick="if(event.target===this)closeReview()">
-  <div class="review-box">
+<div id="reviewOverlay" class="overlay hidden" onclick="if(event.target===this)closeReview()">  <div class="review-box">
     <button class="review-close" onclick="closeReview()" title="关闭">×</button>
     <div id="reviewContent"></div>
   </div>
@@ -214,6 +221,6 @@
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=31" defer></script>
+<script src="app.js?v=32" defer></script>
 </body>
 </html>

@@ -195,6 +195,28 @@
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
   .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:26px}
+  /* ===== TASK-0053 首次引导（≤3 步可跳过） ===== */
+  .ob-box{position:relative;background:var(--surface);border-radius:20px;width:100%;max-width:400px;
+    padding:30px 28px;text-align:center;box-shadow:var(--shadow);animation:pop .35s ease both}
+  .ob-skip{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);
+    font-size:11.5px;cursor:pointer;font-family:inherit}
+  .ob-skip:hover{color:var(--ink)}
+  .ob-emoji{font-size:40px;margin-bottom:10px}
+  .ob-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:10px}
+  .ob-desc{font-size:12.5px;color:var(--muted);line-height:1.8;margin:0 0 20px}
+  .ob-go{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .ob-btn{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:9px 18px;
+    font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
+  .ob-btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .ob-btn:hover{transform:translateY(-1px)}
+  .ob-entries{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+  .ob-entry{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 8px;
+    font-size:10.5px;color:var(--muted);flex:1 1 0;min-width:0}
+  .ob-entry b{display:block;color:var(--ink);font-size:12px;margin-bottom:2px;white-space:nowrap}
+  .ob-dots{display:flex;gap:5px;justify-content:center;margin-top:18px}
+  .ob-dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+  .ob-dots i.on{background:var(--brand)}
+
   /* ===== 视图切换：对话 / 阅读 ===== */
   .view-tabs{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
   .view-tab{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:8px 18px;font-size:13px;

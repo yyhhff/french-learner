@@ -1733,6 +1733,75 @@ async function init(){
   await selectScene(firstId);
   // 读音规则 P0：静默加载（失败只降级读音入口，不影响上面已完成的界面）
   loadPronData();
+  // TASK-0053：首次引导（localStorage 一次性，每步可跳过）
+  maybeShowOnboarding();
+}
+
+/* ============================================================
+   TASK-0053 首次引导（方案 F：≤3 步、每步可跳过、零强制词）
+   localStorage 只存 UI 展示标志，不存学习进度
+   ============================================================ */
+const ONBOARDING_KEY = 'yaya_onboarding_seen';
+
+function maybeShowOnboarding(){
+  try{ if(localStorage.getItem(ONBOARDING_KEY)==='1') return; }catch(e){}
+  showOnboardingStep(1);
+}
+
+function showOnboardingStep(n){
+  const ov = document.getElementById('obOverlay');
+  const c = document.getElementById('obContent');
+  if(!ov || !c) return;
+  const dots = [1,2,3].map(i=>`<i class="${i===n?'on':''}"></i>`).join('');
+  let html = '';
+  if(n===1){
+    html = `
+      <div class="ob-emoji">🌱</div>
+      <div class="ob-title">你好呀，我是呀呀</div>
+      <p class="ob-desc">像婴儿一样，自然地学会法语。<br>这里没有红叉，说错了也没关系——我会顺着你的话轻轻接下去。</p>
+      <div class="ob-go">
+        <button class="ob-btn primary" onclick="showOnboardingStep(2)">开始慢慢学</button>
+        <button class="ob-btn" onclick="closeOnboarding(false)">先随便逛逛</button>
+      </div>
+      <div class="ob-dots">${dots}</div>`;
+  }else if(n===2){
+    html = `
+      <div class="ob-emoji">🎯</div>
+      <div class="ob-title">先看看你现在在哪一级</div>
+      <p class="ob-desc">12 道小题，几分钟就好。<br>也可以先去对话和阅读里逛逛，随时回来测都行。</p>
+      <div class="ob-go">
+        <button class="ob-btn primary" onclick="goOnboardingTarget('assessment')">去测一测</button>
+        <button class="ob-btn" onclick="showOnboardingStep(3)">先不了</button>
+      </div>
+      <div class="ob-dots">${dots}</div>`;
+  }else{
+    html = `
+      <div class="ob-emoji">🧭</div>
+      <div class="ob-title">三个入口，随时都在</div>
+      <div class="ob-entries">
+        <div class="ob-entry"><b>💬 对话陪练</b>像聊天一样开口说</div>
+        <div class="ob-entry"><b>📖 分级阅读</b>读不懂有中文小字</div>
+        <div class="ob-entry"><b>🌱 我的成长</b>每一步都被记下</div>
+      </div>
+      <div class="ob-go"><button class="ob-btn primary" onclick="closeOnboarding(false)">好，开始吧</button></div>`;
+  }
+  c.innerHTML = html;
+  ov.classList.remove('hidden');
+}
+
+function closeOnboarding(){
+  // 任何关闭路径（完成/跳过/点背景）都标记 seen：引导只出现一次，跳过也算看过
+  const ov = document.getElementById('obOverlay');
+  if(ov) ov.classList.add('hidden');
+  try{ localStorage.setItem(ONBOARDING_KEY,'1'); }catch(e){}
+}
+
+function goOnboardingTarget(view){
+  // 去定级即视为走完引导；定级页随时可以切到其他入口
+  try{ localStorage.setItem(ONBOARDING_KEY,'1'); }catch(e){}
+  const ov = document.getElementById('obOverlay');
+  if(ov) ov.classList.add('hidden');
+  switchView(view);
 }
 
 init();

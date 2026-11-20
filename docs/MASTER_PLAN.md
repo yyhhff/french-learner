@@ -53,7 +53,7 @@ Wave 4                D: v4.1 移动与部署（全局改前端，必须独占�
 | B | v2.3 内容工厂 | 1 | 无 | 已合并点亮（批次 1 达成 TASK-0069：106 篇四档各 ≥20、音频 536 条、AI 审校抽检 0/5 误放；批次 2/3 滚动扩充） | 本会话（worktree v2.3-content） | TASK-0066/0069 | feature/v2.3-content → main（merge 9d96e60） |
 | C | v3.2 发音教练 | 1 | 无 | 已合并点亮（TASK-0068：tiny 模型 0.62–0.84s 达标；用户验收发现的切页重叠缺陷已修复 251d0e6 并 GUI 回归通过，待用户复验） | 本会话（worktree v3.2-pron） | TASK-0067/0068 | feature/v3.2-pron → main（2026-11-20 合并） |
 | A | v3.0 每日路径 + 游戏化内核 | 2 | v2.2+v2.3 已合并 | 已合并点亮（含真猫贴纸形象迭代 31714fb；TASK-0079 已归档） | 本会话（worktree v3.0-daily，已清理） | TASK-0079 | feature/v3.0-daily → main（merge dfd1832） |
-| B | v3.1 听力强化 | 2 | v2.3 已合并 | 待集成（TASK-0071 开发完成：7 端点+听力视图，单测 20 例绿，GUI 冒烟过，50 路由回归 0×5xx；变体音频批量断点续跑中，未就绪句自动回退标准音） | 本会话（worktree） | TASK-0071 | feature/v3.1-listen → main（基于 1ea8cb0，7 commits；⚠️ 与 v3.0 合并时 growth.js/main.js/index.html 三处同文件需人工合并） |
+| B | v3.1 听力强化 | 2 | v2.3 已合并 | 已合并点亮（TASK-0071 已归档：真机验收通过 2026-11-21；合并 c17f8e9 解 4 处冲突，集成冒烟 51 路由 0×5xx，变体音频 1072/1072 满就绪） | 本会话（worktree，已清理） | TASK-0071 | feature/v3.1-listen → main（merge c17f8e9） |
 | B | v3.3 语法微卡 | 2 | v2.3 已合并 | 待集成（TASK-0078 开发+自测完成 2026-11-21：153 单测全绿 + GUI 冒烟三嵌入全过，真机验收待用户） | 本会话（worktree v3.3-grammar） | TASK-0078 | feature/v3.3-grammar（c7552c4 后端 + 6b87d5e 前端，基于 006ece4；⚠️ 早于 v3.0 merge dfd1832，合并时 chat.py（xp/gamify 挂接区）、main.js、store.js、styles.css 需先对齐 main 再回归） |
 | A | v4.0 口语四维测评 + 自适应定级 | 3 | v3.0 已合并 | 未认领 | | | |
 | D | v4.1 移动与部署形态 | 4 | 全部已合并 | 未认领 | | | |

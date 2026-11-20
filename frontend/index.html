@@ -28,11 +28,13 @@
     </div>
   </div>
 
-  <!-- 视图切换：今日 / 对话 / 阅读 / 定级 / 考级冲刺（TASK-0070 v3.0 今日置首） -->
+  <!-- 视图切换：今日 / 对话 / 阅读 / 听力 / 定级 / 考级冲刺（v3.0 今日置首 + v3.1 听力并入） -->
+
   <div class="view-tabs" role="tablist">
     <button class="view-tab on" id="tabToday" onclick="switchView('today')">🏠 今日</button>
     <button class="view-tab" id="tabChat" onclick="switchView('chat')">💬 对话陪练</button>
     <button class="view-tab" id="tabRead" onclick="switchView('read')">📖 分级阅读</button>
+    <button class="view-tab" id="tabListen" onclick="switchListenView('listen')">🎧 听力磨耳</button>
     <button class="view-tab" id="tabAssessment" onclick="switchView('assessment')">🎯 定级</button>
     <button class="view-tab" id="tabExam" onclick="switchView('exam')">🏆 考级冲刺</button>
     <button class="view-tab" id="tabGrowth" onclick="switchView('growth')">🌱 我的成长</button>
@@ -151,6 +153,34 @@
           <div class="body"><div class="tip" style="margin:0">这里没有红叉，也没有扣分。读不懂很正常，点小喇叭听一听，慢慢来～</div></div>
         </div>
       </aside>
+    </div>
+  </div>
+
+  <!-- TASK-0071 v3.1 听力磨耳：分级听力 + 变速 + 精听听写（结构由 listen.js 填充） -->
+  <div id="viewListen" class="view hidden">
+    <div class="listen-wrap">
+      <div id="listenHome">
+        <div class="card-h"><h2>🎧 听力磨耳</h2><span>耳朵先开口</span></div>
+        <div class="listen-lead">慢慢听、逐句听，直到耳朵跟得上真实语速。先调 0.75x 慢速，听懂了再加速。</div>
+        <div id="listenChips" class="listen-chips"></div>
+        <div id="listenList" class="listen-list"></div>
+      </div>
+      <div id="listenDetail" class="hidden">
+        <button class="listen-back" onclick="listenBack()">← 返回素材列表</button>
+        <div class="card-h"><h2 id="listenTitle"></h2><span id="listenMeta"></span></div>
+        <div class="listen-ctrls">
+          <div class="listen-variants" id="listenVariants"></div>
+          <div class="listen-speeds" id="listenSpeeds"></div>
+          <button class="listen-ctrl" id="listenLoopBtn" onclick="listenToggleLoop()">🔁 单句循环:关</button>
+          <button class="listen-ctrl" id="listenDictBtn" onclick="listenToggleDictation()">✍️ 精听模式:关</button>
+          <button class="listen-ctrl" onclick="listenPlayAll()">▶️ 整篇连播</button>
+        </div>
+        <div id="listenSentences" class="listen-sentences"></div>
+        <div class="listen-finish">
+          <button id="listenFinishBtn" onclick="listenFinish()" disabled>收口本篇 → 画像记账</button>
+          <span id="listenFinishMsg"></span>
+        </div>
+      </div>
     </div>
   </div>
 

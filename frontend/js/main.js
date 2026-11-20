@@ -8,6 +8,7 @@ import { applyChatResult, chatLinkBtnHTML, cleanToken, detailFromFallback, detec
 import { answerExamChoice, backExamToPapers, examAnswerDone, examTypeName, initExam, nextExam, onExamTextInput, openExamPaper, prevExam, renderExamPapers, renderExamQuestion, renderExamResult, saveExamCurrentText, showExamPane, submitExam, toggleExamRecord, transcribeExamAudio } from './views/exam.js';
 import { closeFeedback, openFeedback, selectFbCat, submitFeedback } from './views/feedback.js';
 import { achievementCardHTML, dailyGoalsCardHTML, microProgressCardHTML, renderGrowth, renderRoadmap, skillCardHTML, switchView } from './views/growth.js';
+import { listenBack, listenFinish, listenOpen, listenPickLevel, listenPlay, listenPlayAll, listenSetSpeed, listenSetVariant, listenSubmit, listenToggleDictation, listenToggleLoop, switchListenView } from './views/listen.js';
 import { closeOnboarding, closeRetention, goOnboardingTarget, maybeShowOnboarding, maybeShowRetention, onboardingSeen, reopenOnboarding, retentionContinue, showOnboardingStep } from './views/onboarding.js';
 import { applyPronProgressItem, buildPronIndex, closePronBook, closePronCard, dismissPronTip, findRulesForCard, loadPronData, loadPronDetails, loadPronProgress, loadPronSummaries, maybeShowPronTip, normIpa, openPronBook, openPronCard, openPronCardForNoRule, postPronProgress, pronBadgeHTML, pronFocusLabel, pronKey, pronLearnedTotal, pronProgressHTML, pronStageOf, pronTotalRules, renderPronBook, renderPronCard, switchPronCard, updatePronBookEntry, updatePronCardProgressUI } from './views/pron.js';
 import { applyCollectResult, collectAllWords, collectReadWord, gentleReadNote, loadReadLevels, markReadComplete, openReadText, postCollect, recommendNext, renderReadLevels, renderReadLines, renderReadTexts, renderReadWords, selectReadLevel, setOffline, showReadDetail } from './views/reading.js';
@@ -256,6 +257,19 @@ window.updateReadVocabBadge = updateReadVocabBadge;
 window.userTurn = userTurn;
 window.wordTokensHTML = wordTokensHTML;
 window.switchPronCoachView = switchPronCoachView;
+// TASK-0071 v3.1 听力磨耳 handlers（集中一块，便于跨车道合并）
+window.listenBack = listenBack;
+window.listenFinish = listenFinish;
+window.listenOpen = listenOpen;
+window.listenPickLevel = listenPickLevel;
+window.listenPlay = listenPlay;
+window.listenPlayAll = listenPlayAll;
+window.listenSetSpeed = listenSetSpeed;
+window.listenSetVariant = listenSetVariant;
+window.listenSubmit = listenSubmit;
+window.listenToggleDictation = listenToggleDictation;
+window.listenToggleLoop = listenToggleLoop;
+window.switchListenView = switchListenView;
 window.setPronCoachFocus = setPronCoachFocus;
 window.nextPronCoachSentence = nextPronCoachSentence;
 window.togglePronCoachRecord = togglePronCoachRecord;

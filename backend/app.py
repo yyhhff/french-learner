@@ -34,6 +34,7 @@ from routers import (
     exam as exam_router,
     feedback,
     input as input_router,
+    listen,
     pron,
     pron_coach,
     profile,
@@ -75,7 +76,7 @@ async def generic_error_handler(_request: Request, exc: Exception):
     )
 
 
-# ---------------------------------------------------------------- 路由装配（36 端点）
+# ---------------------------------------------------------------- 路由装配（53 端点：v3.0 today 1 + v3.1 listen 7 并入）
 for _router in (
     chat.router,
     translate.router,
@@ -92,6 +93,7 @@ for _router in (
     pron_coach.router,
     content_review.router,
     today.router,
+    listen.router,
 ):
     app.include_router(_router)
 
@@ -106,6 +108,7 @@ if db.is_empty():
     logger.info("空库，灌入种子数据…")
     seed.seed_if_empty()
 db.ensure_profile_initialized()  # TASK-0040：演示假值清零迁移（幂等）
+listen.init_tables()  # TASK-0071：listening_logs 幂等建表（模块自建，失败不阻断启动）
 seed_input.load_input_corpus()  # 新增：每次启动同步语料（幂等，文件缺失不阻断）
 try:  # 定级题库：幂等加载，文件缺失/异常不阻断启动（其余 15 端点正常）
     assessment.load_questions()

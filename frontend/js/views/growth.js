@@ -18,6 +18,11 @@ function switchView(name){
   if(pt) pt.classList.remove('on');
   const tv = document.getElementById('viewToday');
   if(tv) tv.classList.toggle('hidden', view!=='today');
+  // 听力视图由 listen.js 自管（TASK-0071）；切回六视图时同样兜底隐藏（同 TASK-0068 教训）
+  const lv = document.getElementById('viewListen');
+  if(lv) lv.classList.add('hidden');
+  const lt = document.getElementById('tabListen');
+  if(lt) lt.classList.remove('on');
   document.getElementById('viewChat').classList.toggle('hidden', view!=='chat');
   document.getElementById('viewRead').classList.toggle('hidden', view!=='read');
   const av = document.getElementById('viewAssessment');

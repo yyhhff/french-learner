@@ -83,3 +83,17 @@ python -m content_pipeline.cli status                 # 统计
 - 本期内容工厂可产 A1 语料并入库（`seed_input.py` 的 `VALID_LEVELS` 加 A1）；
 - **不触碰** v2.2 的定级题库、`assessment.py`、onboarding 台阶路径、场景对话；
 - 两车道都改 `seed_input.py` 的 `VALID_LEVELS`：合并时以「含 A1 的四档集合」为准，避免丢失。
+
+## 9. 变体音频批量（TASK-0071 v3.1 听力强化新增）
+
+- **产物**：每句两版变体——`audio/<text_id>/<seq>_v1.mp3`（男声 `fr-FR-HenriNeural` 原文，多音色）、
+  `<seq>_v2.mp3`（默认 Denise + 口语缩略形文本 + 语速 `+10%`，真实语速适应）；落盘目录与标准音频相同。
+- **缩略形来源**：`backend/reductions.py`（纯函数，按文件路径加载复用，backend 无包结构不 import）。
+- **8011 依赖**：须为 TASK-0071 后的新版 `/tts`（支持可选 `voice`/`rate` 查询参数，缺省 `+0%`；
+  旧版服务会忽略参数并产出与标准版相同的音频——无害，升级重启后重跑即可补齐）。
+- **断点续跑**：进度独立存 `progress.json` 的 `audio_variants` 键，与标准音频 `audio` 键互不影响；
+  文件已存在且非空则跳过；`--retry-failed` 重试失败项。
+- **用法**：`python -m content_pipeline.cli audio-variants [--level A1] [--limit-texts N] [--retry-failed]`
+  或 `python -m content_pipeline.audio_batch --variants`。
+- **消费端**：`GET /api/listen/line-audio/{text_id}/{seq}?variant=v1|v2` 直读变体文件，
+  缺失时服务端按变体口径现场合成兜底（原句文本不下发前端）。

@@ -76,7 +76,7 @@ ROADMAP_DEFS = [
     },
     {
         "version": "v3.1", "title": "耳朵开口", "theme": "听力强化",
-        "status": "planned", "date": None,
+        "status": "done", "date": "2026-11-21",
         "desc": "慢慢听、逐句听，直到耳朵跟得上真实语速。",
         "features": ["变速听力", "精听听写填空", "口语缩略与多音色语速变体"],
     },

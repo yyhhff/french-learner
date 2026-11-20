@@ -285,6 +285,32 @@ async def review(id: str, request: Request):
     return ok({"next_due": next_due, "interval_days": interval_days})
 
 
+@app.get("/api/review/due")
+async def review_due(request: Request):
+    """TASK-0057 到期复习队列（UX_PROGRESS_PLAN §5.2 冻结契约）。
+
+    只在本用户进入复习入口时拉取，温和分页、不推送、无倒计时/红点。
+    """
+    qp = request.query_params
+    try:
+        limit = int(qp.get("limit", 20))
+        offset = int(qp.get("offset", 0))
+    except (TypeError, ValueError):
+        raise ApiError(40001, 400, "limit/offset 必须是整数")
+    if not 1 <= limit <= 100:
+        raise ApiError(40001, 400, "limit 必须在 1..100 之间")
+    if offset < 0:
+        raise ApiError(40001, 400, "offset 不能为负")
+
+    items = db.list_due_reviews(limit=limit, offset=offset)
+    due_count = db.count_due_reviews()
+    return ok({
+        "items": items,
+        "total": due_count,
+        "today_count": due_count,
+    })
+
+
 @app.get("/api/profile")
 async def profile():
     data = db.get_profile()

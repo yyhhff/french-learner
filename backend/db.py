@@ -635,6 +635,56 @@ def list_cards(scene_id: str | None = None, user_id: int = DEFAULT_USER_ID) -> l
 
 # ---------------------------------------------------------------- 复习
 
+def count_due_reviews(user_id: int = DEFAULT_USER_ID, now: str | None = None) -> int:
+    """到期卡片数（next_due <= now），与 get_profile().stats.due_cards_count 同口径。"""
+    conn = get_conn()
+    try:
+        return conn.execute(
+            "SELECT COUNT(*) AS n FROM review_logs WHERE user_id = ? AND next_due <= ?",
+            (user_id, now or now_iso()),
+        ).fetchone()["n"]
+    finally:
+        conn.close()
+
+
+def list_due_reviews(
+    user_id: int = DEFAULT_USER_ID,
+    now: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> list:
+    """到期卡片队列：WordCard 字段 + review_state，按最早到期优先。
+
+    TASK-0057 / UX_PROGRESS_PLAN §5.2 冻结契约：JOIN 只认本用户的卡，
+    next_due<=now，ORDER BY next_due,r.id，LIMIT/OFFSET 温和分页。
+    """
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT c.*, r.repetitions AS _reps, r.ease_factor AS _ease, "
+            "r.interval_days AS _interval, r.next_due AS _next_due, "
+            "r.total_reviews AS _total "
+            "FROM review_logs r JOIN word_cards c ON r.card_id = c.id "
+            "WHERE c.user_id = ? AND c.user_id = r.user_id AND r.next_due <= ? "
+            "ORDER BY r.next_due, r.id LIMIT ? OFFSET ?",
+            (user_id, now or now_iso(), limit, offset),
+        ).fetchall()
+        items = []
+        for row in rows:
+            card = row_to_word_card(row)
+            card["review_state"] = {
+                "repetitions": row["_reps"],
+                "ease_factor": row["_ease"],
+                "interval_days": row["_interval"],
+                "next_due": row["_next_due"],
+                "total_reviews": row["_total"],
+            }
+            items.append(card)
+        return items
+    finally:
+        conn.close()
+
+
 def get_review_state(card_id: int, user_id: int = DEFAULT_USER_ID):
     """取该卡当前的 review_logs 状态；卡片不存在返回 None。"""
     conn = get_conn()

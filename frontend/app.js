@@ -1035,11 +1035,34 @@ function browserRecognizeFallback(){
 let reviewQueue = [], reviewIdx = 0;
 const OFFLINE_INTERVAL = {1:1, 2:2, 3:4, 4:7};
 
-function openReview(){
-  reviewQueue = state.cards.slice();
+// TASK-0057 到期调度：在线拉 GET /api/review/due 的到期队列，离线/失败回退本地全量卡
+async function openReview(){
+  const overlay = document.getElementById('reviewOverlay');
+  if(state.online){
+    try {
+      const res = await apiRequest('/api/review/due');
+      if(res==null) return; // 业务错误已提示
+      reviewQueue = Array.isArray(res.items) ? res.items.slice() : [];
+      if(!reviewQueue.length){
+        // 温和空态：不弹红叉、不催促，给一个「看看全部词卡」的软出口
+        document.getElementById('reviewContent').innerHTML =
+          `<div class="review-done"><div class="done-emoji">🌿</div>
+            <h3>今天没有想见你的词</h3>
+            <p>都记得挺好的，随时想复习再来看看就好～</p>
+            <button class="review-entry" onclick="closeReview()">好呀</button></div>`;
+        overlay.classList.remove('hidden');
+        return;
+      }
+    }catch(e){
+      setOffline();
+      reviewQueue = state.cards.slice();
+    }
+  }else{
+    reviewQueue = state.cards.slice();
+  }
   if(!reviewQueue.length){ notify('还没有生词卡可以复习'); return; }
   reviewIdx = 0;
-  document.getElementById('reviewOverlay').classList.remove('hidden');
+  overlay.classList.remove('hidden');
   renderReviewCard();
 }
 function closeReview(){ document.getElementById('reviewOverlay').classList.add('hidden'); }
@@ -1050,6 +1073,14 @@ function renderReviewCard(){
     box.innerHTML = `<div class="review-done"><div class="done-emoji">🌿</div>
       <h3>今日复习完成</h3><p>温柔地记住了 ${reviewQueue.length} 张卡片，真棒！</p>
       <button class="review-entry" onclick="closeReview()">完成</button></div>`;
+    // TASK-0057 复习完成后刷新真实统计，账本「今日想见你」/成长页数字即时归零
+    if(state.online){
+      apiRequest('/api/profile').then(p=>{
+        if(!p) return;
+        state.profile = p; renderLedger();
+        try { if(typeof renderGrowth==='function') renderGrowth(); } catch(e){}
+      }).catch(()=>{});
+    }
     return;
   }
   const c = reviewQueue[reviewIdx];

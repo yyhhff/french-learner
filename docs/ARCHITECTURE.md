@@ -261,7 +261,8 @@ Base URL：`http://localhost:8000`。所有路径前缀 `/api`。
 | 4 | GET | `/api/cards` | Query 可选 `scene_id:string` | `WordCard[]` | 50001(500) |
 | 5 | POST | `/api/cards/{id}/review` | 路径参数 `id:int`，Body `{rating}` | `ReviewResult` | 40001(400), 40401(404), 50001(500) |
 | 6 | GET | `/api/profile` | 无 | `UserProfile` | 50001(500) |
-| 7 | GET | `/api/health` | 无 | `{status, version, time}` | 50001(500) |
+| 7 | GET | `/api/review/due` | Query 可选 `limit:int`(1..100,默认20) `offset:int`(≥0,默认0) | `{items:DueCard[], total, today_count}` | 40001(400) |
+| 8 | GET | `/api/health` | 无 | `{status, version, time}` | 50001(500) |
 
 ### 5.2 逐端点详解
 
@@ -301,6 +302,11 @@ Base URL：`http://localhost:8000`。所有路径前缀 `/api`。
 - 响应 `data`：`{ "next_due":"2026-11-18T09:30:00Z", "interval_days":1 }`。
 - 逻辑：调用 `srs.schedule(rating, 当前review_logs状态)` → 更新该卡的 `review_logs`（`repetitions/ease_factor/interval_days/next_due/last_reviewed_at/total_reviews`）。
 - 错误：rating 非 1~4 或非整数 → 40001；卡片不存在 → 40401。
+
+#### 7) GET `/api/review/due` — 到期复习队列（TASK-0057）
+- Query：可选 `limit`（1..100，默认 20）、`offset`（≥0，默认 0）；越界/非整数 → 40001。
+- 响应 `data`：`{ items: DueCard[], total, today_count }`。`DueCard` = `WordCard` 全字段 + `review_state:{repetitions,ease_factor,interval_days,next_due,total_reviews}`。
+- 口径：`review_logs.next_due <= now` 且属当前用户，按最早到期优先（`ORDER BY next_due, id`）；`total/today_count` 与 `get_profile().stats.due_cards_count` 同口径。仅进入复习入口时拉取，不推送、无倒计时/红点。复习写入仍走 `POST /api/cards/{id}/review`，`srs.schedule()` 自动推进 next_due。
 
 #### 6) GET `/api/profile` — 用户档案
 - 响应 `data`：`UserProfile`

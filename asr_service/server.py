@@ -375,25 +375,32 @@ async def transcribe(request: Request):
 # 用 edge-tts（微软神经网络语音）生成高质量法语朗读，避免浏览器 TTS 把
 # le/la/les 等功能词读成单独字母。edge-tts 需联网（连微软），失败时前端回退浏览器 TTS。
 TTS_VOICE = os.environ.get("YAYA_TTS_VOICE", "fr-FR-DeniseNeural")
-_tts_cache: dict[tuple[str, str], bytes] = {}
+# TASK-0071 v3.1：/tts 新增可选 voice（音色变体）与 rate（语速，edge-tts 格式如 +10%）。
+# 两参数缺省时行为与旧版完全一致（向后兼容，发音教练等既有调用方零回归）。
+_RATE_RE = re.compile(r"^[+-]\d{1,3}%$")
+_tts_cache: dict[tuple[str, str, str], bytes] = {}
 
 
 @app.get("/tts")
-async def tts(text: str = ""):
-    """把法语文本合成为 mp3 音频流。相同文本+语音缓存，减少重复在线请求。"""
+async def tts(text: str = "", voice: str = "", rate: str = ""):
+    """把法语文本合成为 mp3 音频流。相同文本+语音+语速缓存，减少重复在线请求。"""
     text = (text or "").strip()
     if not text:
         return JSONResponse(status_code=400, content={"ok": False, "error": "空文本"})
     if len(text) > 500:
         return JSONResponse(status_code=400, content={"ok": False, "error": "文本过长"})
-    key = (text, TTS_VOICE)
+    use_voice = (voice or "").strip() or TTS_VOICE
+    use_rate = (rate or "").strip()
+    if use_rate and not _RATE_RE.match(use_rate):
+        return JSONResponse(status_code=400, content={"ok": False, "error": "rate 须为 +N% / -N% 格式"})
+    key = (text, use_voice, use_rate)
     audio = _tts_cache.get(key)
     if audio is None:
         try:
             import edge_tts
 
             t0 = time.time()
-            communicate = edge_tts.Communicate(text, TTS_VOICE)
+            communicate = edge_tts.Communicate(text, use_voice, rate=use_rate or None)
             buf = io.BytesIO()
             async for chunk in communicate.stream():
                 if chunk["type"] == "audio":

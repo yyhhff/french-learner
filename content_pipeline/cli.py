@@ -79,6 +79,11 @@ def main() -> None:
     p_audio.add_argument("--level", default=None)
     p_audio.add_argument("--retry-failed", action="store_true")
 
+    p_av = sub.add_parser("audio-variants")
+    p_av.add_argument("--limit-texts", type=int, default=None)
+    p_av.add_argument("--level", default=None)
+    p_av.add_argument("--retry-failed", action="store_true")
+
     sub.add_parser("status")
 
     args = ap.parse_args()
@@ -98,6 +103,8 @@ def main() -> None:
         print(json.dumps(review_store.approve(slot, "cli-operator"), ensure_ascii=False))
     elif args.cmd == "audio":
         print(json.dumps(audio_batch.run(args.limit_texts, args.level, args.retry_failed), ensure_ascii=False, indent=2))
+    elif args.cmd == "audio-variants":
+        print(json.dumps(audio_batch.run_variants(args.limit_texts, args.level, args.retry_failed), ensure_ascii=False, indent=2))
     elif args.cmd == "status":
         print(json.dumps(status(), ensure_ascii=False, indent=2))
 

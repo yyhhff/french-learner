@@ -64,7 +64,7 @@ ROADMAP_DEFS = [
     },
     {
         "version": "v2.3", "title": "读不完的书", "theme": "内容量产管线",
-        "status": "planned", "date": None,
+        "status": "active", "date": None,
         "desc": "分级短文源源不断，总有刚好适合你的下一篇。",
         "features": ["语料生成与难度校验管线", "200+ 篇 A1–B2 分级内容", "音频批量预生成"],
     },

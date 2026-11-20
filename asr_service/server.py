@@ -8,7 +8,7 @@
 启动（用独立 venv）：
     cd tools/french-learner
     .venv-asr/Scripts/python.exe asr_service/server.py
-默认端口 8010，仅监听 127.0.0.1。
+默认端口 8011（原 8010 与 WorkBuddy multi-account 服务冲突，TASK-0056），仅监听 127.0.0.1。
 """
 from __future__ import annotations
 
@@ -375,4 +375,7 @@ async def tts_status():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8010)
+    # TASK-0056：默认端口 8010→8011 —— 8010 与 WorkBuddy multi-account 服务冲突
+    # （其客户端会轮询 /api/accounts/list，且占用端口导致 ASR 无法启动）
+    port = int(os.environ.get("YAYA_ASR_PORT", "8011"))
+    uvicorn.run(app, host="127.0.0.1", port=port)

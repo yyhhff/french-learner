@@ -5,7 +5,7 @@ title 呀呀法语 - 一键启动
 
 REM ============================================================
 REM 呀呀法语 一键启动脚本
-REM 功能：启动前自检 -> 拉起 语音服务(8010) + 后端(8000，被占自动回退) -> 健康检查 -> 打开浏览器
+REM 功能：启动前自检 -> 拉起 语音服务(8011) + 后端(8000，被占自动回退) -> 健康检查 -> 打开浏览器
 REM 可选环境变量（不设则用默认值）：
 REM   YAYA_PYTHON       后端 Python 解释器全路径（默认自动探测：WorkBuddy 3.13 -> 系统 Python）
 REM   YAYA_ASR_MODEL    语音识别模型 tiny/small（默认 small，详见 asr_service\start_asr.bat）
@@ -100,7 +100,7 @@ if defined KEYSRC (
 )
 
 REM ---------- [4/5] 端口检查 ----------
-echo [4/5] 检查后端端口 / 语音端口 8010 ...
+echo [4/5] 检查后端端口 / 语音端口 8011 ...
 set "BACKEND_ACTION=launch"
 set "ASR_ACTION=launch"
 if defined YAYA_BACKEND_PORT (
@@ -110,7 +110,7 @@ if defined YAYA_BACKEND_PORT (
   set "BACKEND_PORT=8000"
 )
 call :check_backend_port
-call :check_port 8010 "http://127.0.0.1:8010/health" ASR_ACTION
+call :check_port 8011 "http://127.0.0.1:8011/health" ASR_ACTION
 
 REM ---------- [5/5] 文件齐全性 ----------
 echo [5/5] 检查前端与语料文件 ...
@@ -153,7 +153,7 @@ echo 等待服务就绪（最多约 90 秒）...
 set "BACKEND_UP=0"
 set "ASR_UP=0"
 call :wait_http "后端 !BACKEND_PORT!" "http://127.0.0.1:!BACKEND_PORT!/api/health" 30 && set "BACKEND_UP=1"
-call :wait_http "语音 8010" "http://127.0.0.1:8010/health" 45 && set "ASR_UP=1"
+call :wait_http "语音 8011" "http://127.0.0.1:8011/health" 45 && set "ASR_UP=1"
 
 if "%BACKEND_UP%"=="1" if not defined YAYA_NO_BROWSER start "" http://localhost:!BACKEND_PORT!/
 
@@ -246,10 +246,10 @@ call :pick_fallback_port
 exit /b 0
 
 :pick_fallback_port
-REM 从 8001-8019（跳过 8010 语音端口）找第一个空闲端口
+REM 从 8001-8019（跳过 8011 语音端口）找第一个空闲端口
 set "PICKED="
 for /l %%i in (8001,1,8019) do (
-  if not defined PICKED if not "%%i"=="8010" (
+  if not defined PICKED if not "%%i"=="8011" (
     netstat -ano | findstr /r /c:":%%i .*LISTENING" >nul 2>nul
     if errorlevel 1 set "PICKED=%%i"
   )
@@ -259,7 +259,7 @@ if defined PICKED (
   set "BACKEND_PORT=!PICKED!"
   exit /b 0
 )
-echo   [FAIL] 8001-8019（除 8010）也全部被占用，找不到可用后端端口。
+echo   [FAIL] 8001-8019（除 8011）也全部被占用，找不到可用后端端口。
 set /a FAILS+=1
 exit /b 0
 

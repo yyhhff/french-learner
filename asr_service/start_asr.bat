@@ -12,7 +12,7 @@ if not exist ".venv-asr\Scripts\python.exe" (
   exit /b 1
 )
 
-echo 正在启动本地语音识别服务（端口 8010）…
+echo 正在启动本地语音识别服务（端口 8011）…
 echo 首次启动会加载模型，可能需要几十秒，请耐心等待。
 ".venv-asr\Scripts\python.exe" asr_service\server.py
 pause

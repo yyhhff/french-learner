@@ -45,14 +45,14 @@ french-learner/
 ├── data/input/               # 内容角色产出的分级语料（入 git）
 │   ├── texts.json            # 21 篇 A2/B1/B2 对话与短文 + 157 生词标注
 │   └── README.md             # 语料来源/许可/音频兜底说明
-├── asr_service/              # 本地语音识别+合成服务（端口 8010）
+├── asr_service/              # 本地语音识别+合成服务（端口 8011）
 ├── demo.html                 # 历史单文件原型（保留供对照）
 └── .gitignore
 ```
 
 ### 启动
 
-**一键启动（推荐）**：双击仓库根目录 `start.bat`（或命令行运行）。脚本自动完成 5 项启动前自检（后端解释器 / 语音环境 / API key / 端口占用 / 前端与语料文件）→ 拉起语音服务(8010)与后端(8000) → 健康检查 → 自动打开学习页。后端默认 8000；若被其他程序占用，脚本自动改用 8001-8019 中首个空闲端口（设 `YAYA_BACKEND_PORT` 手动指定则不回退），浏览器自动打开新端口入口。服务已在运行时会询问「重启 / 复用 / 退出」；缺 API key 时以 ⚠ 提示降级模式但不阻塞。可选环境变量见脚本头部注释（如 `YAYA_PYTHON` 指定后端解释器、`YAYA_ASR_MODEL=tiny` 回退轻量模型）。
+**一键启动（推荐）**：双击仓库根目录 `start.bat`（或命令行运行）。脚本自动完成 5 项启动前自检（后端解释器 / 语音环境 / API key / 端口占用 / 前端与语料文件）→ 拉起语音服务(8011)与后端(8000) → 健康检查 → 自动打开学习页。后端默认 8000；若被其他程序占用，脚本自动改用 8001-8019 中首个空闲端口（设 `YAYA_BACKEND_PORT` 手动指定则不回退），浏览器自动打开新端口入口。服务已在运行时会询问「重启 / 复用 / 退出」；缺 API key 时以 ⚠ 提示降级模式但不阻塞。可选环境变量见脚本头部注释（如 `YAYA_PYTHON` 指定后端解释器、`YAYA_ASR_MODEL=tiny` 回退轻量模型）。
 
 手动启动（分步）：
 
@@ -122,7 +122,7 @@ python -m venv .venv-asr
 
 **启动两个服务**：
 ```bash
-# 终端 1：本地语音服务（端口 8010）
+# 终端 1：本地语音服务（端口 8011）
 asr_service/start_asr.bat
 
 # 终端 2：主后端（端口 8000）
@@ -135,7 +135,7 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 **法语误识别修正**：tiny 模型在法语近音词上偶发听成英文（`chaud`→`Show !`、`un thé`→`Chef Onti`）。现默认 `beam_size=5` + 法语场景 `initial_prompt` 偏置，并加保守白名单纠正（`Show !`→`Chaud !`、`Chef Onti`→`Un thé`，正常法语句子不误伤）。`/transcribe` 同时返回 `raw_text`/`corrected`，前端会显示「🎧 原声识别：… → 已按法语修正」的温和小字。可用 `YAYA_ASR_BEAM_SIZE`、`YAYA_ASR_INITIAL_PROMPT` 调整（置空关闭偏置）。
 
-**发音朗读（本地神经语音，优先）**：点气泡旁发音按钮，走 `GET /api/tts?text=...` → 8010 语音服务用 **edge-tts**（微软神经网络语音 `fr-FR-DeniseNeural`）合成 mp3 播放。相比浏览器自带 TTS，它能把 `le/la/les` 等功能词自然连读（浏览器缺法语 voice 时会用英语引擎把 `le` 读成字母 L/E）。合成结果按「文本+语音」内存缓存，重复点同一句秒回。需联网连微软（国内可访问、免费）；语音服务未启动或合成失败时，自动回退浏览器 SpeechSynthesis 并尽量选法语 voice——离线仍可用。可用 `YAYA_TTS_VOICE` 换音色（如 `fr-FR-HenriNeural` 男声）。
+**发音朗读（本地神经语音，优先）**：点气泡旁发音按钮，走 `GET /api/tts?text=...` → 8011 语音服务用 **edge-tts**（微软神经网络语音 `fr-FR-DeniseNeural`）合成 mp3 播放。相比浏览器自带 TTS，它能把 `le/la/les` 等功能词自然连读（浏览器缺法语 voice 时会用英语引擎把 `le` 读成字母 L/E）。合成结果按「文本+语音」内存缓存，重复点同一句秒回。需联网连微软（国内可访问、免费）；语音服务未启动或合成失败时，自动回退浏览器 SpeechSynthesis 并尽量选法语 voice——离线仍可用。可用 `YAYA_TTS_VOICE` 换音色（如 `fr-FR-HenriNeural` 男声）。
 
 ### AI 重述与降级
 
@@ -160,7 +160,7 @@ cd backend && python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 **发音修复验收（2026-11-17，针对 `le` 读成字母）**：
 - 根因：浏览器 SpeechSynthesis 缺法语 voice 时用英语引擎硬读，`le`→字母 L/E（非法语错误）
-- 方案：新增 `GET /api/tts`（8000 代理）→ `/tts`（8010，edge-tts 神经语音）→ 前端优先播放合成 mp3，失败回退浏览器 TTS
+- 方案：新增 `GET /api/tts`（8000 代理）→ `/tts`（8011，edge-tts 神经语音）→ 前端优先播放合成 mp3，失败回退浏览器 TTS
 - 实测：`Très bien ! Vous le voulez chaud ou froid ?` 经主后端合成返回 200/audio-mpeg/23184 bytes（1.5s），缓存命中 0s
 - 发音验证：慢速回听清楚识别 `Vous le voulez`（`le` 读成单词 /lə/ 而非字母）；全速时 tiny 把 `le` 听成 `ne` 属 tiny 连读识别局限，非发音问题
 

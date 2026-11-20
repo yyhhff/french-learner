@@ -777,7 +777,7 @@ LLM_BASE_URL=
 LLM_MODEL=
 
 # ===== 本地 ASR/TTS 服务（沿用 v1）=====
-YAYA_ASR_URL=http://127.0.0.1:8010
+YAYA_ASR_URL=http://127.0.0.1:8011
 ```
 
 > 不写真实 key；提交时此文件可入库，真实 `.env` 加入 `.gitignore`。

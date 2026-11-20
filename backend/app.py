@@ -309,7 +309,7 @@ async def profile_skills():
 # ---------------------------------------------------------------- 本地 ASR 代理
 
 ASR_SERVICE_URL = os.environ.get(
-    "YAYA_ASR_URL", "http://127.0.0.1:8010"
+    "YAYA_ASR_URL", "http://127.0.0.1:8011"
 ).rstrip("/")
 
 

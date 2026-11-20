@@ -55,7 +55,7 @@ Wave 4                D: v4.1 移动与部署（全局改前端，必须独占�
 | A | v3.0 每日路径 + 游戏化内核 | 2 | v2.2+v2.3 已合并 | 已合并点亮（含真猫贴纸形象迭代 31714fb；TASK-0079 已归档） | 本会话（worktree v3.0-daily，已清理） | TASK-0079 | feature/v3.0-daily → main（merge dfd1832） |
 | B | v3.1 听力强化 | 2 | v2.3 已合并 | 已合并点亮（TASK-0071 已归档：真机验收通过 2026-11-21；合并 c17f8e9 解 4 处冲突，集成冒烟 51 路由 0×5xx，变体音频 1072/1072 满就绪） | 本会话（worktree，已清理） | TASK-0071 | feature/v3.1-listen → main（merge c17f8e9） |
 | B | v3.3 语法微卡 | 2 | v2.3 已合并 | 待集成（TASK-0078 开发+自测完成 2026-11-21：153 单测全绿 + GUI 冒烟三嵌入全过，真机验收待用户） | 本会话（worktree v3.3-grammar） | TASK-0078 | feature/v3.3-grammar（c7552c4 后端 + 6b87d5e 前端，基于 006ece4；⚠️ 早于 v3.0 merge dfd1832，合并时 chat.py（xp/gamify 挂接区）、main.js、store.js、styles.css 需先对齐 main 再回归） |
-| A | v4.0 口语四维测评 + 自适应定级 | 3 | v3.0 已合并 | 未认领 | | | |
+| A | v4.0 口语四维测评 + 自适应定级 | 3 | v3.0 已合并 | 进行中（2026-11-21 凌晨用户指示夜班认领开工：数据聚合层+体检 API+CAT 定级+前端雷达图分轮推进；方案与取舍见 tool_box tasks/active/TASK-0080） | 夜班会话（worktree v4.0-speaking） | TASK-0080 | feature/v4.0-speaking |
 | D | v4.1 移动与部署形态 | 4 | 全部已合并 | 未认领 | | | |
 
 ## 4. 多会话协作规范（红线）

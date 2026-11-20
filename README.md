@@ -93,18 +93,35 @@ Git Bash 用户可用 `.env`：`cd tools/french-learner/backend && cp .env.examp
 | GET | /api/health | 健康检查 |
 | GET | /api/asr/status | 本地语音服务是否可用（前端探测） |
 | POST | /api/asr/transcribe | 上传音频转写法语（转发到本地 Whisper） |
-| GET | /api/tts?text=... | 文本转高质量法语朗读 mp3（转发到 edge-tts，失败前端回退浏览器） |
+| GET | /api/tts?text=&voice=&rate= | 文本转高质量法语朗读 mp3（转发到 edge-tts，失败前端回退浏览器；v3.1 起支持可选音色/语速参数，缺省行为不变） |
 | GET | /api/input/levels | 输入流可用等级与各等级篇数 |
 | GET | /api/input/texts?level=&limit=&offset= | 分级文本列表 |
 | GET | /api/input/texts/{id} | 文本详情（逐句 + 生词） |
 | POST | /api/input/texts/{id}/collect | 生词收卡入库（幂等） |
 | GET | /api/input/recommend?exclude_ids=&limit= | i+1 难度自适应推荐 |
+| GET | /api/listen/levels | v3.1 四档听力素材总览（篇/句/音频与变体就绪数） |
+| GET | /api/listen/texts?level= | 听力素材清单 |
+| GET | /api/listen/texts/{text_id} | 篇详情（挖空版词序列，原句不下发；含 attempted_seqs 续听预载） |
+| GET | /api/listen/line-audio/{text_id}/{seq}?variant= | 句级音频直读（std/v1 男声/v2 真实语速），缺失时服务端兜底合成 |
+| POST | /api/listen/answer | 精听单句判分（服务端复算挖空）+ 落 listening_logs |
+| POST | /api/listen/finish | 精听收口：正确率 → skill_events('listening') 进画像 |
+| GET | /api/listen/profile | 听力画像聚合（累计/正确率/近 7 天/维度快照） |
 
-统一响应包裹 `{code, data, message}`，成功 `code=0`。`/api/tts` 例外：直接返回音频流 `audio/mpeg`。新增 5 个输入流端点详见 `docs/ARCHITECTURE_V2.md` §5。
+统一响应包裹 `{code, data, message}`，成功 `code=0`。`/api/tts` 与 `/api/listen/line-audio` 例外：直接返回音频流 `audio/mpeg`。全量端点以运行时的 `/openapi.json` 为准（本表随版本补充主要入口）。
 
 ### 分级阅读（i+1 可理解输入，阶段二主线 B）
 
 前端顶部「📖 分级阅读」Tab：按 A2/B1/B2 浏览 21 篇语料，逐句对照中文、点句朗读、一键收生词卡；「推荐下一篇」按 i+1 规则（当前 A2 → 目标 B1，结合生词覆盖率 coverage）选篇，读过的自动排除。语料为原创教学示例，音频暂缺由 edge-tts / 浏览器 TTS 兜底朗读。
+
+### 听力磨耳（v3.1 耳朵开口）
+
+前端顶部「🎧 听力磨耳」Tab：106 篇四档语料全部可听（536 句音频 v2.3 批量线供给）。
+
+- **变速听力**：0.75 / 1.0 / 1.25 三档（前端 `playbackRate`，零后端成本）+ 整篇连播 + 单句循环复听。
+- **精听模式**：听写填空——挖空数按等级（A1=1 / A2=2 / B1·B2=3），优先实词；判分宽松口径（重音符号/大小写/标点不计对错）；答案词只留服务端判分（详情端点不下发原句），提交后回显原句与**口语缩略形对照**（`je ne sais pas`→`j'sais pas`，见 `backend/reductions.py`）。
+- **真实语速变体**：每句两版变体音频——`<seq>_v1.mp3` 男声 HenriNeural 原文、`<seq>_v2.mp3` Denise+缩略形+10% 语速；由 `python -m content_pipeline.cli audio-variants` 批量生成（断点续跑），未就绪句自动回退标准音（服务端 `line-audio` 兜底合成按同口径）。
+- **画像挂接**：精听收口写 `skill_events('listening')` → EWMA 懒计算进 `skill_profile`，「我的成长」听力维度随之更新；记录表 `listening_logs` 由 listen 模块自建（不动 db.py 公共区）。
+- **诚实边界**：变体就绪数如实展示（⏳ = 生成中）；精听进度与收口口径 = 可挖空句（短句不设填空不阻塞）。
 
 ### 语音交互（本地 Whisper，离线可用）
 

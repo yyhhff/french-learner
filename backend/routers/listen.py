@@ -207,6 +207,10 @@ async def listen_text_detail(text_id: str):
             "SELECT seq, fr, cn, speaker FROM input_lines WHERE text_id = ? ORDER BY seq",
             (text_id,),
         ).fetchall()
+        attempted_seqs = [r["seq"] for r in conn.execute(
+            "SELECT DISTINCT seq FROM listening_logs WHERE user_id = ? AND text_id = ?",
+            (db.DEFAULT_USER_ID, text_id),
+        ).fetchall()]
     finally:
         conn.close()
     today = db.today_str()
@@ -221,7 +225,7 @@ async def listen_text_detail(text_id: str):
             "blanks": [{"idx": i, "letters": len(words[i])} for i in blanks],
             **_audio_flags(text_id, [ln["seq"]]),
         })
-    return ok({**dict(t), "lines": out_lines})
+    return ok({**dict(t), "lines": out_lines, "attempted_seqs": attempted_seqs})
 
 
 @router.get("/api/listen/line-audio/{text_id}/{seq}")

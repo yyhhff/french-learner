@@ -105,7 +105,8 @@ async function listenOpen(tid) {
   detail.bySeq = {};
   detail.lines.forEach(l => { detail.bySeq[l.seq] = l; });
   detail.variant = 'std'; detail.speed = 1.0; detail.loop = false; detail.dictation = false;
-  detail.attempted = new Set(); detail.playingSeq = null;
+  detail.attempted = new Set(d.attempted_seqs || []); // 续听：预载历史精听句（诚实记录）
+  detail.playingSeq = null;
   document.getElementById('listenHome').classList.add('hidden');
   document.getElementById('listenDetail').classList.remove('hidden');
   document.getElementById('listenTitle').textContent = d.title;
@@ -233,18 +234,22 @@ function renderSentences() {
   box.innerHTML = detail.lines.map(l => {
     const done = detail.attempted.has(l.seq);
     if (detail.dictation) {
-      const inputs = (l.blanks || []).map((b, i) =>
+      const blanks = l.blanks || [];
+      const inputs = blanks.map((b, i) =>
         `<span class="listen-blank"><i>${i + 1}</i><input type="text" class="listen-input" id="lin-${l.seq}-${i}"
            style="width:${Math.max(b.letters, 3)}em" maxlength="${b.letters + 4}" placeholder="${'_'.repeat(b.letters)}" autocomplete="off"></span>`).join('');
+      const dictArea = blanks.length
+        ? `<div class="listen-blanks">${inputs}
+            <button class="listen-submit" onclick="listenSubmit(${l.seq})">提交</button>
+          </div>`
+        : '<div class="listen-noblank">短句不设填空，跟着听就好 🎧</div>';
       return `
       <div class="listen-row listen-dict ${done ? 'done' : ''}" id="lrow-${l.seq}">
         <button class="listen-play" onclick="listenPlay(${l.seq})">▶</button>
         <span class="listen-seq">${l.seq}</span>
         <div class="listen-dict-main">
           <div class="listen-cn">${esc(l.cn)}</div>
-          <div class="listen-blanks">${inputs}
-            <button class="listen-submit" onclick="listenSubmit(${l.seq})">提交</button>
-          </div>
+          ${dictArea}
           <div class="listen-reveal" id="lrev-${l.seq}"></div>
         </div>
       </div>`;
@@ -262,9 +267,11 @@ function renderSentences() {
 function updateFinishBtn() {
   const btn = document.getElementById('listenFinishBtn');
   const msg = document.getElementById('listenFinishMsg');
-  const all = detail.lines.length && detail.lines.every(l => detail.attempted.has(l.seq));
+  // 收口口径 = 可挖空句（短句无填空，不阻塞收口）；进度分母同口径
+  const need = detail.lines.filter(l => (l.blanks || []).length > 0).length;
+  const all = need > 0 && detail.lines.every(l => (l.blanks || []).length === 0 || detail.attempted.has(l.seq));
   btn.disabled = !all;
-  msg.textContent = all ? '全篇精听完成，收口记入画像' : `精听进度 ${detail.attempted.size}/${detail.lines.length}`;
+  msg.textContent = all ? '全篇精听完成，收口记入画像' : `精听进度 ${detail.attempted.size}/${need}`;
 }
 
 async function listenSubmit(seq) {

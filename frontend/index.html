@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=31">
+<link rel="stylesheet" href="styles.css?v=34">
 </head>
 <body>
 <div class="wrap">
@@ -35,6 +35,7 @@
     <button class="view-tab" id="tabAssessment" onclick="switchView('assessment')">🎯 定级</button>
     <button class="view-tab" id="tabExam" onclick="switchView('exam')">🏆 考级冲刺</button>
     <button class="view-tab" id="tabGrowth" onclick="switchView('growth')">🌱 我的成长</button>
+    <button class="view-tab" id="tabRoadmap" onclick="switchView('roadmap')">🗺️ 路线图</button>
     <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
   </div>
 
@@ -180,9 +181,17 @@
     <div id="growthWrap" class="growth-wrap"></div>
   </div>
 
+  <div id="viewRoadmap" class="view hidden">
+    <!-- TASK-0059 面客建设里程图：全部由 renderRoadmap() 填充，数据源 GET /api/roadmap -->
+    <div id="roadmapWrap" class="roadmap-wrap"></div>
+  </div>
+
   <div class="foot">
     呀呀法语 YaYa · 让每一次开口，都变成温柔的进步
-    <button class="ob-again" onclick="reopenOnboarding()">🌱 重温引导</button>
+    <span class="foot-links">
+      <button class="ob-again" onclick="openFeedback()">💌 说说想法</button>
+      <button class="ob-again" onclick="reopenOnboarding()">🌱 重温引导</button>
+    </span>
   </div>
 </div>
 
@@ -191,6 +200,22 @@
   <div class="ob-box">
     <button class="ob-skip" onclick="closeOnboarding(true)" title="跳过引导，随便逛逛">先随便逛逛</button>
     <div id="obContent"></div>
+  </div>
+</div>
+
+<!-- TASK-0060 留存温和浮层（打开即弹「接着上次」钩子；当天关闭后不再弹；本地 UI 标志不落库） -->
+<div id="rtOverlay" class="overlay hidden" onclick="if(event.target===this)closeRetention()">
+  <div class="rt-box">
+    <button class="rt-skip" onclick="closeRetention()" title="下次再说">稍后再说</button>
+    <div id="rtContent"></div>
+  </div>
+</div>
+
+<!-- TASK-0062 使用反馈浮层（页脚入口，非打开即弹；方向单选 + 文字建议 + 可选联系方式） -->
+<div id="fbOverlay" class="overlay hidden" onclick="if(event.target===this)closeFeedback()">
+  <div class="fb-box">
+    <button class="fb-close" onclick="closeFeedback()" title="关闭">×</button>
+    <div id="fbContent"></div>
   </div>
 </div>
 
@@ -222,6 +247,6 @@
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=36" defer></script>
+<script src="app.js?v=39" defer></script>
 </body>
 </html>

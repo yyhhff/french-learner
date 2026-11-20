@@ -21,6 +21,16 @@ DB_PATH = DATA_DIR / "yaya.db"
 
 DEFAULT_USER_ID = 1
 
+# TASK-0062 反馈预设方向：key=code（入库/前端传值），value=展示名（汇总/前端展示）
+FEEDBACK_CATEGORIES = {
+    "chat": "口语陪练",
+    "read": "分级阅读",
+    "pron": "读音规则",
+    "review": "复习调度",
+    "exam": "考级冲刺",
+    "other": "其他想说的",
+}
+
 
 def now_iso() -> str:
     """当前 UTC 时间，ISO8601 秒精度 + Z。"""
@@ -232,6 +242,18 @@ CREATE TABLE IF NOT EXISTS achievements (
     UNIQUE (user_id, code)
 );
 CREATE INDEX IF NOT EXISTS idx_achievements_user ON achievements (user_id, earned_at);
+
+-- ===== TASK-0062 使用反馈 v1：结构化方向 + 文字建议，汇总驱动版本决策 =====
+CREATE TABLE IF NOT EXISTS feedback (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    category   TEXT    NOT NULL,          -- 预设方向 code（见 FEEDBACK_CATEGORIES），避免自由文本难聚合
+    content    TEXT    NOT NULL,          -- 用户的文字建议
+    contact    TEXT,                      -- 可选联系方式，不强制
+    created_at TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_feedback_user ON feedback (user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_feedback_category ON feedback (category);
 """
 
 
@@ -991,6 +1013,165 @@ def last_read_text(user_id: int = DEFAULT_USER_ID) -> dict | None:
         return dict(row)
     finally:
         conn.close()
+
+
+def get_retention(user_id: int = DEFAULT_USER_ID) -> dict:
+    """TASK-0060 留存激励 v1（UX_PROGRESS_PLAN §D）：纯读现有表聚合，零新表/字段。
+
+    四块：接着上次（last_read）/ 今日小目标（今日真实行为计数）/ streak 正向文案 /
+    微进步（本周 vs 上周 + 等级趋势）。所有"今日/本周"按 UTC 日口径，与 now_iso 一致。
+    文案禁负面词（断签/落后/未完成）；失败由 API 层静默降级。
+    """
+    conn = get_conn()
+    try:
+        today_start = today_str() + "T00:00:00Z"
+        week_start = iso_days_from_now(-7)
+        last_week_start = iso_days_from_now(-14)
+
+        # 今日小目标：读 1 篇 / 复习 3 词 / 对话 1 轮（真实行为计数）
+        read_today = conn.execute(
+            "SELECT COUNT(*) AS n FROM reading_logs WHERE user_id = ? AND created_at >= ?",
+            (user_id, today_start),
+        ).fetchone()["n"]
+        review_today = conn.execute(
+            "SELECT COUNT(*) AS n FROM review_logs WHERE user_id = ? AND last_reviewed_at >= ?",
+            (user_id, today_start),
+        ).fetchone()["n"]
+        chat_today = conn.execute(
+            "SELECT COUNT(*) AS n FROM dialogue_turns "
+            "WHERE user_id = ? AND created_at IS NOT NULL AND created_at >= ?",
+            (user_id, today_start),
+        ).fetchone()["n"]
+        daily_goals = {
+            "read":   {"done": read_today >= 1, "count": read_today,   "target": 1, "label": "读 1 篇"},
+            "review": {"done": review_today >= 3, "count": review_today, "target": 3, "label": "复习 3 个词"},
+            "chat":   {"done": chat_today >= 1,   "count": chat_today,   "target": 1, "label": "聊 1 轮"},
+        }
+
+        # 微进步：本周 vs 上周（新词/阅读），等级趋势复用 skill_profile 快照（纯读）
+        def wins(table: str) -> tuple:
+            this = conn.execute(
+                f"SELECT COUNT(*) AS n FROM {table} WHERE user_id = ? AND created_at >= ?",
+                (user_id, week_start),
+            ).fetchone()["n"]
+            last = conn.execute(
+                f"SELECT COUNT(*) AS n FROM {table} WHERE user_id = ? "
+                "AND created_at >= ? AND created_at < ?",
+                (user_id, last_week_start, week_start),
+            ).fetchone()["n"]
+            return this, last
+
+        words_this, words_last = wins("word_cards")
+        reads_this, reads_last = wins("reading_logs")
+        trend_rows = conn.execute(
+            "SELECT trend FROM skill_profile WHERE user_id = ?", (user_id,)
+        ).fetchall()
+        level_trend = "up" if any(r["trend"] == "up" for r in trend_rows) else "flat"
+        micro_progress = {
+            "words_this_week": words_this, "words_last_week": words_last,
+            "reads_this_week": reads_this, "reads_last_week": reads_last,
+            "level_trend": level_trend,
+        }
+
+        # streak 正向文案：连续天数只作记录，断签温和召回、零负面词
+        urow = conn.execute(
+            "SELECT streak_days, last_active_date FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        days = (urow["streak_days"] if urow else 0) or 0
+        last_active = (urow["last_active_date"] if urow else None) or ""
+        today = today_str()
+        yesterday = (datetime.now(timezone.utc).date() - timedelta(days=1)).strftime("%Y-%m-%d")
+        if last_active == today:
+            tone = "今天也在，真开心 🌿"
+        elif last_active == yesterday:
+            tone = "又见面啦，接着走就好 🌱"
+        elif days > 0:
+            tone = "又见面啦，重新开始就好 🌱"
+        else:
+            tone = "从今天开始，慢慢来就好 🌱"
+        streak = {"days": days, "tone": tone}
+
+        return {
+            "continue_last": last_read_text(user_id),
+            "daily_goals": daily_goals,
+            "streak": streak,
+            "micro_progress": micro_progress,
+        }
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------- 使用反馈（TASK-0062）
+
+def submit_feedback(
+    category: str, content: str, contact: str | None = None,
+    user_id: int = DEFAULT_USER_ID,
+) -> dict:
+    """写入一条使用反馈；category 必须是预设方向 code，content 去空白后非空。"""
+    conn = get_conn()
+    try:
+        cur = conn.execute(
+            "INSERT INTO feedback (user_id, category, content, contact, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, category, content.strip(), (contact or "").strip() or None, now_iso()),
+        )
+        conn.commit()
+        return {"id": cur.lastrowid}
+    finally:
+        conn.close()
+
+
+def get_feedback_summary(user_id: int = DEFAULT_USER_ID, recent_limit: int = 20) -> dict:
+    """反馈汇总（决策依据）：按方向聚合计数 + 最近若干条原文。
+
+    只统计当前 user 的反馈（原型阶段 user_id 固定 1）；by_category 对预设方向
+    全部列出（含 0，便于看哪些方向从没被提），再按 count 降序、code 升序排列。
+    """
+    conn = get_conn()
+    try:
+        total = conn.execute(
+            "SELECT COUNT(*) AS n FROM feedback WHERE user_id = ?", (user_id,)
+        ).fetchone()["n"]
+        counts = {
+            r["category"]: r["n"]
+            for r in conn.execute(
+                "SELECT category, COUNT(*) AS n FROM feedback WHERE user_id = ? GROUP BY category",
+                (user_id,),
+            ).fetchall()
+        }
+        by_category = sorted(
+            (
+                {
+                    "category": code,
+                    "label": label,
+                    "count": counts.get(code, 0),
+                }
+                for code, label in FEEDBACK_CATEGORIES.items()
+            ),
+            key=lambda x: (-x["count"], x["category"]),
+        )
+        recent = [
+            {
+                "id": r["id"],
+                "category": r["category"],
+                "label": FEEDBACK_CATEGORIES.get(r["category"], r["category"]),
+                "content": r["content"],
+                "created_at": r["created_at"],
+            }
+            for r in conn.execute(
+                "SELECT id, category, content, created_at FROM feedback "
+                "WHERE user_id = ? ORDER BY id DESC LIMIT ?",
+                (user_id, recent_limit),
+            ).fetchall()
+        ]
+        return {"total": total, "by_category": by_category, "recent": recent}
+    finally:
+        conn.close()
+
+
+def feedback_categories() -> list:
+    """反馈预设方向（code + 展示名），供前端浮层渲染，前后端单一数据源。"""
+    return [{"code": code, "label": label} for code, label in FEEDBACK_CATEGORIES.items()]
 
 
 def collect_input_words(

@@ -34,6 +34,98 @@ logger = logging.getLogger("yaya.app")
 
 app = FastAPI(title="呀呀法语 YaYa French", version="1.0.0")
 
+# ---------------------------------------------------------------- TASK-0059 面客建设里程图
+# 唯一维护点：每个大版本一个完整主题闭环；status done/active/planned。
+# 点亮新版本 = 把对应条目的 status 改为 done、填 date；无需改前端或数据库。
+# 维护说明见 docs/ROADMAP.md。改动需重启服务生效（无热加载）。
+ROADMAP_DEFS = [
+    {
+        "version": "v1.0", "title": "会说话的开始", "theme": "重述式口语陪练",
+        "status": "done", "date": "2026-11-17",
+        "desc": "像婴儿一样开口——说错了不挨骂，我顺着你的话把对的讲法轻轻讲给你。",
+        "features": ["4 个生活场景对话", "重述式纠错（不打回）", "生词卡 + SM-2 复习", "逐句发音与中文小字"],
+    },
+    {
+        "version": "v1.1", "title": "把音读准", "theme": "零基础读音规则",
+        "status": "done", "date": "2026-11-19",
+        "desc": "点一个词就看它怎么读、为什么这样读，还能跟着念一遍。",
+        "features": ["39 条读音规则", "逐词气泡 + 连读教学", "🎙 跟读近似比对", "词卡发音覆盖 97.8%"],
+    },
+    {
+        "version": "v1.2", "title": "读得下去", "theme": "i+1 分级输入与成长",
+        "status": "done", "date": "2026-11-19",
+        "desc": "读得懂又学得到的短文，读完留个小脚印，回头看得见自己。",
+        "features": ["A2/B1/B2 分级阅读", "逐词发音 + 连读", "进度持久化", "我的成长视图"],
+    },
+    {
+        "version": "v1.3", "title": "温柔地记得", "theme": "学习闭环激励",
+        "status": "done", "date": "2026-11-20",
+        "desc": "该见的词自己回来，每一步都有小小回应——不催、不扣分。",
+        "features": ["SM-2 到期调度", "成就点亮", "五维水平画像", "3 步新手引导"],
+    },
+    {
+        "version": "v2.0", "title": "知道自己在哪儿", "theme": "CEFR 定级与考级",
+        "status": "done", "date": "2026-11-18",
+        "desc": "先认清当下的位置，再朝着目标稳稳走——原创题目，随时可练。",
+        "features": ["12 题 CEFR 定级", "DELF B2 / TCF 模拟卷", "服务端判分零泄露"],
+    },
+    {
+        "version": "v2.1", "title": "明天还想来", "theme": "留存深化",
+        "status": "done", "date": "2026-11-20",
+        "desc": "一点小目标、一句「接着上次」，让学习像每天散个步一样自然。",
+        "features": ["今日小目标", "接着上次", "成长趋势"],
+    },
+    # ---------------- TASK-0063 补强总纲 v2.2–v4.1（planned 灰态；详案与认领看板见 docs/MASTER_PLAN.md）
+    {
+        "version": "v2.2", "title": "第一级台阶", "theme": "零基础 A1 通路",
+        "status": "planned", "date": None,
+        "desc": "从读音到第一句，零基础也有刚刚好的台阶。",
+        "features": ["A1 定级档与新手台阶路径", "高频 300 词 + 基础句型", "A1 分级语料与对话场景"],
+    },
+    {
+        "version": "v2.3", "title": "读不完的书", "theme": "内容量产管线",
+        "status": "planned", "date": None,
+        "desc": "分级短文源源不断，总有刚好适合你的下一篇。",
+        "features": ["语料生成与难度校验管线", "200+ 篇 A1–B2 分级内容", "音频批量预生成"],
+    },
+    {
+        "version": "v3.0", "title": "每天十五分钟", "theme": "每日路径与游戏化",
+        "status": "planned", "date": None,
+        "desc": "打开就知道今天学什么，一点小积累看得见。",
+        "features": ["今日任务视图", "经验与等级", "连续天数（温和记录不惩罚）", "呀呀陪伴成长"],
+    },
+    {
+        "version": "v3.1", "title": "耳朵开口", "theme": "听力强化",
+        "status": "planned", "date": None,
+        "desc": "慢慢听、逐句听，直到耳朵跟得上真实语速。",
+        "features": ["变速听力", "精听听写填空", "口语缩略与多音色语速变体"],
+    },
+    {
+        "version": "v3.2", "title": "发音教练", "theme": "跟读打分",
+        "status": "planned", "date": None,
+        "desc": "跟着念一遍，哪儿没发出来温柔告诉你。",
+        "features": ["跟读录音三维评分", "词级命中反馈", "发音挑战任务"],
+    },
+    {
+        "version": "v3.3", "title": "语法的针脚", "theme": "显性语法微卡",
+        "status": "planned", "date": None,
+        "desc": "遇到时轻轻点一下，语法就缝进了句子里。",
+        "features": ["40+ 语法微卡", "阅读情境嵌入", "按重述错误推荐"],
+    },
+    {
+        "version": "v4.0", "title": "说得出口", "theme": "口语四维测评",
+        "status": "planned", "date": None,
+        "desc": "用你说过的每一句话，画一张口语体检报告。",
+        "features": ["流利/准确/复杂/互动四维报告", "自适应定级", "定期重测提醒"],
+    },
+    {
+        "version": "v4.1", "title": "口袋里的呀呀", "theme": "移动与部署",
+        "status": "planned", "date": None,
+        "desc": "通勤排队都能学，呀呀装进口袋。",
+        "features": ["手机响应式 + PWA", "一键启动简化", "局域网访问"],
+    },
+]
+
 # 契约 4.3：CORS 参数逐字使用
 app.add_middleware(
     CORSMiddleware,
@@ -344,6 +436,72 @@ async def achievements():
         "unlocked_count": result["unlocked_count"],
         "new_unlocked": result["new_codes"],
     })
+
+
+@app.get("/api/roadmap")
+async def roadmap():
+    """TASK-0059 面客建设里程图：服务端常量下发，前端只读渲染。
+
+    维护点唯一：改 ROADMAP_DEFS 的 status/date 即点亮，前端零改动。
+    """
+    done = [r for r in ROADMAP_DEFS if r["status"] == "done"]
+    return ok({
+        "items": ROADMAP_DEFS,
+        "current_version": next(
+            (r["version"] for r in ROADMAP_DEFS if r["status"] == "active"),
+            (done[-1]["version"] if done else ROADMAP_DEFS[0]["version"]),
+        ),
+        "done_count": len(done),
+        "total": len(ROADMAP_DEFS),
+    })
+
+
+@app.get("/api/retention")
+async def retention():
+    """TASK-0060 留存激励 v1（UX_PROGRESS_PLAN §D）：纯读现有表聚合，零新表。
+
+    接着上次 / 今日小目标 / streak 正向文案 / 微进步；文案禁负面词，失败静默降级。
+    """
+    data = db.get_retention(db.DEFAULT_USER_ID)
+    return ok(data)
+
+
+# ---------------------------------------------------------------- 使用反馈（TASK-0062）
+
+@app.get("/api/feedback/categories")
+async def feedback_categories():
+    """TASK-0062 反馈预设方向（code+label）：前后端单一数据源，前端打开浮层时懒拉。"""
+    return ok(db.feedback_categories())
+
+
+@app.post("/api/feedback")
+async def post_feedback(request: Request):
+    """TASK-0062 提交一条使用反馈：预设方向 + 文字建议（+ 可选联系方式）。
+
+    category 必须是 FEEDBACK_CATEGORIES 的 key；content 去空白后非空、≤1000 字。
+    """
+    body = await json_body(request)
+    category = body.get("category")
+    content = body.get("content")
+    contact = body.get("contact")
+    if not isinstance(category, str) or category not in db.FEEDBACK_CATEGORIES:
+        raise ApiError(40001, 400, "feedback 方向无效")
+    if not isinstance(content, str) or not content.strip():
+        raise ApiError(40001, 400, "请写下想说的话")
+    if len(content.strip()) > 1000:
+        raise ApiError(40001, 400, "建议内容不能超过 1000 字")
+    if contact is not None and not isinstance(contact, str):
+        raise ApiError(40001, 400, "联系方式格式无效")
+    if isinstance(contact, str) and len(contact.strip()) > 200:
+        raise ApiError(40001, 400, "联系方式不能超过 200 字")
+    result = db.submit_feedback(category, content, contact, db.DEFAULT_USER_ID)
+    return ok(result)
+
+
+@app.get("/api/feedback/summary")
+async def feedback_summary():
+    """TASK-0062 反馈汇总（版本优化决策依据）：按方向计数 + 最近原文。"""
+    return ok(db.get_feedback_summary(db.DEFAULT_USER_ID))
 
 
 # ---------------------------------------------------------------- 本地 ASR 代理

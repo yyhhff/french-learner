@@ -127,6 +127,9 @@ const state = {
   },
   skillProfile:null,    // TASK-0055 水平画像（GET /api/profile/skills，懒计算）
   achievements:null,    // TASK-0058 成就（GET /api/achievements，懒计算 + 灰态）
+  roadmap:null,         // TASK-0059 面客建设里程图（GET /api/roadmap，后端常量）
+  retention:null,       // TASK-0060 留存激励（GET /api/retention，纯读聚合 + 温和文案）
+  feedbackCats:null,    // TASK-0062 反馈方向（GET /api/feedback/categories，服务端常量）
   pron:{
     summaries:[],       // GET /rules 摘要四字段（小册子索引用）
     detailsLoaded:false,// 是否已并发拉全详情、建好索引
@@ -1144,8 +1147,8 @@ function updateReadVocabBadge(){
 }
 
 function switchView(name){
-  // 五个视图：chat / read / assessment / exam / growth；其他值一律按 chat 处理（保留原默认行为）
-  const view = (name==='read'||name==='assessment'||name==='exam'||name==='growth') ? name : 'chat';
+  // 六个视图：chat / read / assessment / exam / growth / roadmap；其他值一律按 chat 处理（保留原默认行为）
+  const view = (name==='read'||name==='assessment'||name==='exam'||name==='growth'||name==='roadmap') ? name : 'chat';
   document.getElementById('viewChat').classList.toggle('hidden', view!=='chat');
   document.getElementById('viewRead').classList.toggle('hidden', view!=='read');
   const av = document.getElementById('viewAssessment');
@@ -1154,6 +1157,8 @@ function switchView(name){
   if(ev) ev.classList.toggle('hidden', view!=='exam');
   const gv = document.getElementById('viewGrowth');
   if(gv) gv.classList.toggle('hidden', view!=='growth');
+  const rv = document.getElementById('viewRoadmap');
+  if(rv) rv.classList.toggle('hidden', view!=='roadmap');
   document.getElementById('tabChat').classList.toggle('on', view==='chat');
   document.getElementById('tabRead').classList.toggle('on', view==='read');
   const at = document.getElementById('tabAssessment');
@@ -1162,6 +1167,8 @@ function switchView(name){
   if(et) et.classList.toggle('on', view==='exam');
   const gt = document.getElementById('tabGrowth');
   if(gt) gt.classList.toggle('on', view==='growth');
+  const rt = document.getElementById('tabRoadmap');
+  if(rt) rt.classList.toggle('on', view==='roadmap');
   // 进入词卡（对话）视图时确保进度加载一次；init 已加载则不重复请求
   if(view==='chat' && !state.pron.progressFetched){
     loadPronProgress().then(updatePronBookEntry);
@@ -1177,6 +1184,8 @@ function switchView(name){
   if(view==='exam') initExam();
   // 切到成长视图：每次进入都拉最新 profile（轻量端点），数字永远新鲜
   if(view==='growth') renderGrowth();
+  // 切到路线图：每次进入都拉最新（后端常量），点亮状态随维护即时反映
+  if(view==='roadmap') renderRoadmap();
 }
 
 /* ============================================================
@@ -1192,6 +1201,8 @@ async function renderGrowth(){
     try { const sk = await apiRequest('/api/profile/skills'); if(sk) state.skillProfile = sk; } catch(e){}
     // TASK-0058 成就（懒计算端点，读时判定 + 新解锁计 XP）；失败静默，成就是增益功能
     try { const ach = await apiRequest('/api/achievements'); if(ach) state.achievements = ach; } catch(e){}
+    // TASK-0060 留存激励（纯读聚合：今日目标/微进步/streak 文案）；失败静默
+    try { const rt = await apiRequest('/api/retention'); if(rt) state.retention = rt; } catch(e){}
   }
   const s = (state.profile||FALLBACK_PROFILE).stats||{};
   const num = v => fmtNum(v||0);
@@ -1221,8 +1232,111 @@ async function renderGrowth(){
           : `<div class="g-note g-empty">读完第一篇短文，这里就会留下小脚印</div>`}
       </div>
     </div>
+    ${dailyGoalsCardHTML()}
+    ${microProgressCardHTML()}
     ${skillCardHTML()}
     ${achievementCardHTML()}`;
+}
+
+/* TASK-0060 今日小目标：3 项真实行为计数，完成打勾给肯定、未完成无焦虑。
+   文案禁负面词（不做"未完成/断签/落后"），未完成只显示进度、不加红叉。 */
+function dailyGoalsCardHTML(){
+  const rt = state.retention;
+  const goals = (rt && rt.daily_goals) || {};
+  const order = [['read','📖'],['review','🔁'],['chat','💬']];
+  const rows = order.map(([k,ico]) => {
+    const g = goals[k] || {done:false,count:0,target:1,label:''};
+    const frac = g.target ? Math.min(1,(g.count||0)/g.target) : 0;
+    return `<div class="dg-row ${g.done?'done':''}">
+      <span class="dg-ico">${g.done?'✓':ico}</span>
+      <span class="dg-label">${esc(g.label||'')}</span>
+      <span class="dg-bar"><i style="width:${Math.round(frac*100)}%"></i></span>
+      <span class="dg-count">${g.done?('完成 🌿'):(fmtNum(g.count)+'/'+g.target)}</span>
+    </div>`;
+  }).join('');
+  const allDone = order.every(([k])=> goals[k] && goals[k].done);
+  const note = allDone ? '今天的小目标都实现了，真为你开心 🌿' : '每天一点点，就很好 🌱';
+  return `<div class="skill-card dg-card">
+    <div class="sk-head"><span class="sk-title">🎯 今日小目标</span><span class="sk-sub">做到了就很好</span></div>
+    <div class="dg-list">${rows}</div>
+    <div class="dg-note">${note}</div>
+  </div>`;
+}
+
+/* TASK-0060 微进步：本周 vs 上周（新词/阅读）+ 等级趋势，全部来自真实数据。
+   趋势只有 ↑/→（PM §D 禁施压）；变化为 0 时不制造"退步"焦虑。 */
+function microProgressCardHTML(){
+  const rt = state.retention;
+  const m = (rt && rt.micro_progress) || {};
+  const streak = (rt && rt.streak) || {days:0, tone:'从今天开始，慢慢来就好 🌱'};
+  const wUp = (m.words_this_week||0) - (m.words_last_week||0);
+  const rUp = (m.reads_this_week||0) - (m.reads_last_week||0);
+  const arrow = v => v>0 ? '<b class="mp-up">↑</b>' : '<b class="mp-flat">→</b>';
+  const trendHtml = m.level_trend==='up'
+    ? `<span class="mp-trend up">近两周在往上走 ↑</span>`
+    : `<span class="mp-trend flat">稳稳地往前走 →</span>`;
+  return `<div class="skill-card mp-card">
+    <div class="sk-head"><span class="sk-title">🌿 微进步</span><span class="sk-sub">和上周比一比</span></div>
+    <div class="mp-grid">
+      <div class="mp-cell"><span class="mp-num">${fmtNum(m.words_this_week||0)}</span><span class="mp-lbl">本周新词 ${arrow(wUp)}</span></div>
+      <div class="mp-cell"><span class="mp-num">${fmtNum(m.reads_this_week||0)}</span><span class="mp-lbl">本周阅读 ${arrow(rUp)}</span></div>
+      <div class="mp-cell"><span class="mp-num">${fmtNum(streak.days||0)}</span><span class="mp-lbl">连续天数</span></div>
+    </div>
+    <div class="mp-note">${trendHtml}<span class="mp-tone">${esc(streak.tone||'')}</span></div>
+  </div>`;
+}
+
+/* ============================================================
+   TASK-0059 面客建设里程图：大版本主题闭环 + 点亮
+   数据源 GET /api/roadmap（后端常量唯一维护点）；前端只读渲染。
+   状态 done=点亮 / active=温和高亮 / planned=灰态（无日期、不施压）。
+   ============================================================ */
+async function renderRoadmap(){
+  const wrap = document.getElementById('roadmapWrap');
+  if(!wrap) return;
+  if(state.online){
+    try { const r = await apiRequest('/api/roadmap'); if(r) state.roadmap = r; } catch(e){}
+  }
+  const data = state.roadmap;
+  const items = data && Array.isArray(data.items) ? data.items : [];
+  if(!items.length){
+    wrap.innerHTML = `<div class="rm-empty">路线图暂未就绪，稍后再来看看～ 🌱</div>`;
+    return;
+  }
+  const statusLabel = { done:'已点亮', active:'进行中', planned:'规划中' };
+  const nodes = items.map(r => {
+    const st = r.status==='done' ? 'done' : (r.status==='active' ? 'active' : 'planned');
+    const feats = Array.isArray(r.features) ? r.features : [];
+    const featHtml = st==='planned'
+      ? `<div class="rm-feats rm-feats-gray">${feats.map(f=>`<span>${esc(f)}</span>`).join('')}</div>`
+      : `<div class="rm-feats">${feats.map(f=>`<span>${esc(f)}</span>`).join('')}</div>`;
+    const dateHtml = r.date ? `<span class="rm-date">${esc(String(r.date).slice(0,10))}</span>` : '';
+    return `<div class="rm-node ${st}">
+      <div class="rm-dot">${st==='done'?'✓':(st==='active'?'●':'○')}</div>
+      <div class="rm-body">
+        <div class="rm-head">
+          <span class="rm-ver">${esc(r.version||'')}</span>
+          <span class="rm-title">${esc(r.title||'')}</span>
+          <span class="rm-status">${statusLabel[st]||''}</span>
+          ${dateHtml}
+        </div>
+        <div class="rm-theme">${esc(r.theme||'')}</div>
+        <div class="rm-desc">${esc(r.desc||'')}</div>
+        ${featHtml}
+      </div>
+    </div>`;
+  }).join('');
+  const done = (data && typeof data.done_count==='number') ? data.done_count
+    : items.filter(r=>r.status==='done').length;
+  const current = data && data.current_version ? data.current_version : items[0].version;
+  wrap.innerHTML = `
+    <div class="rm-intro">
+      <div class="rm-intro-h">🗺️ 呀呀法语 · 建设里程图</div>
+      <div class="rm-intro-p">每一个大版本，都是一段完整的学习旅程。走过的，会亮起来；正在走的，我们慢慢来。</div>
+      <div class="rm-progress"><span>已点亮 <b>${done}</b> / ${items.length} 个版本</span><span>当前 ${esc(current||'')}</span></div>
+    </div>
+    <div class="rm-track">${nodes}</div>
+    <div class="rm-foot">我们会一个版本一个版本地把它做好，谢谢你陪着长大 🌿</div>`;
 }
 
 /* TASK-0058 成就卡：解锁点亮 + 未解锁灰态给「下一个目标」牵引；
@@ -1787,6 +1901,8 @@ async function init(){
     closeReview();
     closePronCard();
     closePronBook();
+    closeRetention();
+    closeFeedback();
   });
 
   // TASK-0052：阅读完成落库——内容超一屏时，滚动到文末自动标记（幂等）
@@ -1822,6 +1938,8 @@ async function init(){
     }catch(e){
       setOffline();
     }
+    // TASK-0060 留存数据单独拉取（增益功能，失败不拖垮首屏/不误进离线）
+    try { const rt = await apiRequest('/api/retention'); if(rt) state.retention = rt; } catch(e){}
   }
 
   if(!state.scenes.length){
@@ -1841,7 +1959,14 @@ async function init(){
   // 读音规则 P0：静默加载（失败只降级读音入口，不影响上面已完成的界面）
   loadPronData();
   // TASK-0053：首次引导（localStorage 一次性，每步可跳过）
+  const obPending = !onboardingSeen();
   maybeShowOnboarding();
+  // TASK-0060：留存温和浮层（onboarding 未完成时不抢弹；有「接着上次」才弹）
+  if(!obPending) maybeShowRetention();
+}
+
+function onboardingSeen(){
+  try{ return localStorage.getItem(ONBOARDING_KEY)==='1'; }catch(e){ return false; }
 }
 
 /* ============================================================
@@ -1914,6 +2039,52 @@ function goOnboardingTarget(view){
   const ov = document.getElementById('obOverlay');
   if(ov) ov.classList.add('hidden');
   switchView(view);
+}
+
+/* ============================================================
+   TASK-0060 留存温和浮层：打开即弹「接着上次」钩子（UX_PROGRESS_PLAN §D）
+   仅本地 UI 标志（当天关闭不再弹），不落库、不写入学习进度。
+   onboarding 未完成时不抢弹；无 last_read 时不弹；文案零负面词。
+   ============================================================ */
+const RETENTION_KEY = 'yaya_retention_dismissed';
+
+function maybeShowRetention(){
+  const rt = state.retention;
+  if(!rt || !rt.continue_last) return;
+  // 当天已关闭过 → 不再弹（按 UTC 日期，与后端 now_iso 一致）
+  const today = new Date().toISOString().slice(0,10);
+  try{ if(localStorage.getItem(RETENTION_KEY)===today) return; }catch(e){}
+  const ov = document.getElementById('rtOverlay');
+  const c = document.getElementById('rtContent');
+  if(!ov || !c) return;
+  const last = rt.continue_last;
+  const level = esc(last.cefr_level||'');
+  const title = esc(String(last.title||'').slice(0,20));
+  c.innerHTML = `
+    <div class="rt-emoji">📖</div>
+    <div class="rt-title">又见面啦，欢迎回来</div>
+    <p class="rt-desc">上次你读到 ${level?('<b>'+level+'</b> 的 '):''}《${title}》，<br>要不要接着读下去？慢慢来就好 🌱</p>
+    <div class="rt-go">
+      <button class="rt-btn primary" onclick="retentionContinue()">接着读</button>
+      <button class="rt-btn" onclick="closeRetention()">稍后再说</button>
+    </div>`;
+  ov.classList.remove('hidden');
+}
+
+function closeRetention(){
+  const ov = document.getElementById('rtOverlay');
+  if(ov) ov.classList.add('hidden');
+  const today = new Date().toISOString().slice(0,10);
+  try{ localStorage.setItem(RETENTION_KEY, today); }catch(e){}
+}
+
+function retentionContinue(){
+  closeRetention();
+  switchView('read');
+  const last = state.retention && state.retention.continue_last;
+  if(last && last.text_id && typeof openReadText==='function'){
+    try{ openReadText(last.text_id); }catch(e){}
+  }
 }
 
 init();
@@ -2670,4 +2841,87 @@ function renderPronBook(){
           ${pronBadgeHTML(s.id)}
         </div>`).join('')}</div>
     </div>`).join('');
+}
+
+/* ============================================================
+   TASK-0062 使用反馈入口：页脚「💌 说说想法」→ 浮层表单（非打开即弹）
+   方向单选（服务端下发，本地兜底）+ 文字建议 + 可选联系方式。
+   提交写库；成功给温和确认。离线或失败不阻塞，用户可稍后再说。
+   ============================================================ */
+const FB_CATS_FALLBACK = [
+  {code:'chat', label:'口语陪练'}, {code:'read', label:'分级阅读'},
+  {code:'pron', label:'读音规则'}, {code:'review', label:'复习调度'},
+  {code:'exam', label:'考级冲刺'}, {code:'other', label:'其他想说的'}
+];
+let fbSelectedCat = null;
+
+async function openFeedback(){
+  const ov = document.getElementById('fbOverlay');
+  const c = document.getElementById('fbContent');
+  if(!ov || !c) return;
+  // 懒拉方向（前后端单一数据源），失败用本地兜底，不阻塞打开
+  let cats = FB_CATS_FALLBACK;
+  if(state.online){
+    try{
+      const got = await apiRequest('/api/feedback/categories');
+      if(Array.isArray(got) && got.length) cats = got;
+    }catch(e){}
+  }
+  fbSelectedCat = null;
+  c.innerHTML = `
+    <div class="fb-emoji">💌</div>
+    <div class="fb-title">说说你的想法</div>
+    <p class="fb-desc">哪一块最想我们做得更好？<br>你的想法会变成下一个版本 🌱</p>
+    <div class="fb-label">最想优化哪一块</div>
+    <div class="fb-cats">${cats.map((x,i)=>`
+      <button type="button" class="fb-cat${i===0?' on':''}" data-cat="${esc(x.code)}"
+        onclick="selectFbCat(this)">${esc(x.label)}</button>`).join('')}</div>
+    <div class="fb-label">具体建议</div>
+    <textarea id="fbText" class="fb-text" maxlength="1000" rows="4"
+      placeholder="想多一点例句？想要某个场景？都告诉我吧～"></textarea>
+    <input id="fbContact" class="fb-contact" maxlength="200"
+      placeholder="邮箱或微信（选填，方便我们找到你）">
+    <div class="fb-actions">
+      <button class="fb-btn primary" onclick="submitFeedback()">寄出想法</button>
+      <button class="fb-btn" onclick="closeFeedback()">稍后再说</button>
+    </div>`;
+  // 默认选中第一项
+  const first = c.querySelector('.fb-cat');
+  if(first) fbSelectedCat = first.getAttribute('data-cat');
+  ov.classList.remove('hidden');
+}
+
+function selectFbCat(el){
+  document.querySelectorAll('#fbContent .fb-cat').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  fbSelectedCat = el.getAttribute('data-cat');
+}
+
+function closeFeedback(){
+  const ov = document.getElementById('fbOverlay');
+  if(ov) ov.classList.add('hidden');
+}
+
+async function submitFeedback(){
+  const textEl = document.getElementById('fbText');
+  const contactEl = document.getElementById('fbContact');
+  const content = textEl ? textEl.value.trim() : '';
+  if(!content){ notify('写一句想说的话吧～'); if(textEl) textEl.focus(); return; }
+  if(!fbSelectedCat){ notify('先选一个方向吧～'); return; }
+  if(!state.online){ notify('联网后就能寄出想法啦，先记着～'); return; }
+  const body = {category: fbSelectedCat, content: content};
+  if(contactEl && contactEl.value.trim()) body.contact = contactEl.value.trim();
+  const c = document.getElementById('fbContent');
+  const btn = c && c.querySelector('.fb-btn.primary');
+  if(btn){ btn.disabled = true; btn.textContent = '寄出中…'; }
+  const res = await apiRequest('/api/feedback', {method:'POST', body:body});
+  if(res){
+    c.innerHTML = `
+      <div class="fb-emoji">🌿</div>
+      <div class="fb-title">收到啦，谢谢你</div>
+      <p class="fb-desc">你的想法已经记下，<br>会在往后的版本里慢慢发芽。</p>
+      <div class="fb-actions"><button class="fb-btn primary" onclick="closeFeedback()">好的</button></div>`;
+  }else{
+    if(btn){ btn.disabled = false; btn.textContent = '寄出想法'; }
+  }
 }

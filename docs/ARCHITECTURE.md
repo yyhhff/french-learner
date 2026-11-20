@@ -263,7 +263,12 @@ Base URL：`http://localhost:8000`。所有路径前缀 `/api`。
 | 6 | GET | `/api/profile` | 无 | `UserProfile` | 50001(500) |
 | 7 | GET | `/api/review/due` | Query 可选 `limit:int`(1..100,默认20) `offset:int`(≥0,默认0) | `{items:DueCard[], total, today_count}` | 40001(400) |
 | 8 | GET | `/api/achievements` | 无 | `{items:Achievement[], unlocked_count, new_unlocked:string[]}` | 50001(500) |
-| 9 | GET | `/api/health` | 无 | `{status, version, time}` | 50001(500) |
+| 9 | GET | `/api/roadmap` | 无 | `{items:RoadmapVersion[], current_version, done_count, total}` | 50001(500) |
+| 10 | GET | `/api/retention` | 无 | `{continue_last, daily_goals, streak, micro_progress}` | 50001(500) |
+| 11 | GET | `/api/feedback/categories` | 无 | `{code,label}[]` | 50001(500) |
+| 12 | POST | `/api/feedback` | `{category, content, contact?}` | `{id:int}` | 40001(400) |
+| 13 | GET | `/api/feedback/summary` | 无 | `{total, by_category:[{category,label,count}], recent:[...]}` | 50001(500) |
+| 14 | GET | `/api/health` | 无 | `{status, version, time}` | 50001(500) |
 
 ### 5.2 逐端点详解
 
@@ -303,6 +308,24 @@ Base URL：`http://localhost:8000`。所有路径前缀 `/api`。
 - 响应 `data`：`{ "next_due":"2026-11-18T09:30:00Z", "interval_days":1 }`。
 - 逻辑：调用 `srs.schedule(rating, 当前review_logs状态)` → 更新该卡的 `review_logs`（`repetitions/ease_factor/interval_days/next_due/last_reviewed_at/total_reviews`）。
 - 错误：rating 非 1~4 或非整数 → 40001；卡片不存在 → 40401。
+
+#### 9) GET `/api/roadmap` — 面客建设里程图（TASK-0059）
+- 响应 `data`：`{ items: RoadmapVersion[], current_version, done_count, total }`。`RoadmapVersion` = `{version,title,theme,status,date,desc,features}`；`status ∈ done/active/planned`，planned 时 `date=null`。
+- 数据源为服务端常量 `app.py:ROADMAP_DEFS`（唯一维护点），零数据库；前端只读渲染。改常量 status/date 即点亮，需重启服务生效。`done_count` = status==done 条数；`current_version` = 首个 active，无则最后一个 done。
+- 维护说明见 `docs/ROADMAP.md`。
+
+#### 10) GET `/api/retention` — 留存激励聚合（TASK-0060）
+- 响应 `data`：`{ continue_last, daily_goals, streak, micro_progress }`，纯读现有表、零新表/字段（UX_PROGRESS_PLAN §D）。
+  - `continue_last`：`{text_id,cefr_level,title,created_at} | null`，来自最近一篇已读（= `last_read_text`），无则不弹"接着上次"钩子。
+  - `daily_goals`：`{read:{done,count,target,label}, review:{...}, chat:{...}}`，今日真实行为计数（读≥1 / 复习≥3 / 对话≥1），"今日"按 UTC 日起点 `YYYY-MM-DDT00:00:00Z` 过滤。
+  - `streak`：`{days, tone}`，days 直接读 `users.streak_days`（跨天规则由 `update_user_activity` 维护）；tone 为温和正向文案，禁负面词。
+  - `micro_progress`：`{words_this_week,words_last_week,reads_this_week,reads_last_week,level_trend}`，本周=近 7 天、上周=前 7-14 天；`level_trend ∈ up/flat`（读 `skill_profile` 快照 trend）。
+- 无参数；失败前端静默降级、不施压。打开即弹浮层与"当天不再弹"由前端 localStorage 管理，不落库。
+
+#### 11-13) 使用反馈（TASK-0062）
+- `GET /api/feedback/categories`：`{code,label}[]`，前端浮层懒拉，前后端单一数据源（`db.FEEDBACK_CATEGORIES`）。
+- `POST /api/feedback`：Body `{category, content, contact?}`；`category` 必须是预设方向 code、`content` 去空白非空且 ≤1000 字、`contact` ≤200 字，否则 40001；成功返回 `{id}`。写 `feedback` 表（user_id 当前固定 1）。
+- `GET /api/feedback/summary`：`{total, by_category:[{category,label,count}], recent:[...]}`；`by_category` 覆盖全部预设方向（含 0）并按 count 降序，`recent` 最近 20 条原文。规划新版本前先看此端点，详见 `docs/FEEDBACK.md`。当前无鉴权，面客多人使用前须加管理端鉴权（含用户文本与联系方式）。
 
 #### 8) GET `/api/achievements` — 成就列表（TASK-0058）
 - 响应 `data`：`{ items: Achievement[], unlocked_count, new_unlocked }`。`Achievement` = `{code, name_zh, desc_zh, earned_at, unlocked}`；未解锁时 `earned_at=null, unlocked=false`（灰态）。

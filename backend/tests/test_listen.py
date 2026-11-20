@@ -8,7 +8,7 @@ import unittest
 import reductions as rd
 from routers.listen import (
     _normalize_answer,
-    _split_words,
+    _tokens_and_words,
     pick_blank_indices,
 )
 
@@ -57,15 +57,30 @@ class TestReductions(unittest.TestCase):
         self.assertEqual(rd.reduce_sentence(None), "")
 
 
-class TestSplitWords(unittest.TestCase):
-    def test_basic(self):
-        self.assertEqual(_split_words("Je vais au marché."), ["Je", "vais", "au", "marché"])
+class TestTokenize(unittest.TestCase):
+    """展示 tokens 与判分 words 等长同序（挖空下标共用）。"""
+
+    def test_parallel_lists(self):
+        toks, words = _tokens_and_words("Je vais au marché.")
+        self.assertEqual(toks, ["Je", "vais", "au", "marché."])
+        self.assertEqual(words, ["Je", "vais", "au", "marché"])
+
+    def test_punct_only_token_kept_in_tokens(self):
+        toks, words = _tokens_and_words("Bonjour ?")
+        self.assertEqual(toks, ["Bonjour", "?"])
+        self.assertEqual(words, ["Bonjour", ""])  # 纯标点在 words 里为空串，不会成为挖空
 
     def test_internal_apostrophe_kept(self):
-        self.assertEqual(_split_words("Qu'un seul l'homme"), ["Qu'un", "seul", "l'homme"])
+        toks, words = _tokens_and_words("Qu'un seul l'homme")
+        self.assertEqual(toks, ["Qu'un", "seul", "l'homme"])
+        self.assertEqual(words, ["Qu'un", "seul", "l'homme"])
+
+    def test_same_length(self):
+        toks, words = _tokens_and_words("Oh, tu as dû partir hier, hein ?")
+        self.assertEqual(len(toks), len(words))
 
     def test_empty(self):
-        self.assertEqual(_split_words(""), [])
+        self.assertEqual(_tokens_and_words(""), ([], []))
 
 
 class TestBlanks(unittest.TestCase):

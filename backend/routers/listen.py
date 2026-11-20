@@ -50,9 +50,14 @@ _STOPWORDS = {
 _BLANK_COUNT = {"A1": 1, "A2": 2}
 
 
-def _split_words(fr: str) -> list[str]:
-    """整句按空白切词并剥边缘标点（保留词内撇号/连字符）。"""
-    return [t for t in (w.strip(_SPLIT_STRIP) for w in str(fr).split()) if t]
+def _tokens_and_words(fr: str) -> tuple[list[str], list[str]]:
+    """整句按空白切词，返回（保留标点的展示 tokens, 剥边缘标点的判分 words）。
+
+    两列表等长同序：挖空下标在两者上指向同一个词。纯标点 token（如独立的 ?）
+    在 words 里是空串，天然不会被选为挖空（len<3）。
+    """
+    toks = str(fr).split()
+    return toks, [t.strip(_SPLIT_STRIP) for t in toks]
 
 
 def pick_blank_indices(words: list[str], level: str, salt: str) -> list[int]:
@@ -190,10 +195,11 @@ async def listen_texts(level: str = ""):
 
 @router.get("/api/listen/texts/{text_id}")
 async def listen_text_detail(text_id: str):
-    """篇详情：逐句中文提示 + 挖空版词序列（答案词位以 null 下发，原句不下发）。
+    """篇详情：逐句挖空版词序列（答案词位以 null 下发，原句不下发）+ 中文提示。
 
-    words 中挖空位为 null，blanks 给出 {idx, letters}（词长提示）；
-    判分所需答案只留在服务端（answer 端点按同 salt 复算）。
+    tokens 中挖空位为 null（其余词可见，供精听填空的上下文），
+    blanks 给出 {idx, letters}（词长提示）；判分所需答案只留在服务端
+    （answer 端点按同 salt 复算）。
     """
     conn = db.get_conn()
     try:
@@ -216,12 +222,12 @@ async def listen_text_detail(text_id: str):
     today = db.today_str()
     out_lines = []
     for ln in lines:
-        words = _split_words(ln["fr"])
+        tokens, words = _tokens_and_words(ln["fr"])
         blanks = pick_blank_indices(words, t["cefr_level"], f"{text_id}:{ln['seq']}:{today}")
-        masked = [None if i in blanks else w for i, w in enumerate(words)]
+        masked = [None if i in blanks else tk for i, tk in enumerate(tokens)]
         out_lines.append({
             "seq": ln["seq"], "cn": ln["cn"], "speaker": ln["speaker"],
-            "words": masked,
+            "tokens": masked,
             "blanks": [{"idx": i, "letters": len(words[i])} for i in blanks],
             **_audio_flags(text_id, [ln["seq"]]),
         })
@@ -296,7 +302,7 @@ async def listen_answer(request: Request):
         conn.close()
     if not t or not ln:
         raise ApiError(40401, 404, "听力素材或句不存在")
-    words = _split_words(ln["fr"])
+    tokens, words = _tokens_and_words(ln["fr"])
     blanks = pick_blank_indices(words, t["cefr_level"], f"{text_id}:{seq}:{db.today_str()}")
     if not blanks:
         raise ApiError(40002, 400, "本句过短，无可挖空词")

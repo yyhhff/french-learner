@@ -999,3 +999,8 @@
   .listen-finish button:not(:disabled):hover{opacity:.9}
   .listen-finish span{font-size:12.5px;color:var(--muted)}
   .listen-noblank{font-size:12px;color:var(--muted);margin-top:6px}
+  .listen-sent{font-size:15px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .listen-tok{white-space:nowrap}
+  .listen-input.w-ok{border-color:var(--teal);color:var(--teal);font-weight:600}
+  .listen-input.w-no{border-color:var(--brand);color:var(--brand);font-weight:700}
+  .listen-sent .listen-submit{margin-left:6px}

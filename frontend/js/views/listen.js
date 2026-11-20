@@ -235,21 +235,31 @@ function renderSentences() {
     const done = detail.attempted.has(l.seq);
     if (detail.dictation) {
       const blanks = l.blanks || [];
-      const inputs = blanks.map((b, i) =>
-        `<span class="listen-blank"><i>${i + 1}</i><input type="text" class="listen-input" id="lin-${l.seq}-${i}"
-           style="width:${Math.max(b.letters, 3)}em" maxlength="${b.letters + 4}" placeholder="${'_'.repeat(b.letters)}" autocomplete="off"></span>`).join('');
-      const dictArea = blanks.length
-        ? `<div class="listen-blanks">${inputs}
-            <button class="listen-submit" onclick="listenSubmit(${l.seq})">提交</button>
-          </div>`
-        : '<div class="listen-noblank">短句不设填空，跟着听就好 🎧</div>';
+      const lettersByIdx = {};
+      blanks.forEach(b => { lettersByIdx[b.idx] = b.letters; });
+      let bi = 0;
+      const sent = (l.tokens || []).map((tk, i) => {
+        if (tk === null) {
+          const k = bi++;
+          const len = lettersByIdx[i] || 4;
+          return `<input type="text" class="listen-input" id="lin-${l.seq}-${k}"
+            style="width:${Math.max(len, 3)}em" maxlength="${len + 4}"
+            placeholder="${'_'.repeat(Math.max(len, 3))}" autocomplete="off">`;
+        }
+        return `<span class="listen-tok">${esc(tk)}</span>`;
+      }).join(' ');
+      const submitBtn = blanks.length
+        ? `<button class="listen-submit" onclick="listenSubmit(${l.seq})">提交</button>`
+        : '';
+      const noBlankHint = blanks.length ? '' : '<div class="listen-noblank">短句不设填空，跟着听就好 🎧</div>';
       return `
       <div class="listen-row listen-dict ${done ? 'done' : ''}" id="lrow-${l.seq}">
         <button class="listen-play" onclick="listenPlay(${l.seq})">▶</button>
         <span class="listen-seq">${l.seq}</span>
         <div class="listen-dict-main">
+          <div class="listen-sent">${sent}${submitBtn}</div>
           <div class="listen-cn">${esc(l.cn)}</div>
-          ${dictArea}
+          ${noBlankHint}
           <div class="listen-reveal" id="lrev-${l.seq}"></div>
         </div>
       </div>`;
@@ -291,8 +301,14 @@ async function listenSubmit(seq) {
       `<div class="listen-fr">${esc(r.fr)}</div>` +
       (r.fr !== r.fr_reduced ? `<div class="listen-frred">口语：${esc(r.fr_reduced)}</div>` : '') +
       `<div class="listen-ans">${r.correct ? '✅ 全对' : '答案：'} ${marks}</div>`;
-    row.querySelectorAll('.listen-input').forEach(el => el.disabled = true);
-    row.querySelector('.listen-submit').disabled = true;
+    row.querySelectorAll('.listen-input').forEach((el, i) => {
+      // 对的填回答案（绿）；错的保留用户原词（红），正确答案只在下方答案行展示
+      if (r.per_word[i] && r.answers && r.answers[i] !== undefined) el.value = r.answers[i];
+      el.classList.add(r.per_word[i] ? 'w-ok' : 'w-no');
+      el.disabled = true;
+    });
+    const sub = row.querySelector('.listen-submit');
+    if (sub) sub.disabled = true;
     updateFinishBtn();
   } catch (e) {
     notify('提交失败：' + (e.message || e));

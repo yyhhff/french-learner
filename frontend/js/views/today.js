@@ -8,6 +8,13 @@ import { switchView } from './growth.js';
 
 const TASK_ICONS = { review: '🔁', read: '📖', chat: '💬' };
 const TASK_TITLES = { review: '词词回来见你', read: '读一小段', chat: '和呀呀说说话' };
+// 呀呀形象：真猫贴纸（用户自家猫照片，抠图 PNG）。mood 关系隐喻：初见/熟悉=并排，老友/灵魂伙伴=依偎
+const MOOD_IMG = {
+  newcomer: '/assets/yaya-cats-side.png',
+  buddy: '/assets/yaya-cats-side.png',
+  oldfriend: '/assets/yaya-cats-cuddle.png',
+  soulmate: '/assets/yaya-cats-cuddle.png',
+};
 
 export async function initToday(){
   try{
@@ -31,8 +38,9 @@ export function renderToday(d){
   const allDone = (d.tasks || []).every(t => t.done);
   wrap.innerHTML = `
     <div class="today-hero">
-      <div class="today-yaya today-yaya--${esc(yaya.mood || 'newcomer')}" title="呀呀">
-        <i class="today-yaya-eye l"></i><i class="today-yaya-eye r"></i><i class="today-yaya-blush"></i>
+      <div class="today-yaya-img-wrap today-yaya--${esc(yaya.mood || 'newcomer')}" title="呀呀">
+        <img class="today-yaya-img" src="${MOOD_IMG[yaya.mood] || MOOD_IMG.newcomer}" alt="呀呀和小伙伴">
+        ${(yaya.mood === 'soulmate') ? '<i class="today-yaya-heart">♥</i>' : ''}
       </div>
       <div class="today-hero-txt">
         <h2>${allDone ? '今天的小目标都完成啦' : '今天想做的事'}</h2>

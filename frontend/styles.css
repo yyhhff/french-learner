@@ -956,16 +956,9 @@
 .today-xp-bar i{display:block;height:100%;background:linear-gradient(90deg,#F0A35E,#E8853B);border-radius:99px;transition:width .5s}
 .today-xp-hint{margin-top:6px;font-size:11.5px;color:var(--muted);text-align:right}
 .today-empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 0}
-/* 呀呀陪伴形象：纯 CSS 圆脸，mood 四态换色与表情（零素材依赖） */
-.today-yaya{position:relative;width:58px;height:58px;border-radius:99px;background:#F6C89B;flex:none;box-shadow:inset -3px -4px 0 rgba(0,0,0,.06)}
-.today-yaya-eye{position:absolute;top:22px;width:7px;height:9px;border-radius:99px;background:#5B4232}
-.today-yaya-eye.l{left:16px}
-.today-yaya-eye.r{right:16px}
-.today-yaya-blush{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:18px;height:7px;border-radius:99px;background:rgba(230,120,90,.35)}
-.today-yaya--newcomer{background:#F6D9B0}
-.today-yaya--buddy{background:#F6C89B}
-.today-yaya--oldfriend{background:#F3B98F}
-.today-yaya--oldfriend .today-yaya-eye{height:5px;top:25px;border-radius:99px 99px 0 0;background:transparent;border-top:2.5px solid #5B4232}
-.today-yaya--soulmate{background:#EBADD1}
-.today-yaya--soulmate .today-yaya-eye{height:5px;top:25px;background:transparent;border-top:2.5px solid #5B4232;border-radius:99px 99px 0 0}
-.today-yaya--soulmate .today-yaya-blush{width:24px;background:rgba(220,90,120,.4)}
+/* 呀呀陪伴形象 v3：真猫贴纸（用户自家猫照片，透明底 PNG，mood 四态换图）——初见/熟悉=并排，老友/灵魂伙伴=依偎 */
+.today-yaya-img-wrap{position:relative;flex:none;width:118px;height:96px;display:flex;align-items:center;justify-content:center}
+.today-yaya-img{max-width:118px;max-height:96px;filter:drop-shadow(0 3px 6px rgba(240,150,90,.28));transition:transform .3s}
+.today-yaya-img-wrap:hover .today-yaya-img{transform:scale(1.05) rotate(-2deg)}
+.today-yaya-heart{position:absolute;top:-10px;right:2px;color:#F27FA5;font-size:16px;transform:rotate(14deg);text-shadow:0 1px 3px rgba(242,127,165,.4)}
+.today-yaya--oldfriend .today-yaya-img,.today-yaya--soulmate .today-yaya-img{max-width:132px}

@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 import assessment
 import db
 import exam
+import gamify
 import pronunciation
 import seed
 import seed_input
@@ -37,6 +38,7 @@ from routers import (
     pron_coach,
     profile,
     roadmap,
+    today,
     translate,
     tts,
 )
@@ -89,12 +91,17 @@ for _router in (
     pron.router,
     pron_coach.router,
     content_review.router,
+    today.router,
 ):
     app.include_router(_router)
 
 # ---------------------------------------------------------------- 启动初始化
 
 db.init_db()
+try:  # TASK-0070 v3.0：xp_events 明细表（幂等建表，异常不阻断启动）
+    gamify.init_tables()
+except Exception as exc:  # noqa: BLE001
+    logger.warning("gamify 表初始化异常，XP 明细降级为空：%s", exc)
 if db.is_empty():
     logger.info("空库，灌入种子数据…")
     seed.seed_if_empty()

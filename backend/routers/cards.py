@@ -15,6 +15,7 @@ import ai
 import assessment
 import db
 import exam
+import gamify
 import pronunciation
 import srs
 
@@ -57,6 +58,8 @@ async def review(id: str, request: Request):
         ("memory", 75 if good else 40, "review", str(card_id)),
         ("vocabulary", 70 if good else 45, "review", str(card_id)),
     ])
+    # TASK-0070 v3.0：复习 +2xp（gamify 内部处理日封顶与 streak）
+    gamify.award("review", 2, detail=str(card_id))
 
     return ok({"next_due": next_due, "interval_days": interval_days})
 

@@ -28,9 +28,10 @@
     </div>
   </div>
 
-  <!-- 视图切换：对话 / 阅读 / 定级 / 考级冲刺 -->
+  <!-- 视图切换：今日 / 对话 / 阅读 / 定级 / 考级冲刺（TASK-0070 v3.0 今日置首） -->
   <div class="view-tabs" role="tablist">
-    <button class="view-tab on" id="tabChat" onclick="switchView('chat')">💬 对话陪练</button>
+    <button class="view-tab on" id="tabToday" onclick="switchView('today')">🏠 今日</button>
+    <button class="view-tab" id="tabChat" onclick="switchView('chat')">💬 对话陪练</button>
     <button class="view-tab" id="tabRead" onclick="switchView('read')">📖 分级阅读</button>
     <button class="view-tab" id="tabAssessment" onclick="switchView('assessment')">🎯 定级</button>
     <button class="view-tab" id="tabExam" onclick="switchView('exam')">🏆 考级冲刺</button>
@@ -40,7 +41,12 @@
     <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
   </div>
 
-  <div id="viewChat" class="view">
+  <!-- TASK-0070 v3.0 今日：三件事任务卡 + XP/等级 + streak + 呀呀陪伴态，全部由 today.js 填充 -->
+  <div id="viewToday" class="view">
+    <div id="todayWrap" class="today-wrap"></div>
+  </div>
+
+  <div id="viewChat" class="view hidden">
   <div class="grid">
 
     <!-- left -->

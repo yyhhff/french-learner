@@ -924,3 +924,48 @@
     .proncoach-fr{font-size:18px}
     .proncoach-cn{margin-left:0}
   }
+
+/* ===== TASK-0070 v3.0 今日视图（.today- 前缀分段，不重排他人段落） ===== */
+.today-wrap{max-width:720px;margin:0 auto;padding:6px 4px 24px}
+.today-hero{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:14px}
+.today-hero-txt{flex:1;min-width:0}
+.today-hero-txt h2{margin:0 0 4px;font-size:17px;color:var(--ink)}
+.today-hero-txt p{margin:0;font-size:13px;color:var(--muted)}
+.today-streak{display:flex;flex-direction:column;align-items:center;background:var(--brand-soft);border-radius:14px;padding:10px 14px;min-width:84px}
+.today-streak b{font-size:20px;color:var(--brand)}
+.today-streak span{font-size:10.5px;color:var(--muted);text-align:center;max-width:96px}
+.today-streak.on b{color:#E8853B}
+.today-tasks{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.today-task{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.today-task.done{opacity:.72;border-color:#CFE3D8;background:#F4FAF6}
+.today-task-head{display:flex;align-items:center;gap:12px}
+.today-task-ico{font-size:22px}
+.today-task-txt{flex:1;min-width:0}
+.today-task-txt b{display:block;font-size:14px;color:var(--ink)}
+.today-task-txt span{font-size:12px;color:var(--muted)}
+.today-task-check{width:28px;height:28px;border-radius:99px;background:#DCF1E4;color:#3E9E6C;display:flex;align-items:center;justify-content:center;font-size:15px}
+.today-task-btn{border:1px solid var(--line);background:var(--brand-soft);color:var(--brand);border-radius:99px;padding:7px 16px;font-size:12.5px;cursor:pointer}
+.today-task-btn:hover{border-color:#F3C9B4}
+.today-task-bar{height:6px;background:var(--line);border-radius:99px;margin-top:10px;overflow:hidden}
+.today-task-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#F3C9B4);border-radius:99px;transition:width .5s}
+.today-xp{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.today-xp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.today-lv{font-size:14px;color:var(--brand);font-weight:600}
+.today-xp-num{font-size:12px;color:var(--muted)}
+.today-xp-bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.today-xp-bar i{display:block;height:100%;background:linear-gradient(90deg,#F0A35E,#E8853B);border-radius:99px;transition:width .5s}
+.today-xp-hint{margin-top:6px;font-size:11.5px;color:var(--muted);text-align:right}
+.today-empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 0}
+/* 呀呀陪伴形象：纯 CSS 圆脸，mood 四态换色与表情（零素材依赖） */
+.today-yaya{position:relative;width:58px;height:58px;border-radius:99px;background:#F6C89B;flex:none;box-shadow:inset -3px -4px 0 rgba(0,0,0,.06)}
+.today-yaya-eye{position:absolute;top:22px;width:7px;height:9px;border-radius:99px;background:#5B4232}
+.today-yaya-eye.l{left:16px}
+.today-yaya-eye.r{right:16px}
+.today-yaya-blush{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:18px;height:7px;border-radius:99px;background:rgba(230,120,90,.35)}
+.today-yaya--newcomer{background:#F6D9B0}
+.today-yaya--buddy{background:#F6C89B}
+.today-yaya--oldfriend{background:#F3B98F}
+.today-yaya--oldfriend .today-yaya-eye{height:5px;top:25px;border-radius:99px 99px 0 0;background:transparent;border-top:2.5px solid #5B4232}
+.today-yaya--soulmate{background:#EBADD1}
+.today-yaya--soulmate .today-yaya-eye{height:5px;top:25px;background:transparent;border-top:2.5px solid #5B4232;border-radius:99px 99px 0 0}
+.today-yaya--soulmate .today-yaya-blush{width:24px;background:rgba(220,90,120,.4)}

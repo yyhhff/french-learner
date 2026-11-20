@@ -15,6 +15,7 @@ import { closeReview, doReview, openReview, readOfflineNote, renderReviewCard, u
 import { ipaEq, levDistance, pronShadowReset, pronShadowSection, scoreShadow, shadowFeedback, shadowSelfAssess, stringSim, toggleShadowRecord, transcribeShadowAudio } from './views/shadow.js';
 import { closePronPopover, openFullFromPop, openWordPopover, pronPopOutside, toggleLinkingInline } from './views/word-popover.js';
 import { initPronCoach, nextPronCoachSentence, setPronCoachFocus, switchPronCoachView, togglePronCoachRecord } from './views/pron_coach.js';
+import { goTodayTask, initToday } from './views/today.js';
 
 async function init(){
   document.addEventListener('keydown', e=>{
@@ -78,6 +79,8 @@ async function init(){
   updateReadVocabBadge();
   const firstId = state.scenes[0].id;
   await selectScene(firstId);
+  // TASK-0070 v3.0：今日为默认首屏视图，启动即加载三件事/XP/streak（失败由 initToday 降级）
+  initToday();
   // 读音规则 P0：静默加载（失败只降级读音入口，不影响上面已完成的界面）
   loadPronData();
   // TASK-0053：首次引导（localStorage 一次性，每步可跳过）
@@ -257,6 +260,8 @@ window.setPronCoachFocus = setPronCoachFocus;
 window.nextPronCoachSentence = nextPronCoachSentence;
 window.togglePronCoachRecord = togglePronCoachRecord;
 window.initPronCoach = initPronCoach;
+window.goTodayTask = goTodayTask;
+window.initToday = initToday;
 
 // 顶层副作用（原 app.js 末尾）
 document.addEventListener('pointerdown', unlockAudio, {once:false});

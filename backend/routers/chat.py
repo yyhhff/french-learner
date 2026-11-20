@@ -15,6 +15,7 @@ import ai
 import assessment
 import db
 import exam
+import gamify
 import pronunciation
 import srs
 
@@ -99,8 +100,8 @@ async def chat(request: Request):
         explanation=result.explanation,
         is_correction=is_correction,
     )
-    # 每轮 +10 XP，本轮共 2 轮
-    db.update_user_activity(user_id, xp_delta=20)
+    # TASK-0070 v3.0：XP 统一走 gamify.award（对话 3xp/轮、日封顶 30，内含 streak 更新）
+    gamify.award("chat", 3, detail=scene_id, user_id=user_id)
 
     # TASK-0055 口语信号（弱信号 α=0.15）：流利度按"开口即练习"，语法按是否被重述纠错
     _record_skill_events([

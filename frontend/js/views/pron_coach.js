@@ -17,7 +17,8 @@ const pcState = {
 function el(id){ return document.getElementById(id); }
 
 // ---- 视图切换：独立函数，不进 growth.js 的 switchView（避免改他人模块）----
-const VIEWS = ['chat','read','assessment','exam','growth','roadmap','proncoach'];
+// TASK-0070 v3.0：视图列表加入 today（容器/Tab 命名恰好符合 viewToday/tabToday 拼接规则）
+const VIEWS = ['today','chat','read','assessment','exam','growth','roadmap','proncoach'];
 function switchPronCoachView(name){
   const view = VIEWS.includes(name) ? name : 'chat';
   VIEWS.forEach(v=>{

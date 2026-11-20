@@ -120,6 +120,8 @@ const state = {
     current:null,       // 当前 InputTextDetail
     currentId:null,
     readIds:[],         // 已读 id 集合，供 recommend exclude_ids
+    reportedIds:[],     // TASK-0052：本会话已上报"读完"的 id（防重复 POST；服务端另有 UNIQUE 幂等）
+    _dwellTimer:null,   // 短文（不溢出）的 8 秒停留计时器
     available:true,
     loaded:false
   },
@@ -1177,7 +1179,10 @@ async function renderGrowth(){
       </div>
       <div class="growth-card">
         <div class="g-title">📖 阅读</div>
-        <div class="g-note g-empty">读过的短文，以后会在这里留下小脚印（记录功能慢慢来）</div>
+        ${s.read_count
+          ? `<div class="g-nums"><span><b>${num(s.read_count)}</b>已读篇数</span>${s.last_read ? `<span><b>${esc(s.last_read.cefr_level||'—')}</b>最近《${esc(String(s.last_read.title||'').slice(0,10))}》</span>` : ''}</div>
+        <div class="g-note">每一篇都算数，慢慢读就好 🌱</div>`
+          : `<div class="g-note g-empty">读完第一篇短文，这里就会留下小脚印</div>`}
       </div>
     </div>`;
 }
@@ -1467,9 +1472,35 @@ function showReadDetail(detail){
   }
   const note = document.getElementById('readNote');
   if(note) note.innerHTML = '';
+  // TASK-0052：内容不足一屏的短文，停留 8 秒视为读完（切换文章即取消）
+  clearTimeout(state.read._dwellTimer);
+  state.read._dwellTimer = setTimeout(function(){
+    const el = document.getElementById('readBody');
+    if(el && el.scrollHeight <= el.clientHeight + 24 && state.read.currentId === detail.id){
+      markReadComplete(detail.id);
+    }
+  }, 8000);
   renderReadLines(detail);
   renderReadWords(detail);
   renderReadTexts();
+}
+
+// TASK-0052：阅读完成落库——幂等上报，成功且首次时温和提示
+async function markReadComplete(textId){
+  if(!textId || !state.online) return;
+  if(state.read.reportedIds.indexOf(textId) >= 0) return;
+  state.read.reportedIds.push(textId);
+  try{
+    const r = await apiRequest('/api/input/texts/'+encodeURIComponent(textId)+'/complete', {method:'POST'});
+    if(r && r.first_time){
+      if(state.read.readIds.indexOf(textId) < 0) state.read.readIds.push(textId);
+      gentleReadNote('读完了，这一篇已经记下 🌱 已读 '+(r.read_count||1)+' 篇');
+    }
+  }catch(e){
+    // 失败回滚本会话标记，下次到文末可重试；不打断阅读
+    const i = state.read.reportedIds.indexOf(textId);
+    if(i >= 0) state.read.reportedIds.splice(i, 1);
+  }
 }
 
 function renderReadLines(detail){
@@ -1650,6 +1681,18 @@ async function init(){
     closePronCard();
     closePronBook();
   });
+
+  // TASK-0052：阅读完成落库——内容超一屏时，滚动到文末自动标记（幂等）
+  const readBody = document.getElementById('readBody');
+  if(readBody){
+    readBody.addEventListener('scroll', function(){
+      if(!state.read.currentId) return;
+      if(this.scrollHeight <= this.clientHeight + 24) return; // 短文走停留计时，不靠滚动
+      if(this.scrollTop + this.clientHeight >= this.scrollHeight - 24){
+        markReadComplete(state.read.currentId);
+      }
+    }, {passive:true});
+  }
 
   // 先健康检查：网络不通即进入离线演示模式
   try {

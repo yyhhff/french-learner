@@ -161,6 +161,18 @@ CREATE INDEX IF NOT EXISTS idx_input_texts_level ON input_texts (cefr_level, sor
 CREATE INDEX IF NOT EXISTS idx_input_lines_text ON input_lines (text_id, seq);
 CREATE INDEX IF NOT EXISTS idx_input_words_text ON input_words (text_id);
 
+-- ===== TASK-0052 增量：阅读完成落库（UNIQUE 保证一篇只记一次，重复标记幂等）=====
+CREATE TABLE IF NOT EXISTS reading_logs (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    text_id    TEXT NOT NULL,
+    cefr_level TEXT,
+    title      TEXT,
+    created_at TEXT NOT NULL,
+    UNIQUE (user_id, text_id)
+);
+CREATE INDEX IF NOT EXISTS idx_reading_user ON reading_logs (user_id, created_at);
+
 -- ===== 阶段0 增量：定级/考级尝试表（旧 8 表结构一字不改）=====
 CREATE TABLE IF NOT EXISTS attempts (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -506,6 +518,8 @@ def get_profile(user_id: int = DEFAULT_USER_ID):
             "total_cards": total_cards,
             "dialogue_count": dialogue_count,
             "review_count": total,
+            "read_count": count_read_texts(user_id),
+            "last_read": last_read_text(user_id),
         }
         return profile
     finally:
@@ -843,6 +857,55 @@ def get_mastered_words(user_id: int = DEFAULT_USER_ID) -> set:
             (user_id,),
         ).fetchall()
         return {r["word"] for r in rows}
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------- 阅读完成（TASK-0052）
+
+def mark_text_read(
+    user_id: int,
+    text_id: str,
+    cefr_level: str | None = None,
+    title: str | None = None,
+) -> bool:
+    """标记一篇短文已读。幂等：UNIQUE(user_id,text_id) + INSERT OR IGNORE，首次记入返回 True。"""
+    conn = get_conn()
+    try:
+        cur = conn.execute(
+            "INSERT OR IGNORE INTO reading_logs (user_id, text_id, cefr_level, title, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, text_id, cefr_level, title, now_iso()),
+        )
+        conn.commit()
+        return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
+def count_read_texts(user_id: int = DEFAULT_USER_ID) -> int:
+    """已读篇数（按去重后的 text_id 计）。"""
+    conn = get_conn()
+    try:
+        return conn.execute(
+            "SELECT COUNT(*) AS n FROM reading_logs WHERE user_id = ?", (user_id,)
+        ).fetchone()["n"]
+    finally:
+        conn.close()
+
+
+def last_read_text(user_id: int = DEFAULT_USER_ID) -> dict | None:
+    """最近一篇已读（成长卡"最近一篇"展示用）。"""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT text_id, cefr_level, title, created_at FROM reading_logs "
+            "WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+            (user_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return dict(row)
     finally:
         conn.close()
 

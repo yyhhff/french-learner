@@ -490,6 +490,24 @@ async def input_text_collect(text_id: str, request: Request):
     return ok(result)
 
 
+@app.post("/api/input/texts/{text_id}/complete")
+async def input_text_complete(text_id: str):
+    """TASK-0052：阅读完成落库（幂等）。滚动到文末时由前端调用，一篇只记一次。"""
+    detail = db.get_input_text_detail(text_id)
+    if detail is None:
+        raise ApiError(40401, 404, f"语料不存在：{text_id}")
+    first_time = db.mark_text_read(
+        user_id=db.DEFAULT_USER_ID,
+        text_id=text_id,
+        cefr_level=detail.get("cefr_level"),
+        title=detail.get("title"),
+    )
+    return ok({
+        "first_time": first_time,
+        "read_count": db.count_read_texts(db.DEFAULT_USER_ID),
+    })
+
+
 def _level_score(level, current: str, target: str) -> int:
     if level == target:
         return 3

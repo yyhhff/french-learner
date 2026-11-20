@@ -2,6 +2,7 @@ import { apiRequest } from '../api.js';
 import { FALLBACK_PROFILE, FALLBACK_SCENES, buildFallbackCards, esc, notify, state } from '../store.js';
 import { speak } from './audio.js';
 import { chatLinkBtnHTML, renderLedger, renderScenes, renderTop, sentenceTokensHTML } from './chat.js';
+import { grammarChipHTML, loadGrammarCards } from './grammar.js';
 import { readOfflineNote, updateReadVocabBadge } from './review.js';
 import { openWordPopover } from './word-popover.js';
 
@@ -10,6 +11,7 @@ async function loadReadLevels(){
     const levels = await apiRequest('/api/input/levels');
     if(levels==null) return;
     state.read.available = true;
+    loadGrammarCards(); // TASK-0078：语法卡库懒加载（异步、失败静默），命中句子出 📌 chip
     state.read.levels = Array.isArray(levels) ? levels : [];
     renderReadLevels();
     if(state.read.levels.length){
@@ -137,7 +139,7 @@ function renderReadLines(detail){
     html += `<div class="rline ${cls}">
       <div class="rspk">${who}</div>
       <div class="rbubble">
-        <span class="fr">${sentenceTokensHTML(l.fr)}<button class="rplay" onclick="speak(this)" data-text="${esc(l.fr)}" title="听这句">🔊</button>${chatLinkBtnHTML(l.fr)}</span>
+        <span class="fr">${sentenceTokensHTML(l.fr)}<button class="rplay" onclick="speak(this)" data-text="${esc(l.fr)}" title="听这句">🔊</button>${chatLinkBtnHTML(l.fr)}${grammarChipHTML(l.fr)}</span>
         ${l.cn?`<span class="cn">${esc(l.cn)}</span>`:''}
       </div>
     </div>`;

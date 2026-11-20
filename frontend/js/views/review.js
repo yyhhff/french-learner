@@ -2,6 +2,7 @@ import { apiRequest } from '../api.js';
 import { esc, notify, state } from '../store.js';
 import { speak } from './audio.js';
 import { renderLedger } from './chat.js';
+import { refreshGrammarBanner } from './grammar.js';
 import { renderGrowth } from './growth.js';
 import { setOffline } from './reading.js';
 
@@ -39,6 +40,7 @@ async function openReview(){
   reviewIdx = 0;
   overlay.classList.remove('hidden');
   renderReviewCard();
+  refreshGrammarBanner(); // TASK-0078：复习入口按 recast 错误画像温和推语法卡（异步、静默失败）
 }
 
 function closeReview(){ document.getElementById('reviewOverlay').classList.add('hidden'); }

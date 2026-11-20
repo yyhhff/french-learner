@@ -139,6 +139,11 @@ const state = {
     progressFetched:false,
     available:true,     // 规则端点是否可用（失败则词卡不显示读音入口）
     bookOpen:false
+  },
+  grammar:{             // v3.3 语法微卡（TASK-0078）：三嵌入共享态，端点失败静默降级
+    cards:null,         // GET /api/grammar/cards 的 items（含 patterns，懒加载）
+    available:true,     // 卡库端点是否可用（失败则不出 chip/banner）
+    bannerDismissed:false // 复习 banner 手动收起后本会话不再打扰
   }
 };
 

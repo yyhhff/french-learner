@@ -1,6 +1,7 @@
 import { apiRequest } from '../api.js';
 import { FALLBACK_DETAILS, FALLBACK_PROFILE, FALLBACK_SCENES, RECAST_RULES, TRY_CHIPS, capitalize, esc, normalizeTurn, notify, state, userTurn } from '../store.js';
 import { speak } from './audio.js';
+import { grammarInlineHTML } from './grammar.js';
 import { findRulesForCard, pronFocusLabel } from './pron.js';
 import { setOffline } from './reading.js';
 import { openWordPopover, toggleLinkingInline } from './word-popover.js';
@@ -67,6 +68,7 @@ function messageHTML(m){
         </div>
         ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
         <div class="why">${m.explanation?esc(m.explanation)+'<br>':''}你说的是：${esc(m.recast_of)}</div>
+        ${grammarInlineHTML(m.grammar_card)}
       </div>
     </div>`;
   }
@@ -254,6 +256,7 @@ function applyChatResult(data){
     id:null, role:'assistant', fr:data.ai_text||'', cn:data._cn||'翻译中…',
     recast_of:data.recast_of==null?null:data.recast_of,
     explanation:data.explanation==null?null:data.explanation,
+    grammar_card:data.grammar_card||null, // TASK-0078：同类 recast 错误第 3 次时后端下发的语法卡
     is_correction:isCorrection, created_at:null
   });
   renderChat();

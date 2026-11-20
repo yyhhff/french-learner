@@ -15,6 +15,7 @@ import { closeReview, doReview, openReview, readOfflineNote, renderReviewCard, u
 import { ipaEq, levDistance, pronShadowReset, pronShadowSection, scoreShadow, shadowFeedback, shadowSelfAssess, stringSim, toggleShadowRecord, transcribeShadowAudio } from './views/shadow.js';
 import { closePronPopover, openFullFromPop, openWordPopover, pronPopOutside, toggleLinkingInline } from './views/word-popover.js';
 import { initPronCoach, nextPronCoachSentence, setPronCoachFocus, switchPronCoachView, togglePronCoachRecord } from './views/pron_coach.js';
+import { closeGrammarPop, dismissGrammarBanner, openGrammarPop } from './views/grammar.js';
 
 async function init(){
   document.addEventListener('keydown', e=>{
@@ -25,6 +26,7 @@ async function init(){
     closeA1Path();
     closeRetention();
     closeFeedback();
+    closeGrammarPop();
   });
 
   // TASK-0052：阅读完成落库——内容超一屏时，滚动到文末自动标记（幂等）
@@ -257,6 +259,11 @@ window.setPronCoachFocus = setPronCoachFocus;
 window.nextPronCoachSentence = nextPronCoachSentence;
 window.togglePronCoachRecord = togglePronCoachRecord;
 window.initPronCoach = initPronCoach;
+
+// v3.3 语法微卡（TASK-0078）：inline onclick 需要的全局出口
+window.openGrammarPop = openGrammarPop;
+window.closeGrammarPop = closeGrammarPop;
+window.dismissGrammarBanner = dismissGrammarBanner;
 
 // 顶层副作用（原 app.js 末尾）
 document.addEventListener('pointerdown', unlockAudio, {once:false});

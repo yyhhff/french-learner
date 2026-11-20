@@ -29,6 +29,7 @@ from routers import (
     assessment as assessment_router,
     cards,
     chat,
+    content_review,
     exam as exam_router,
     feedback,
     input as input_router,
@@ -87,6 +88,7 @@ for _router in (
     exam_router.router,
     pron.router,
     pron_coach.router,
+    content_review.router,
 ):
     app.include_router(_router)
 

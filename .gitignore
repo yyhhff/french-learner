@@ -29,3 +29,7 @@ htmlcov/
 *.mp3
 *.webm
 *.wav
+
+# v2.3 内容工厂缓存/产出（候选、审计、音频批量落盘；input/texts.json 入库语料仍跟踪）
+data/cache/
+data/output/

@@ -14,6 +14,7 @@ import { applyCollectResult, collectAllWords, collectReadWord, gentleReadNote, l
 import { closeReview, doReview, openReview, readOfflineNote, renderReviewCard, updateReadVocabBadge } from './views/review.js';
 import { ipaEq, levDistance, pronShadowReset, pronShadowSection, scoreShadow, shadowFeedback, shadowSelfAssess, stringSim, toggleShadowRecord, transcribeShadowAudio } from './views/shadow.js';
 import { closePronPopover, openFullFromPop, openWordPopover, pronPopOutside, toggleLinkingInline } from './views/word-popover.js';
+import { initPronCoach, nextPronCoachSentence, setPronCoachFocus, switchPronCoachView, togglePronCoachRecord } from './views/pron_coach.js';
 
 async function init(){
   document.addEventListener('keydown', e=>{
@@ -251,6 +252,11 @@ window.updatePronCardProgressUI = updatePronCardProgressUI;
 window.updateReadVocabBadge = updateReadVocabBadge;
 window.userTurn = userTurn;
 window.wordTokensHTML = wordTokensHTML;
+window.switchPronCoachView = switchPronCoachView;
+window.setPronCoachFocus = setPronCoachFocus;
+window.nextPronCoachSentence = nextPronCoachSentence;
+window.togglePronCoachRecord = togglePronCoachRecord;
+window.initPronCoach = initPronCoach;
 
 // 顶层副作用（原 app.js 末尾）
 document.addEventListener('pointerdown', unlockAudio, {once:false});

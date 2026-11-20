@@ -51,7 +51,7 @@ Wave 4                D: v4.1 移动与部署（全局改前端，必须独占�
 | — | Wave 0 地基拆分（routers + ES modules + worktree） | 0 | 无 | 已合并点亮 | 本会话（主工作区） | TASK-0064 | feature/wave0-foundation → main（2026-11-20 合并） |
 | A | v2.2 零基础 A1 通路 | 1 | 无 | 进行中 | 本会话（worktree） | TASK-0065 | feature/v2.2-a1 |
 | B | v2.3 内容工厂 | 1 | 无 | 进行中 | 本会话（worktree v2.3-content） | TASK-0066 | feature/v2.3-content |
-| C | v3.2 发音教练 | 1 | 无 | 未认领 | | | |
+| C | v3.2 发音教练 | 1 | 无 | 进行中 | 本会话（worktree v3.2-pron） | TASK-0067 | feature/v3.2-pron |
 | A | v3.0 每日路径 + 游戏化内核 | 2 | v2.2+v2.3 已合并 | 未认领 | | | |
 | B | v3.1 听力强化 | 2 | v2.3 已合并 | 未认领 | | | |
 | B | v3.3 语法微卡 | 2 | v2.3 已合并 | 未认领 | | | |

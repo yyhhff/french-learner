@@ -861,3 +861,66 @@
     .chat{height:auto;min-height:300px;max-height:60vh}
     .vocab-panel{height:auto;max-height:60vh}
   }
+
+  /* ===== TASK-0067 v3.2 发音教练（.proncoach- 前缀，独立分段，不重排他人样式）===== */
+  .proncoach-wrap{max-width:760px;margin:0 auto;padding:8px 4px 40px}
+  .proncoach-intro{margin-bottom:18px}
+  .proncoach-intro h2{font-size:22px;font-weight:700;margin-bottom:6px}
+  .proncoach-intro p{font-size:13px;color:var(--muted);line-height:1.7}
+  .proncoach-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .proncoach-chip{border:1px solid var(--line);background:var(--surface);color:var(--muted);
+    font-size:12.5px;padding:6px 14px;border-radius:99px;cursor:pointer;transition:all .18s}
+  .proncoach-chip:hover{border-color:var(--brand);color:var(--brand)}
+  .proncoach-chip.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+  .proncoach-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    box-shadow:var(--shadow);padding:24px 26px}
+  .proncoach-empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 0}
+  .proncoach-card-head{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+  .proncoach-badge{font-size:11px;font-weight:700;color:var(--teal);background:var(--teal-soft);
+    border-radius:6px;padding:2px 8px}
+  .proncoach-tag{font-size:11px;color:var(--brand);background:var(--brand-soft);border-radius:6px;padding:2px 8px}
+  .proncoach-src{font-size:11px;color:var(--muted);margin-left:auto}
+  .proncoach-sentence{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px}
+  .proncoach-play{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:var(--blue-soft);color:var(--blue);font-size:18px;cursor:pointer;transition:transform .15s}
+  .proncoach-play:hover{transform:scale(1.08)}
+  .proncoach-play.speaking{background:var(--blue);color:#fff}
+  .proncoach-fr{font-size:21px;font-weight:600;line-height:1.5;color:var(--ink)}
+  .proncoach-cn{font-size:13px;color:var(--muted);margin:0 0 22px 54px}
+  .proncoach-record-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .proncoach-rec-btn{border:none;background:var(--brand);color:#fff;font-size:14px;font-weight:600;
+    padding:10px 20px;border-radius:10px;cursor:pointer;box-shadow:0 6px 16px rgba(232,121,74,.25);transition:all .18s}
+  .proncoach-rec-btn:hover{background:#d9693c}
+  .proncoach-rec-btn.rec{background:#c0392b;box-shadow:none}
+  .proncoach-status{font-size:12.5px;color:var(--muted)}
+  .proncoach-result{margin-top:18px}
+  .proncoach-fb{border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.6}
+  .proncoach-fb.ok{background:var(--teal-soft);color:#137a58}
+  .proncoach-fb.retry{background:var(--amber-soft);color:#9a6a10}
+  .proncoach-fb.unsure{background:#F2F1EC;color:var(--muted)}
+  .proncoach-fb b{font-weight:700}
+  .proncoach-fb-detail{font-size:12.5px;margin-top:4px;opacity:.9}
+  .proncoach-scores{margin-top:16px;padding:14px 16px;background:var(--bg);border-radius:10px}
+  .proncoach-dim{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
+  .proncoach-dim>span{width:64px;color:var(--muted);flex:none}
+  .proncoach-dim>b{width:28px;text-align:right;font-weight:700;color:var(--ink)}
+  .proncoach-bar{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+  .proncoach-bar i{display:block;height:100%;border-radius:99px;transition:width .5s}
+  .proncoach-bar i.high{background:linear-gradient(90deg,var(--teal),#5DCAA5)}
+  .proncoach-bar i.mid{background:linear-gradient(90deg,var(--amber),#E8B656)}
+  .proncoach-bar i.low{background:linear-gradient(90deg,var(--brand),#F0956B)}
+  .proncoach-overall{text-align:right;font-size:12.5px;color:var(--muted);margin-top:6px}
+  .proncoach-overall b{font-size:17px;color:var(--brand)}
+  .proncoach-miss{margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .proncoach-miss span{display:inline-block;background:var(--brand-soft);color:var(--brand);
+    border-radius:6px;padding:2px 9px;margin:0 4px 4px 0;font-weight:600}
+  .proncoach-next-row{margin-top:20px;text-align:right}
+  .proncoach-next{border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    font-size:13px;padding:8px 18px;border-radius:9px;cursor:pointer;transition:all .18s}
+  .proncoach-next:hover{border-color:var(--brand);color:var(--brand)}
+  .proncoach-note{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:14px;text-align:center}
+  @media(max-width:640px){
+    .proncoach-card{padding:18px}
+    .proncoach-fr{font-size:18px}
+    .proncoach-cn{margin-left:0}
+  }

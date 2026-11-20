@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=34">
+<link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body>
 <div class="wrap">
@@ -36,6 +36,7 @@
     <button class="view-tab" id="tabExam" onclick="switchView('exam')">🏆 考级冲刺</button>
     <button class="view-tab" id="tabGrowth" onclick="switchView('growth')">🌱 我的成长</button>
     <button class="view-tab" id="tabRoadmap" onclick="switchView('roadmap')">🗺️ 路线图</button>
+    <button class="view-tab" id="tabProncoach" onclick="switchPronCoachView('proncoach')">🎤 发音教练</button>
     <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
   </div>
 
@@ -184,6 +185,21 @@
   <div id="viewRoadmap" class="view hidden">
     <!-- TASK-0059 面客建设里程图：全部由 renderRoadmap() 填充，数据源 GET /api/roadmap -->
     <div id="roadmapWrap" class="roadmap-wrap"></div>
+  </div>
+
+  <!-- TASK-0067 v3.2 发音教练：选句器选句 + 跟读三维评分，全部由 pron_coach.js 填充 -->
+  <div id="viewProncoach" class="view hidden">
+    <div class="proncoach-wrap">
+      <div class="proncoach-intro">
+        <h2>🎤 发音教练</h2>
+        <p>听一遍标准音，再跟着读。呀呀会听你的发音，温柔地指出哪个词可以再练练——这里没有红叉，只有进步。</p>
+      </div>
+      <div id="proncoachFilters" class="proncoach-filters"></div>
+      <div id="proncoachCard" class="proncoach-card">
+        <div class="proncoach-empty">正在为你挑一句…</div>
+      </div>
+      <p class="proncoach-note">评分基于转写对齐，评不了每个音素的细微差别；u/ou、鼻化元音这类难点，标签句会带你重点练。发音打分端到端一般 1–3 秒。</p>
+    </div>
   </div>
 
   <div class="foot">

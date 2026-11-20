@@ -70,13 +70,13 @@ ROADMAP_DEFS = [
     },
     {
         "version": "v3.0", "title": "每天十五分钟", "theme": "每日路径与游戏化",
-        "status": "planned", "date": None,
+        "status": "done", "date": "2026-11-21",
         "desc": "打开就知道今天学什么，一点小积累看得见。",
         "features": ["今日任务视图", "经验与等级", "连续天数（温和记录不惩罚）", "呀呀陪伴成长"],
     },
     {
         "version": "v3.1", "title": "耳朵开口", "theme": "听力强化",
-        "status": "planned", "date": None,
+        "status": "done", "date": "2026-11-21",
         "desc": "慢慢听、逐句听，直到耳朵跟得上真实语速。",
         "features": ["变速听力", "精听听写填空", "口语缩略与多音色语速变体"],
     },

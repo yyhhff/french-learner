@@ -8,6 +8,7 @@ import { applyChatResult, chatLinkBtnHTML, cleanToken, detailFromFallback, detec
 import { answerExamChoice, backExamToPapers, examAnswerDone, examTypeName, initExam, nextExam, onExamTextInput, openExamPaper, prevExam, renderExamPapers, renderExamQuestion, renderExamResult, saveExamCurrentText, showExamPane, submitExam, toggleExamRecord, transcribeExamAudio } from './views/exam.js';
 import { closeFeedback, openFeedback, selectFbCat, submitFeedback } from './views/feedback.js';
 import { achievementCardHTML, dailyGoalsCardHTML, microProgressCardHTML, renderGrowth, renderRoadmap, skillCardHTML, switchView } from './views/growth.js';
+import { listenBack, listenFinish, listenOpen, listenPickLevel, listenPlay, listenPlayAll, listenSetSpeed, listenSetVariant, listenSubmit, listenToggleDictation, listenToggleLoop, switchListenView } from './views/listen.js';
 import { closeOnboarding, closeRetention, goOnboardingTarget, maybeShowOnboarding, maybeShowRetention, onboardingSeen, reopenOnboarding, retentionContinue, showOnboardingStep } from './views/onboarding.js';
 import { applyPronProgressItem, buildPronIndex, closePronBook, closePronCard, dismissPronTip, findRulesForCard, loadPronData, loadPronDetails, loadPronProgress, loadPronSummaries, maybeShowPronTip, normIpa, openPronBook, openPronCard, openPronCardForNoRule, postPronProgress, pronBadgeHTML, pronFocusLabel, pronKey, pronLearnedTotal, pronProgressHTML, pronStageOf, pronTotalRules, renderPronBook, renderPronCard, switchPronCard, updatePronBookEntry, updatePronCardProgressUI } from './views/pron.js';
 import { applyCollectResult, collectAllWords, collectReadWord, gentleReadNote, loadReadLevels, markReadComplete, openReadText, postCollect, recommendNext, renderReadLevels, renderReadLines, renderReadTexts, renderReadWords, selectReadLevel, setOffline, showReadDetail } from './views/reading.js';
@@ -16,6 +17,7 @@ import { ipaEq, levDistance, pronShadowReset, pronShadowSection, scoreShadow, sh
 import { closePronPopover, openFullFromPop, openWordPopover, pronPopOutside, toggleLinkingInline } from './views/word-popover.js';
 import { initPronCoach, nextPronCoachSentence, setPronCoachFocus, switchPronCoachView, togglePronCoachRecord } from './views/pron_coach.js';
 import { closeGrammarPop, dismissGrammarBanner, openGrammarPop } from './views/grammar.js';
+import { goTodayTask, initToday } from './views/today.js';
 
 async function init(){
   document.addEventListener('keydown', e=>{
@@ -80,6 +82,8 @@ async function init(){
   updateReadVocabBadge();
   const firstId = state.scenes[0].id;
   await selectScene(firstId);
+  // TASK-0070 v3.0：今日为默认首屏视图，启动即加载三件事/XP/streak（失败由 initToday 降级）
+  initToday();
   // 读音规则 P0：静默加载（失败只降级读音入口，不影响上面已完成的界面）
   loadPronData();
   // TASK-0053：首次引导（localStorage 一次性，每步可跳过）
@@ -255,10 +259,25 @@ window.updateReadVocabBadge = updateReadVocabBadge;
 window.userTurn = userTurn;
 window.wordTokensHTML = wordTokensHTML;
 window.switchPronCoachView = switchPronCoachView;
+// TASK-0071 v3.1 听力磨耳 handlers（集中一块，便于跨车道合并）
+window.listenBack = listenBack;
+window.listenFinish = listenFinish;
+window.listenOpen = listenOpen;
+window.listenPickLevel = listenPickLevel;
+window.listenPlay = listenPlay;
+window.listenPlayAll = listenPlayAll;
+window.listenSetSpeed = listenSetSpeed;
+window.listenSetVariant = listenSetVariant;
+window.listenSubmit = listenSubmit;
+window.listenToggleDictation = listenToggleDictation;
+window.listenToggleLoop = listenToggleLoop;
+window.switchListenView = switchListenView;
 window.setPronCoachFocus = setPronCoachFocus;
 window.nextPronCoachSentence = nextPronCoachSentence;
 window.togglePronCoachRecord = togglePronCoachRecord;
 window.initPronCoach = initPronCoach;
+window.goTodayTask = goTodayTask;
+window.initToday = initToday;
 
 // v3.3 语法微卡（TASK-0078）：inline onclick 需要的全局出口
 window.openGrammarPop = openGrammarPop;

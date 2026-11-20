@@ -15,6 +15,7 @@ import ai
 import assessment
 import db
 import exam
+import gamify
 import pronunciation
 import srs
 
@@ -122,6 +123,8 @@ async def input_text_complete(text_id: str):
             ("reading", rscore, "input", text_id),
             ("vocabulary", max(40, rscore - 8), "input", text_id),
         ])
+        # TASK-0070 v3.0：首读 +15xp（幂等 reading_logs 已保证只触发一次）
+        gamify.award("read", 15, detail=text_id)
     return ok({
         "first_time": first_time,
         "read_count": db.count_read_texts(db.DEFAULT_USER_ID),

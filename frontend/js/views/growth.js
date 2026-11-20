@@ -5,15 +5,24 @@ import { speak } from './audio.js';
 import { initExam } from './exam.js';
 import { loadPronProgress, updatePronBookEntry } from './pron.js';
 import { loadReadLevels } from './reading.js';
+import { initToday } from './today.js';
 
 function switchView(name){
-  // 六个视图：chat / read / assessment / exam / growth / roadmap；其他值一律按 chat 处理（保留原默认行为）
-  const view = (name==='read'||name==='assessment'||name==='exam'||name==='growth'||name==='roadmap') ? name : 'chat';
-  // 发音教练视图由 pron_coach.js 自管（TASK-0067）；从它切回六视图时必须兜底隐藏，否则两视图重叠（TASK-0068 验收缺陷）
+  // 七个视图：today / chat / read / assessment / exam / growth / roadmap；其他值一律按 today 处理（TASK-0070 今日置首）
+  const view = (name==='today'||name==='read'||name==='assessment'||name==='exam'||name==='growth'||name==='roadmap') ? name
+             : (name==='chat' ? 'chat' : 'today');
+  // 发音教练视图由 pron_coach.js 自管（TASK-0067）；从它切回视图时必须兜底隐藏，否则两视图重叠（TASK-0068 验收缺陷）
   const pv = document.getElementById('viewProncoach');
   if(pv) pv.classList.add('hidden');
   const pt = document.getElementById('tabProncoach');
   if(pt) pt.classList.remove('on');
+  const tv = document.getElementById('viewToday');
+  if(tv) tv.classList.toggle('hidden', view!=='today');
+  // 听力视图由 listen.js 自管（TASK-0071）；切回六视图时同样兜底隐藏（同 TASK-0068 教训）
+  const lv = document.getElementById('viewListen');
+  if(lv) lv.classList.add('hidden');
+  const lt = document.getElementById('tabListen');
+  if(lt) lt.classList.remove('on');
   document.getElementById('viewChat').classList.toggle('hidden', view!=='chat');
   document.getElementById('viewRead').classList.toggle('hidden', view!=='read');
   const av = document.getElementById('viewAssessment');
@@ -24,6 +33,8 @@ function switchView(name){
   if(gv) gv.classList.toggle('hidden', view!=='growth');
   const rv = document.getElementById('viewRoadmap');
   if(rv) rv.classList.toggle('hidden', view!=='roadmap');
+  const tt = document.getElementById('tabToday');
+  if(tt) tt.classList.toggle('on', view==='today');
   document.getElementById('tabChat').classList.toggle('on', view==='chat');
   document.getElementById('tabRead').classList.toggle('on', view==='read');
   const at = document.getElementById('tabAssessment');
@@ -34,6 +45,8 @@ function switchView(name){
   if(gt) gt.classList.toggle('on', view==='growth');
   const rt = document.getElementById('tabRoadmap');
   if(rt) rt.classList.toggle('on', view==='roadmap');
+  // 进入今日视图时刷新数据（每次都拉，保证任务状态真实）
+  if(view==='today'){ initToday(); }
   // 进入词卡（对话）视图时确保进度加载一次；init 已加载则不重复请求
   if(view==='chat' && !state.pron.progressFetched){
     loadPronProgress().then(updatePronBookEntry);

@@ -1,6 +1,60 @@
 {
-  "version": 1,
+  "version": 2,
   "questions": [
+    {
+      "id": "asm_a1_001",
+      "level": "A1",
+      "skill": "词汇",
+      "question": "「Bonjour !」是法语里最常用的打招呼方式，它是什么意思？",
+      "options": ["再见", "你好", "谢谢", "对不起"],
+      "answer_idx": 1,
+      "explanation_zh": "Bonjour 就是『你好』，白天见到人都可以用它打招呼。回答时也说 Bonjour 就好啦。晚上见面可以说 Bonsoir——记住这两个，走到哪儿都能礼貌开口哦。"
+    },
+    {
+      "id": "asm_a1_002",
+      "level": "A1",
+      "skill": "词汇",
+      "question": "别人递给你东西，你想说「谢谢」，应该说哪个词？",
+      "options": ["Merci", "Pardon", "Salut", "Oui"],
+      "answer_idx": 0,
+      "explanation_zh": "Merci 是『谢谢』，别人帮了你想表达感谢就用它，加上 beaucoup 变成 Merci beaucoup（非常感谢）更有礼貌。Pardon 是『对不起/借过』，Salut 是随意的『嗨』，Oui 是『是的』——分清这几个，日常交流就很顺啦。"
+    },
+    {
+      "id": "asm_a1_003",
+      "level": "A1",
+      "skill": "语法",
+      "question": "补全句子：「Je ___ chinois.」（我是中国人，用 être 的正确形式）",
+      "options": ["suis", "es", "est", "sommes"],
+      "answer_idx": 0,
+      "explanation_zh": "être（是）遇到主语 je（我），就变成 suis，所以是 Je suis。es 配 tu，est 配 il/elle，sommes 配 nous。先把『我是 Je suis』记牢，自我介绍就能开口啦。"
+    },
+    {
+      "id": "asm_a1_004",
+      "level": "A1",
+      "skill": "语法",
+      "question": "补全句子：「J'___ un chat.」（我有一只猫，用 avoir 的正确形式）",
+      "options": ["ai", "as", "a", "avons"],
+      "answer_idx": 0,
+      "explanation_zh": "avoir（有）遇到 je 变成 ai，因为 je ai 读起来不顺，缩写成 J'ai，所以是 J'ai un chat。as 配 tu，a 配 il/elle。『J'ai …』是说法语时用得最多的句型之一，先把它变成习惯吧。"
+    },
+    {
+      "id": "asm_a1_005",
+      "level": "A1",
+      "skill": "理解",
+      "question": "「Je m'appelle Marie.」这句话在告诉我们什么？",
+      "options": ["我今年 Marie 岁", "我叫 Marie", "我来自 Marie", "我喜欢 Marie"],
+      "answer_idx": 1,
+      "explanation_zh": "s'appeler 是『名叫』，Je m'appelle Marie 就是『我叫 Marie』。认识新朋友时，这句话是自我介绍的第一步。你也可以说 Je m'appelle + 你的名字，试着介绍自己吧。"
+    },
+    {
+      "id": "asm_a1_006",
+      "level": "A1",
+      "skill": "理解",
+      "question": "朋友问你「Ça va ?」，他是在关心什么？",
+      "options": ["你叫什么名字", "你好吗／还好吗", "现在几点", "东西多少钱"],
+      "answer_idx": 1,
+      "explanation_zh": "Ça va ? 是很口语的『你好吗／还好吗』。回答一句 Ça va bien, merci（我很好，谢谢）就够啦。这是法国人见面最常用的寒暄，跟着说一遍就很地道。"
+    },
     {
       "id": "asm_a2_001",
       "level": "A2",
@@ -36,6 +90,24 @@
       "options": ["可以吸烟", "吸烟区", "禁止吸烟", "小心烟火"],
       "answer_idx": 2,
       "explanation_zh": "Défense de fumer 直译是『不准吸烟』，défense de + 动词表示『禁止做某事』，这是一个很常见的公共标识，认出它就能看懂告示啦。其他几个选项把意思弄反或换了话题，留意这个小陷阱哦。"
+    },
+    {
+      "id": "asm_a2_005",
+      "level": "A2",
+      "skill": "语法",
+      "question": "Choisissez la bonne forme : « Elle ___ au cinéma ce soir. »（aller 的现在时变位）",
+      "options": ["vais", "vas", "va", "allons"],
+      "answer_idx": 2,
+      "explanation_zh": "主语是 elle（她），aller 的现在时第三人称单数是 va，所以是 Elle va au cinéma。vais 配 je，vas 配 tu，allons 配 nous。aller 是个不规则动词，把 je vais / tu vas / il va 这组读熟，出门说『去哪儿』就不用愁啦。"
+    },
+    {
+      "id": "asm_a2_006",
+      "level": "A2",
+      "skill": "理解",
+      "question": "「— Tu veux du café ? — Non, merci, je préfère du thé.」第二个人想要什么？",
+      "options": ["咖啡", "什么都不喝", "茶", "水"],
+      "answer_idx": 2,
+      "explanation_zh": "第二个人先礼貌地谢过咖啡（Non, merci），再说 je préfère du thé——préférer 是『更喜欢』，所以他想要的是茶。抓住 préférer 这个词，就抓住了对方真正的选择，听懂日常点单更轻松啦。"
     },
     {
       "id": "asm_b1_001",
@@ -74,6 +146,24 @@
       "explanation_zh": "第二个人说『还有时间』：火车 8:15 开，现在才 7:50，中间还隔着 25 分钟呢。其他选项把时间理解反了，或凭空加了『改点』。抓住两个时间点一对照，句意就清楚啦。"
     },
     {
+      "id": "asm_b1_005",
+      "level": "B1",
+      "skill": "词汇",
+      "question": "« Ce restaurant a bonne réputation. » Le mot « réputation » veut dire :",
+      "options": ["价格", "名声／口碑", "菜单", "位置"],
+      "answer_idx": 1,
+      "explanation_zh": "réputation 是『名声、口碑』，avoir bonne réputation 就是『口碑好』。价格是 prix，菜单是 carte，位置是 emplacement。认识 réputation，读评论和推荐时就更有把握啦。"
+    },
+    {
+      "id": "asm_b1_006",
+      "level": "B1",
+      "skill": "理解",
+      "question": "« Si j'avais le temps, je voyagerais davantage. » Cette phrase exprime :",
+      "options": ["我过去经常旅行", "如果我有时间，我会多旅行（但现在没有）", "我将来一定会旅行", "我不喜欢旅行"],
+      "answer_idx": 1,
+      "explanation_zh": "这是条件式句型：Si + 未完成过去时（j'avais），主句用条件式（je voyagerais），表达『与现在事实相反的假设』——实际上我现在没有时间。看清 si 从句的时态，就能读懂这种含蓄的愿望啦。"
+    },
+    {
       "id": "asm_b2_001",
       "level": "B2",
       "skill": "词汇",
@@ -108,6 +198,24 @@
       "options": ["提出一个反例", "转换到新的话题", "提出一个疑问", "说明前文带来的结果"],
       "answer_idx": 3,
       "explanation_zh": "第二句用 Cela（这）回指前面的『城市投资交通』，说明它带来的结果——缓解拥堵，所以作用是『说明前文带来的结果』。它并没有举反例、换话题或提问。留意 Cela 这种回指词，段落逻辑一下就清晰啦。"
+    },
+    {
+      "id": "asm_b2_005",
+      "level": "B2",
+      "skill": "词汇",
+      "question": "« Un changement radical est nécessaire. » Le mot « radical » signifie :",
+      "options": ["微小的", "根本的／彻底的", "临时的", "表面的"],
+      "answer_idx": 1,
+      "explanation_zh": "radical 意思是『根本的、彻底的』，un changement radical 就是『根本性的改变』。微小的用 mineur，临时的是 temporaire，表面的是 superficiel。分清这几个形容词，读社论和评论时语气就抓得更准啦。"
+    },
+    {
+      "id": "asm_b2_006",
+      "level": "B2",
+      "skill": "语法",
+      "question": "Choisissez la bonne forme : « Bien qu'il ___ fatigué, il continue à travailler. »",
+      "options": ["est", "sera", "soit", "était"],
+      "answer_idx": 2,
+      "explanation_zh": "bien que（尽管）后面要接虚拟式，être 的第三人称单数虚拟式是 soit，所以是 bien qu'il soit fatigué。est 是直陈式，sera 是将来时，était 是未完成过去时。记住『bien que + 虚拟式』，让步句就写得地道啦。"
     }
   ]
 }

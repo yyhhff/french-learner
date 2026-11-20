@@ -3,6 +3,7 @@ import { FALLBACK_PROFILE, esc, notify, state } from '../store.js';
 import { renderTop } from './chat.js';
 import { switchView } from './growth.js';
 import { recommendNext } from './reading.js';
+import { a1PathDone, openA1Path } from './a1-path.js';
 
 const ASSESS_RESULT_KEY = 'placement_result';
 
@@ -14,7 +15,9 @@ const assessmentState = {
   result:null
 };
 
-const ASM_LEVELS = ['A2','B1','B2'];
+// v2.2 四档：A1/A2/B1/B2；后端权重 0/1/2/3，加权满分 6*(0+1+2+3)=36。
+const ASM_LEVELS = ['A1','A2','B1','B2'];
+const ASM_MAX_WEIGHTED = 36;
 
 function showAssessmentPane(which){
   const map = {intro:'asmIntro', quiz:'asmQuiz', result:'asmResult'};
@@ -53,8 +56,8 @@ async function startAssessment(){
     if(btn) btn.disabled = false;
     return;
   }
-  // 按 level 分组稳定排序 A2 → B1 → B2（判分按 id 匹配，顺序不影响结果）
-  const order = {A2:0, B1:1, B2:2};
+  // 按 level 分组稳定排序 A1 → A2 → B1 → B2（判分按 id 匹配，顺序不影响结果）
+  const order = {A1:0, A2:1, B1:2, B2:3};
   assessmentState.questions = qs.slice().sort((a,b)=>
     (order[a.level]==null?9:order[a.level]) - (order[b.level]==null?9:order[b.level]));
   assessmentState.answers = {};
@@ -155,7 +158,7 @@ async function submitAssessment(){
     notify('网络开小差了，再试一次就好');
     return;
   }
-  const level = String(data.level||'A2');
+  const level = String(data.level||'A1');
   assessmentState.result = data;
   if(state.profile) state.profile.cefr_level = level;
   else state.profile = Object.assign({}, FALLBACK_PROFILE, {cefr_level:level});
@@ -166,16 +169,21 @@ async function submitAssessment(){
   }catch(e){}
   showAssessmentPane('result');
   renderAssessmentResult(data);
+  // v2.2：落 A1 的新定级用户自动进入台阶路径（读音→首词→首句跟读）
+  if(level==='A1' && !a1PathDone() && !sessionStorage.getItem('a1_path_launched')){
+    try{ sessionStorage.setItem('a1_path_launched','1'); }catch(e){}
+    setTimeout(openA1Path, 600);
+  }
 }
 
 function renderAssessmentResult(data){
   const box = document.getElementById('asmResult');
   if(!box) return;
   const score = Number(data.score)||0;
-  const total = Number(data.total)||12;
+  const total = Number(data.total)||24;
   const s = Number(data.weighted_score)||0;
-  const pct = Math.min(100, Math.round(s/24*100));
-  const level = String(data.level||'A2');
+  const pct = Math.min(100, Math.round(s/ASM_MAX_WEIGHTED*100));
+  const level = String(data.level||'A1');
   box.innerHTML = `
     <div class="card asm-result-card">
       <div class="asm-result-top">
@@ -186,13 +194,16 @@ function renderAssessmentResult(data){
         </div>
         <div class="asm-result-score">答对 <b>${score}</b> 题<span> / 共 ${total} 题</span></div>
       </div>
-      <div class="asm-weight-row"><span>加权得分</span><b>${s} / 24</b></div>
+      <div class="asm-weight-row"><span>加权得分</span><b>${s} / ${ASM_MAX_WEIGHTED}</b></div>
       <div class="asm-bar"><i style="width:${pct}%"></i></div>
       <div class="asm-interpret">${esc(data.interpretation_zh||'')}</div>
       <div class="asm-result-actions">
         <button class="asm-ghost" onclick="startAssessment()">再测一次</button>
-        <button class="asm-primary" onclick="goAssessmentRecommend()">看看推荐内容</button>
+        ${level==='A1'
+          ? '<button class="asm-primary" onclick="openA1Path()">🌱 进入第一步</button>'
+          : '<button class="asm-primary" onclick="goAssessmentRecommend()">看看推荐内容</button>'}
       </div>
+      ${level==='A1' ? '<div class="a1-path-hint">从最基础的读音开始，我陪你一步步来 🌱</div>' : ''}
       <div class="asm-result-foot">觉得不太准？随时可以再测一次 🌱</div>
     </div>`;
 }

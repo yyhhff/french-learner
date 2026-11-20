@@ -400,7 +400,7 @@ async def tts(text: str = "", voice: str = "", rate: str = ""):
             import edge_tts
 
             t0 = time.time()
-            communicate = edge_tts.Communicate(text, use_voice, rate=use_rate or None)
+            communicate = edge_tts.Communicate(text, use_voice, rate=use_rate or "+0%")
             buf = io.BytesIO()
             async for chunk in communicate.stream():
                 if chunk["type"] == "audio":

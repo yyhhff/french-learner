@@ -20,12 +20,15 @@ import random
 import re
 import time
 import unicodedata
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 from fastapi import APIRouter, Request
+from fastapi.responses import Response
 
 import db
-from common import ApiError, _record_skill_events, json_body, logger, ok
+from common import ASR_SERVICE_URL, ApiError, _record_skill_events, json_body, logger, ok
 
 router = APIRouter()
 
@@ -219,6 +222,50 @@ async def listen_text_detail(text_id: str):
             **_audio_flags(text_id, [ln["seq"]]),
         })
     return ok({**dict(t), "lines": out_lines})
+
+
+@router.get("/api/listen/line-audio/{text_id}/{seq}")
+async def listen_line_audio(text_id: str, seq: int, variant: str = ""):
+    """句级音频直读（标准 / v1 男声 / v2 缩略形真实语速），文件缺失时服务端回退在线合成。
+
+    兜底在服务端做：原句文本不下发前端（与详情端点同一诚实边界）。
+    """
+    from content_pipeline.paths import AUDIO_DIR
+
+    suffix = f"_{variant}" if variant in ("v1", "v2") else ""
+    path = AUDIO_DIR / text_id / f"{seq}{suffix}.mp3"
+    if path.is_file() and path.stat().st_size > 0:
+        return Response(
+            content=path.read_bytes(),
+            media_type="audio/mpeg",
+            headers={"Cache-Control": "public, max-age=604800"},
+        )
+    conn = db.get_conn()
+    try:
+        ln = conn.execute(
+            "SELECT fr FROM input_lines WHERE text_id = ? AND seq = ?", (text_id, seq)
+        ).fetchone()
+    finally:
+        conn.close()
+    if not ln:
+        raise ApiError(40401, 404, "句不存在")
+    text, voice, rate = ln["fr"], "", ""
+    if variant == "v1":
+        voice = "fr-FR-HenriNeural"
+    elif variant == "v2":
+        from reductions import reduce_sentence
+
+        text, rate = reduce_sentence(ln["fr"]), "+10%"
+    qs = urllib.parse.urlencode({"text": text, "voice": voice, "rate": rate})
+    try:
+        with urllib.request.urlopen(ASR_SERVICE_URL + "/tts?" + qs, timeout=40) as resp:
+            audio = resp.read()
+    except Exception as exc:  # noqa: BLE001 — 8011 不可用时如实报错，前端提示
+        logger.warning("听力音频兜底合成失败 %s/%s/%s：%s", text_id, seq, variant or "std", exc)
+        raise ApiError(50001, 500, "语音合成服务暂不可用")
+    if not audio:
+        raise ApiError(50001, 500, "朗读音频为空")
+    return Response(content=audio, media_type="audio/mpeg")
 
 
 @router.post("/api/listen/answer")

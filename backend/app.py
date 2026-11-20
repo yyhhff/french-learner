@@ -74,7 +74,7 @@ async def generic_error_handler(_request: Request, exc: Exception):
     )
 
 
-# ---------------------------------------------------------------- 路由装配（51 端点，含 v3.1 listen 6 个）
+# ---------------------------------------------------------------- 路由装配（52 端点，含 v3.1 listen 7 个）
 for _router in (
     chat.router,
     translate.router,

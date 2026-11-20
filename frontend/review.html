@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>呀呀法语 · 语料审校台 v2.3</title>
+<style>
+  :root { --bg:#f7f8fa; --card:#fff; --ink:#1f2430; --muted:#6b7280; --line:#e5e7eb;
+          --ok:#0a7d4f; --warn:#b45309; --bad:#b91c1c; --brand:#2f6fed; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif; }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:14px 24px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:5; }
+  header h1 { font-size:17px; margin:0; }
+  header .sub { color:var(--muted); font-size:12px; }
+  .wrap { max-width:1100px; margin:20px auto; padding:0 20px; }
+  .stats { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .stat { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 16px; min-width:110px; }
+  .stat b { font-size:20px; display:block; }
+  .stat span { color:var(--muted); font-size:12px; }
+  .toolbar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+  button { font:inherit; border:1px solid var(--line); background:#fff; border-radius:8px; padding:7px 14px; cursor:pointer; }
+  button:hover { border-color:var(--brand); color:var(--brand); }
+  button.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+  button.ok { background:var(--ok); color:#fff; border-color:var(--ok); }
+  button.bad { color:var(--bad); }
+  .filters select { padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .row { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+  .row .head { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+  .row .title { font-weight:600; font-size:15px; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:var(--brand); margin-left:6px; }
+  .tag.A1,.tag.A2,.tag.B1,.tag.B2 { background:#ecfdf5; color:var(--ok); }
+  .st { font-size:12px; padding:2px 9px; border-radius:999px; }
+  .st.pending,.st.validated { background:#fef3c7; color:var(--warn); }
+  .st.approved { background:#d1fae5; color:var(--ok); }
+  .st.rejected,.st.rejected_by_reviewer { background:#fee2e2; color:var(--bad); }
+  .meta { color:var(--muted); font-size:12px; margin:6px 0; }
+  .body { white-space:pre-wrap; background:#fafbfc; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:8px 0; max-height:180px; overflow:auto; }
+  .flags { font-size:12px; }
+  .flags .e { color:var(--bad); } .flags .w { color:var(--warn); }
+  .actions { display:flex; gap:8px; margin-top:8px; }
+  .note { width:100%; margin-top:6px; padding:6px 10px; border:1px solid var(--line); border-radius:8px; }
+  .empty { text-align:center; color:var(--muted); padding:40px; }
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1f2430; color:#fff;
+           padding:10px 18px; border-radius:8px; opacity:0; transition:opacity .25s; z-index:20; }
+  .toast.show { opacity:1; }
+  a { color:var(--brand); text-decoration:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>语料审校台 <span class="sub">v2.3 内容工厂 · 唯一入库通道</span></h1>
+  <span class="sub" style="margin-left:auto"><a href="/">← 返回应用</a></span>
+</header>
+<div class="wrap">
+  <div class="stats" id="stats"></div>
+  <div class="toolbar">
+    <div class="filters">
+      <select id="f-status"><option value="">全部状态</option><option>pending</option><option>validated</option><option>approved</option><option>rejected</option></select>
+      <select id="f-level"><option value="">全部等级</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select>
+    </div>
+    <button class="primary" id="ai-approve">AI 批量通过（已校验候选）</button>
+    <button id="refresh">刷新</button>
+    <span class="sub" id="count"></span>
+  </div>
+  <div id="list"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const API = {
+  queue: '/api/content/review/queue',
+  approve: '/api/content/review/approve',
+  reject: '/api/content/review/reject',
+  approveAll: '/api/content/review/approve-all',
+};
+let rows = [];
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000); }
+async function api(url, body){
+  const opt = body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {};
+  const r = await fetch(url, opt); const j = await r.json();
+  if (j.code !== 0) throw new Error(j.message || '请求失败');
+  return j.data;
+}
+async function load(){
+  rows = await api(API.queue); render();
+}
+function render(){
+  const fs=document.getElementById('f-status').value, fl=document.getElementById('f-level').value;
+  const shown = rows.filter(r => (!fs || r.status.indexOf(fs)===0) && (!fl || r.level===fl));
+  const cnt = rows.reduce((a,r)=>{a[r.status]=(a[r.status]||0)+1; return a;},{});
+  document.getElementById('stats').innerHTML =
+    ['pending','validated','approved','rejected'].map(s=>`<div class="stat"><b>${cnt[s]||0}</b><span>${s}</span></div>`).join('');
+  document.getElementById('count').textContent = `显示 ${shown.length} / ${rows.length}`;
+  const el=document.getElementById('list');
+  if(!shown.length){ el.innerHTML='<div class="empty">暂无候选。先在命令行运行生成与校验管线。</div>'; return; }
+  el.innerHTML = shown.map((r,i)=>{
+    const pass = r.validation_pass===true;
+    const flags = (r.errors||[]).map(e=>`<span class="e">✗ ${e}</span>`).join(' ') +
+                  (r.warnings||[]).map(w=>`<span class="w">△ ${w}</span>`).join(' ');
+    return `<div class="row" data-slot="${r.slot}">
+      <div class="head"><div class="title">${r.title||r.id||r.slot}
+        <span class="tag ${r.level||''}">${r.level||'?'}</span><span class="tag">${r.topic||''}</span></div>
+        <span class="st ${r.status}">${r.status}</span></div>
+      <div class="meta">${r.id||''} · 校验:${pass?'通过':(r.validation_pass===false?'未通过':'未校验')} · 覆盖率:${r.coverage??'—'} · 审核者:${r.reviewed_by||'—'}</div>
+      <div class="flags">${flags||'<span style="color:var(--muted)">无异常</span>'}</div>
+      <input class="note" placeholder="审校备注（否决/改后通过时填写）">
+      <div class="actions">
+        <button class="ok" data-act="approve">通过并入库</button>
+        <button class="bad" data-act="reject">否决</button>
+      </div></div>`;
+  }).join('');
+  el.querySelectorAll('.row').forEach(row=>{
+    row.querySelectorAll('button[data-act]').forEach(btn=>{
+      btn.onclick = async ()=>{
+        const slot=row.dataset.slot, note=row.querySelector('.note').value;
+        const url = btn.dataset.act==='approve' ? API.approve : API.reject;
+        try { await api(url, {slot, note, reviewer:'human-reviewer'}); toast(btn.dataset.act==='approve'?'已通过并入库':'已否决'); await load(); }
+        catch(e){ toast('操作失败：'+e.message); }
+      };
+    });
+  });
+}
+document.getElementById('refresh').onclick = load;
+document.getElementById('f-status').onchange = render;
+document.getElementById('f-level').onchange = render;
+document.getElementById('ai-approve').onclick = async ()=>{
+  if(!confirm('AI 批量通过所有已校验候选？通过的条目将写入 texts.json（保留人工否决通道）。')) return;
+  try { const d=await api(API.approveAll, {reviewer:'ai-reviewer-v2.3'});
+    toast(`新增 ${d.added} 篇，已存在 ${d.skipped_existing} 篇`); await load(); }
+  catch(e){ toast('操作失败：'+e.message); }
+};
+load().catch(e=>{ document.getElementById('list').innerHTML=`<div class="empty">加载失败：${e.message}<br>请确认主后端（8000/8001）已启动。</div>`; });
+</script>
+</body>
+</html>

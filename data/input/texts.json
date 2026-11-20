@@ -598,6 +598,823 @@
         { "word": "malgré tout", "meaning": "尽管如此", "pos": "loc.", "cefr_level": "B2", "example": "Malgré tout, beaucoup de jeunes choisissent de s'y installer.", "pronunciation": "mal.ɡʁe tu", "line_seq": 5 },
         { "word": "aspirations", "meaning": "抱负，愿望", "pos": "n.f.", "cefr_level": "C1", "example": "Un choix qui reflète nos aspirations et nos priorités.", "pronunciation": "as.pi.ʁa.sjɔ̃", "line_seq": 6 }
       ]
+    },
+    {
+      "id": "gen_a1_001",
+      "title": "早晨起床",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Bonjour !\nComment ça va ?\nJe me lève à 7 heures.",
+      "body_cn": "你好！\n你好吗？\n我七点钟起床。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour !", "cn": "你好！", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Comment ça va ?", "cn": "你好吗？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je me lève à 7 heures.", "cn": "我七点钟起床。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour !", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "Comment", "meaning": "怎样，如何", "pos": "adv.", "cefr_level": "A1", "example": "Comment ça va ?", "pronunciation": "kɔ̃ ʁə" },
+        { "word": "ça va", "meaning": "你好吗", "pos": "phr.", "cefr_level": "A1", "example": "Comment ça va ?", "pronunciation": "sɑ vɑ" },
+        { "word": "Je", "meaning": "我", "pos": "pron.", "cefr_level": "A1", "example": "Je me lève à 7 heures.", "pronunciation": "ʒe" },
+        { "word": "me lève", "meaning": "起床", "pos": "v.", "cefr_level": "A1", "example": "Je me lève à 7 heures.", "pronunciation": "mə lev" }
+      ]
+    },
+    {
+      "id": "gen_a1_003",
+      "title": "在面包店",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Bonjour, pouvez-vous me donner un pain ?\nOui, bien sûr, madame. Vous avez le pain complet ou le pain de mie ?\nJe prends le pain complet, s'il vous plaît.",
+      "body_cn": "你好，你能给我一块面包吗？\n当然可以，女士。您要全麦面包还是白面包？\n我想要全麦面包。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, pouvez-vous me donner un pain ?", "cn": "你好，你能给我一块面包吗？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, bien sûr, madame. Vous avez le pain complet ou le pain de mie ?", "cn": "当然可以，女士。您要全麦面包还是白面包？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je prends le pain complet, s'il vous plaît.", "cn": "我想要全麦面包。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, comment ça va ?", "pronunciation": "bɔ̃ʁo" },
+        { "word": "pouvez-vous", "meaning": "你能", "pos": "v.pr.", "cefr_level": "A1", "example": "Pouvez-vous me donner un pain ?", "pronunciation": "puvəv" },
+        { "word": "un", "meaning": "一", "pos": "art.", "cefr_level": "A1", "example": "un pain", "pronunciation": "ɛ̃" },
+        { "word": "paine", "meaning": "面包", "pos": "n.m.", "cefr_level": "A1", "example": "Je veux un pain.", "pronunciation": "pan" },
+        { "word": "complet", "meaning": "全麦的", "pos": "adj.", "cefr_level": "A1", "example": "le pain complet", "pronunciation": "kɔ̃plɛ" }
+      ]
+    },
+    {
+      "id": "gen_a1_005",
+      "title": "周末计划",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Je vais à la plage ce week-end.\nTu vas aussi ?\nOui, je vais au parc avec mes amis.",
+      "body_cn": "这个周末我要去海滩。\n你也要去吗？\n是的，我要和朋友们去公园。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Je vais à la plage ce week-end.", "cn": "这个周末我要去海滩。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Tu vas aussi ?", "cn": "你也要去吗？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Oui, je vais au parc avec mes amis.", "cn": "是的，我要和朋友们去公园。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "vais", "meaning": "去，走", "pos": "v.", "cefr_level": "A1", "example": "Je vais à la plage.", "pronunciation": "vai" },
+        { "word": "plage", "meaning": "海滩", "pos": "n.f.", "cefr_level": "A1", "example": "Nous allons à la plage.", "pronunciation": "plag" },
+        { "word": "parc", "meaning": "公园", "pos": "n.m.", "cefr_level": "A1", "example": "Il y a un parc près de chez nous.", "pronunciation": "par" },
+        { "word": "amis", "meaning": "朋友", "pos": "n.m.", "cefr_level": "A1", "example": "Mes amis sont ici.", "pronunciation": "ami" }
+      ]
+    },
+    {
+      "id": "gen_a1_007",
+      "title": "借东西",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Tu peux me prêter ton livre ?\nOui, bien sûr. C'est là-bas.\nMerci beaucoup.",
+      "body_cn": "你能把你的书借给我吗？\n当然可以。在那边。\n非常感谢。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Tu peux me prêter ton livre ?", "cn": "你能把你的书借给我吗？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, bien sûr. C'est là-bas.", "cn": "当然可以。在那边。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Merci beaucoup.", "cn": "非常感谢。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "prêter", "meaning": "借", "pos": "v.", "cefr_level": "A1", "example": "Je peux te prêter mon stylo.", "pronunciation": "pʁe.tʀe" },
+        { "word": "livre", "meaning": "书", "pos": "n.m.", "cefr_level": "A1", "example": "Il a beaucoup de livres.", "pronunciation": "l.vʁ" },
+        { "word": "oui", "meaning": "是的", "pos": "adv.", "cefr_level": "A1", "example": "Tu veux boire du thé ?", "pronunciation": "wɛ" },
+        { "word": "merci", "meaning": "谢谢", "pos": "intj.", "cefr_level": "A1", "example": "Merci pour ton aide.", "pronunciation": "mɛʁ.si" }
+      ]
+    },
+    {
+      "id": "gen_a1_008",
+      "title": "预约理发",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Bonjour, je voudrais prendre un rendez-vous pour une coupe de cheveux.\nJe suis disponible le mardi après-midi.\nMerci.",
+      "body_cn": "你好，我想预约剪头发。\n我周二下午有空。\n谢谢。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, je voudrais prendre un rendez-vous pour une coupe de cheveux.", "cn": "你好，我想预约剪头发。" },
+        { "seq": 2, "speaker": null, "fr": "Je suis disponible le mardi après-midi.", "cn": "我周二下午有空。" },
+        { "seq": 3, "speaker": null, "fr": "Merci.", "cn": "谢谢。" }
+      ],
+      "words": [
+        { "word": "rendez-vous", "meaning": "预约", "pos": "n.m.", "cefr_level": "A1", "example": "Je veux prendre un rendez-vous.", "pronunciation": "ʁɑ̃.də.vw" },
+        { "word": "coupe", "meaning": "剪发", "pos": "n.f.", "cefr_level": "A1", "example": "Je veux une coupe courte.", "pronunciation": "ku.p" },
+        { "word": "disponible", "meaning": "有空", "pos": "adj.", "cefr_level": "A1", "example": "Je suis disponible demain.", "pronunciation": "di.spɑ̃.a.bəl" },
+        { "word": "merci", "meaning": "谢谢", "pos": "interj.", "cefr_level": "A1", "example": "Merci pour ton aide.", "pronunciation": "mɛʁ.si" }
+      ]
+    },
+    {
+      "id": "gen_a1_011",
+      "title": "买火车票",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Bonjour, pouvez-vous m'aider à acheter un billet de train?\nOui, bien sûr. Vous avez besoin d'un billet aller simple ou retour?\nJe veux un billet aller simple, s'il vous plaît.",
+      "body_cn": "你好，你能帮我买张火车票吗？\n当然可以。您需要单程票还是往返票？\n我想要一张单程票，谢谢。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, pouvez-vous m'aider à acheter un billet de train?", "cn": "你好，你能帮我买张火车票吗？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, bien sûr. Vous avez besoin d'un billet aller simple ou retour?", "cn": "当然可以。您需要单程票还是往返票？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je veux un billet aller simple, s'il vous plaît.", "cn": "我想要一张单程票，谢谢。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "billet", "meaning": "票", "pos": "n.m.", "cefr_level": "A1", "example": "un billet de train", "pronunciation": "bile" },
+        { "word": "aller simple", "meaning": "单程票", "pos": "adj.", "cefr_level": "A1", "example": "un billet aller simple", "pronunciation": "alɛʁ sɛ̃pl" },
+        { "word": "retour", "meaning": "往返", "pos": "n.m.", "cefr_level": "A1", "example": "un billet aller-retour", "pronunciation": "ʁtwɛʁ" },
+        { "word": "s'il vous plaît", "meaning": "请", "pos": "interj.", "cefr_level": "A1", "example": "Je veux un café, s'il vous plaît.", "pronunciation": "sɛl vɔz plɛ" }
+      ]
+    },
+    {
+      "id": "gen_a1_013",
+      "title": "打车出行",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Bonjour, je voudrais un taxi.\nOui, bien sûr. Où voulez-vous aller ?\nJe vais à l'aéroport.\nMerci.",
+      "body_cn": "你好，我想要一辆出租车。\n好的，当然。您要去哪里？\n我要去机场。\n谢谢。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, je voudrais un taxi.", "cn": "你好，我想要一辆出租车。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, bien sûr. Où voulez-vous aller ?", "cn": "好的，当然。您要去哪里？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je vais à l'aéroport.", "cn": "我要去机场。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Merci.", "cn": "谢谢。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, comment ça va ?", "pronunciation": "bɔ̃ʁo" },
+        { "word": "taxi", "meaning": "出租车", "pos": "n.m.", "cefr_level": "A1", "example": "Je prends un taxi.", "pronunciation": "taksi" },
+        { "word": "Oui", "meaning": "是的", "pos": "adv.", "cefr_level": "A1", "example": "Oui, je veux ça.", "pronunciation": "wɛ" },
+        { "word": "voudrais", "meaning": "想要", "pos": "v. irreg.", "cefr_level": "A1", "example": "Je voudrais un verre d'eau.", "pronunciation": "vudʁa" },
+        { "word": "aéroport", "meaning": "机场", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais à l'aéroport.", "pronunciation": "ɛʁɔːpɔʁ" }
+      ]
+    },
+    {
+      "id": "gen_a1_015",
+      "title": "公交换乘",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Bonjour, je vais au centre-ville. Pouvez-vous me dire comment je peux y aller en bus ?\nOui, c'est simple. Prenez le bus 3 et descendez à la station 'Centre-ville'.\nMerci, c'est très gentil.",
+      "body_cn": "你好，我要去市中心。你能告诉我怎么坐公交去吗？\n是的，很简单。坐3路公交，在市中心站下车。\n谢谢，太好了。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, je vais au centre-ville. Pouvez-vous me dire comment je peux y aller en bus ?", "cn": "你好，我要去市中心。你能告诉我怎么坐公交去吗？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, c'est simple. Prenez le bus 3 et descendez à la station 'Centre-ville'.", "cn": "是的，很简单。坐3路公交，在市中心站下车。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Merci, c'est très gentil.", "cn": "谢谢，太好了。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int. (interjection)", "cefr_level": "A1", "example": "Bonjour, comment ça va ?", "pronunciation": "bɔ̃ʁʒo" },
+        { "word": "centre-ville", "meaning": "市中心", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais au centre-ville.", "pronunciation": "sɛ̃.tɛʁ.vil" },
+        { "word": "bus", "meaning": "公交", "pos": "n.m.", "cefr_level": "A1", "example": "Prenez le bus 3.", "pronunciation": "bys" },
+        { "word": "station", "meaning": "站", "pos": "n.f.", "cefr_level": "A1", "example": "Descendez à la station.", "pronunciation": "stasjɔ̃" }
+      ]
+    },
+    {
+      "id": "gen_a1_016",
+      "title": "询问时刻表",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Bonjour, pouvez-vous me dire quand est-ce que le prochain train pour Paris part ?\nJe voudrais savoir l'heure du prochain bus pour la gare.\nMerci.",
+      "body_cn": "你好，你能告诉我下一班去巴黎的火车什么时候出发吗？\n我想知道下一班去火车站的公交车是什么时候。\n谢谢。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, pouvez-vous me dire quand est-ce que le prochain train pour Paris part ?", "cn": "你好，你能告诉我下一班去巴黎的火车什么时候出发吗？", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je voudrais savoir l'heure du prochain bus pour la gare.", "cn": "我想知道下一班去火车站的公交车是什么时候。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Merci.", "cn": "谢谢。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, comment ça va ?", "pronunciation": "bɔ̃ʁo" },
+        { "word": "pouvez-vous", "meaning": "你能", "pos": "v.", "cefr_level": "A1", "example": "Pouvez-vous me donner l'heure ?", "pronunciation": "puvəv" },
+        { "word": "dire", "meaning": "告诉", "pos": "v.", "cefr_level": "A1", "example": "Je peux te dire que je suis en retard.", "pronunciation": "dɛʁ" },
+        { "word": "quand", "meaning": "什么时候", "pos": "adv.", "cefr_level": "A1", "example": "Quand est-ce que tu viens ?", "pronunciation": "kɑ̃" },
+        { "word": "le", "meaning": "下一班", "pos": "art.", "cefr_level": "A1", "example": "Le prochain train est à 9h.", "pronunciation": "lə" },
+        { "word": "train", "meaning": "火车", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais en train.", "pronunciation": "tʁɛn" },
+        { "word": "Paris", "meaning": "巴黎", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais à Paris.", "pronunciation": "pari" },
+        { "word": "part", "meaning": "出发", "pos": "v.", "cefr_level": "A1", "example": "Le train part à 8h.", "pronunciation": "pɑʁt" },
+        { "word": "bus", "meaning": "公交车", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais en bus.", "pronunciation": "by" }
+      ]
+    },
+    {
+      "id": "gen_a1_017",
+      "title": "试衣服",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Bonjour, est-ce que je peux essayer cette robe?\nOui, bien sûr. Allez-y, c'est dans la cabine.\nC'est très joli. Je l'essaie.",
+      "body_cn": "你好，我可以试穿这件裙子吗？\n当然可以。请进，换衣间在那边。\n很好看。我试试。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, est-ce que je peux essayer cette robe?", "cn": "你好，我可以试穿这件裙子吗？", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Oui, bien sûr. Allez-y, c'est dans la cabine.", "cn": "当然可以。请进，换衣间在那边。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "C'est très joli. Je l'essaie.", "cn": "很好看。我试试。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "essayer", "meaning": "试穿", "pos": "v.", "cefr_level": "A1", "example": "Je vais essayer cette chemise.", "pronunciation": "ɛs.tai.ʁ" },
+        { "word": "robe", "meaning": "裙子", "pos": "n.f.", "cefr_level": "A1", "example": "Cette robe est jolie.", "pronunciation": "ʁɔb" },
+        { "word": "cabine", "meaning": "换衣间", "pos": "n.f.", "cefr_level": "A1", "example": "La cabine est grande.", "pronunciation": "kabin" },
+        { "word": "joli", "meaning": "好看的", "pos": "adj.", "cefr_level": "A1", "example": "Ce livre est joli.", "pronunciation": "ʒɔ.li" }
+      ]
+    },
+    {
+      "id": "gen_a1_019",
+      "title": "在菜市场上",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Bonjour, je cherche du poivre.\nDis-moi, où est le poivre ?\nMerci, voici le poivre.",
+      "body_cn": "你好，我想找些胡椒。\n请问胡椒在哪里？\n谢谢，这就是胡椒。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, je cherche du poivre.", "cn": "你好，我想找些胡椒。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Dis-moi, où est le poivre ?", "cn": "请问胡椒在哪里？", "audio_url": null },
+        { "seq": 3, "speaker": "B", "fr": "Merci, voici le poivre.", "cn": "谢谢，这就是胡椒。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, comment ça va ?", "pronunciation": "boʁn" },
+        { "word": "cherche", "meaning": "找", "pos": "v.", "cefr_level": "A1", "example": "Je cherche mon portefeuille.", "pronunciation": "ʃɛʁtʃ" },
+        { "word": "poivre", "meaning": "胡椒", "pos": "n.m.", "cefr_level": "A1", "example": "J'aime le goût du poivre.", "pronunciation": "pɔvɛʁ" },
+        { "word": "Dis-moi", "meaning": "请问", "pos": "int.", "cefr_level": "A1", "example": "Dis-moi ton nom, s'il te plaît.", "pronunciation": "dis'mwa" },
+        { "word": "Merci", "meaning": "谢谢", "pos": "int.", "cefr_level": "A1", "example": "Merci pour ton aide.", "pronunciation": "mɛʁsi" }
+      ]
+    },
+    {
+      "id": "gen_a1_022",
+      "title": "网上购物",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Bonjour, je vais faire des achats en ligne aujourd'hui.\nJe vais chercher des vêtements pour la saison d'automne.\nJe vais aussi commander des livres pour lire pendant les vacances.",
+      "body_cn": "你好，我今天要网上购物。\n我要找一些秋天的衣服。\n我还要订购一些书，假期的时候读。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, je vais faire des achats en ligne aujourd'hui.", "cn": "你好，我今天要网上购物。" },
+        { "seq": 2, "speaker": null, "fr": "Je vais chercher des vêtements pour la saison d'automne.", "cn": "我要找一些秋天的衣服。" },
+        { "seq": 3, "speaker": null, "fr": "Je vais aussi commander des livres pour lire pendant les vacances.", "cn": "我还要订购一些书，假期的时候读。" }
+      ],
+      "words": [
+        { "word": "achats", "meaning": "购物", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais faire des achats.", "pronunciation": "a.ʃa" },
+        { "word": "vêtements", "meaning": "衣服", "pos": "n.m.", "cefr_level": "A1", "example": "Je cherche des vêtements pour l'été.", "pronunciation": "vɛ.tɛmɔ̃" },
+        { "word": "saison", "meaning": "季节", "pos": "n.f.", "cefr_level": "A1", "example": "C'est la saison des fruits.", "pronunciation": "asezɔ̃" },
+        { "word": "commander", "meaning": "订购", "pos": "v.", "cefr_level": "A1", "example": "Je vais commander un livre.", "pronunciation": "ko.mɑ̃.de" }
+      ]
+    },
+    {
+      "id": "gen_a1_002",
+      "title": "超市购物",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Je vais faire mes courses au supermarché.\nJe prends une bannière pour me souvenir des produits que je dois acheter.\nJe suis dans le rayon des fruits et légumes.\nLes tomates sont rouges et les pommes sont jaunes.",
+      "body_cn": "我要去超市购物。\n我拿了一面旗帜来记住我需要买的产品。\n我在水果和蔬菜区。\n西红柿是红色的，苹果是黄色的。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je vais faire mes courses au supermarché.", "cn": "我要去超市购物。" },
+        { "seq": 2, "speaker": null, "fr": "Je prends une bannière pour me souvenir des produits que je dois acheter.", "cn": "我拿了一面旗帜来记住我需要买的产品。" },
+        { "seq": 3, "speaker": null, "fr": "Je suis dans le rayon des fruits et légumes.", "cn": "我在水果和蔬菜区。" },
+        { "seq": 4, "speaker": null, "fr": "Les tomates sont rouges et les pommes sont jaunes.", "cn": "西红柿是红色的，苹果是黄色的。" }
+      ],
+      "words": [
+        { "word": "courses", "meaning": "购物", "pos": "n.f.", "cefr_level": "A1", "example": "Je vais faire mes courses.", "pronunciation": "kɔʁs" },
+        { "word": "supermarché", "meaning": "超市", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais au supermarché.", "pronunciation": "supɛʁmɑʁʃe" },
+        { "word": "bannière", "meaning": "旗帜", "pos": "n.f.", "cefr_level": "A1", "example": "Je prends une bannière.", "pronunciation": "banjeʁ" },
+        { "word": "produits", "meaning": "产品", "pos": "n.m.pl.", "cefr_level": "A1", "example": "Je dois acheter des produits.", "pronunciation": "pʁɔdyti" },
+        { "word": "fruits", "meaning": "水果", "pos": "n.m.pl.", "cefr_level": "A1", "example": "Je suis dans le rayon des fruits.", "pronunciation": "fʁwi" },
+        { "word": "légumes", "meaning": "蔬菜", "pos": "n.m.pl.", "cefr_level": "A1", "example": "Je suis dans le rayon des légumes.", "pronunciation": "lɛɡym" },
+        { "word": "tomates", "meaning": "西红柿", "pos": "n.f.pl.", "cefr_level": "A1", "example": "Les tomates sont rouges.", "pronunciation": "tɔmat" },
+        { "word": "pommes", "meaning": "苹果", "pos": "n.f.pl.", "cefr_level": "A1", "example": "Les pommes sont jaunes.", "pronunciation": "pɔm" }
+      ]
+    },
+    {
+      "id": "gen_a1_010",
+      "title": "乘坐地铁",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Je vais au travail en métro tous les jours.\nLe métro est rapide et confortable.\nJ'aime le métro parce qu'il est pratique et il y a toujours des gens.",
+      "body_cn": "我每天乘坐地铁去上班。\n地铁又快又舒适。\n我喜欢地铁因为它很方便，而且总有人。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je vais au travail en métro tous les jours.", "cn": "我每天乘坐地铁去上班。" },
+        { "seq": 2, "speaker": null, "fr": "Le métro est rapide et confortable.", "cn": "地铁又快又舒适。" },
+        { "seq": 3, "speaker": null, "fr": "J'aime le métro parce qu'il est pratique et il y a toujours des gens.", "cn": "我喜欢地铁因为它很方便，而且总有人。" }
+      ],
+      "words": [
+        { "word": "vais", "meaning": "去", "pos": "v.", "cefr_level": "A1", "example": "Je vais à l'école.", "pronunciation": "vɛ" },
+        { "word": "travail", "meaning": "工作", "pos": "n.m.", "cefr_level": "A1", "example": "Il travaille dans une entreprise.", "pronunciation": "tʁwaʁɔl" },
+        { "word": "métro", "meaning": "地铁", "pos": "n.m.", "cefr_level": "A1", "example": "Je prends le métro pour aller au travail.", "pronunciation": "mɛtʁo" },
+        { "word": "rapide", "meaning": "快的", "pos": "adj.", "cefr_level": "A1", "example": "Le train est rapide.", "pronunciation": "ʁapid" },
+        { "word": "confortable", "meaning": "舒适的", "pos": "adj.", "cefr_level": "A1", "example": "La chaise est confortable.", "pronunciation": "kɔ̃fɔʁtɛbl" }
+      ]
+    },
+    {
+      "id": "gen_a1_018",
+      "title": "退换货的经历",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Hier, j'ai acheté un pull. Mais aujourd'hui, je suis allé(e) au magasin pour le changer. Le pull était trop grand.\nLe vendeur m'a demandé mon billet de caisse. Après l'avoir vérifié, il m'a dit que je pouvais le changer.\nJ'ai pris un autre pull de la bonne taille et je suis sorti(e) content(e).",
+      "body_cn": "昨天，我买了一件毛衣。但今天，我去商店换了一件。毛衣太大了。\n售货员问我要收据。检查过后，他告诉我我可以换。\n我拿了一件合适尺寸的毛衣，很高兴地走了出来。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Hier, j'ai acheté un pull. Mais aujourd'hui, je suis allé(e) au magasin pour le changer. Le pull était trop grand.", "cn": "昨天，我买了一件毛衣。但今天，我去商店换了一件。毛衣太大了。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Le vendeur m'a demandé mon billet de caisse. Après l'avoir vérifié, il m'a dit que je pouvais le changer.", "cn": "售货员问我要收据。检查过后，他告诉我我可以换。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "J'ai pris un autre pull de la bonne taille et je suis sorti(e) content(e).", "cn": "我拿了一件合适尺寸的毛衣，很高兴地走了出来。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "acheter", "meaning": "买", "pos": "v.", "cefr_level": "A1", "example": "Je veux acheter un livre.", "pronunciation": "a.ʃe.bɛʁ" },
+        { "word": "marchand", "meaning": "售货员", "pos": "n.m.", "cefr_level": "A1", "example": "Le marchand m'a demandé mon argent.", "pronunciation": "maʃ.ɑ̃" },
+        { "word": "changer", "meaning": "换", "pos": "v.", "cefr_level": "A1", "example": "Je veux changer ce pull.", "pronunciation": "ʃa.ʒe" },
+        { "word": "grand", "meaning": "大", "pos": "adj.", "cefr_level": "A1", "example": "Ce pull est trop grand.", "pronunciation": "ɡʁɑ̃" }
+      ]
+    },
+    {
+      "id": "gen_a1_024",
+      "title": "找零钱",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Je suis allé(e) au magasin hier.\nJ'ai acheté un livre et un stylo.\nLe total est de vingt euros.\nLa caissière m'a donné onze euros de change.",
+      "body_cn": "我昨天去了商店。\n我买了一本书和一支钢笔。\n总共是二十欧元。\n收银员给了我十一个欧元找零。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je suis allé(e) au magasin hier.", "cn": "我昨天去了商店。" },
+        { "seq": 2, "speaker": null, "fr": "J'ai acheté un livre et un stylo.", "cn": "我买了一本书和一支钢笔。" },
+        { "seq": 3, "speaker": null, "fr": "Le total est de vingt euros.", "cn": "总共是二十欧元。" },
+        { "seq": 4, "speaker": null, "fr": "La caissière m'a donné onze euros de change.", "cn": "收银员给了我十一个欧元找零。" }
+      ],
+      "words": [
+        { "word": "magasin", "meaning": "商店", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais au magasin.", "pronunciation": "maɡa.sɛ̃" },
+        { "word": "livre", "meaning": "书", "pos": "n.m.", "cefr_level": "A1", "example": "J'aime lire des livres.", "pronunciation": "libʁ" },
+        { "word": "stylo", "meaning": "钢笔", "pos": "n.m.", "cefr_level": "A1", "example": "Je veux un stylo noir.", "pronunciation": "stilo" },
+        { "word": "total", "meaning": "总共", "pos": "adj.", "cefr_level": "A1", "example": "Le total est de vingt euros.", "pronunciation": "tɔtal" },
+        { "word": "euros", "meaning": "欧元", "pos": "n.m.", "cefr_level": "A1", "example": "J'ai vingt euros.", "pronunciation": "ɛʁo" },
+        { "word": "change", "meaning": "找零", "pos": "n.m.", "cefr_level": "A1", "example": "Il me donne cinq euros de change.", "pronunciation": "ʃɑ̃ʒ" }
+      ]
+    },
+    {
+      "id": "gen_a1_025",
+      "title": "看医生",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Bonjour, docteur.\nJ'ai mal à la tête.\nJe prends de la fièvre.\nMerci, docteur.",
+      "body_cn": "您好，医生。\n我头痛。\n我发烧了。\n谢谢，医生。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, docteur.", "cn": "您好，医生。" },
+        { "seq": 2, "speaker": "A", "fr": "J'ai mal à la tête.", "cn": "我头痛。" },
+        { "seq": 3, "speaker": "A", "fr": "Je prends de la fièvre.", "cn": "我发烧了。" },
+        { "seq": 4, "speaker": "A", "fr": "Merci, docteur.", "cn": "谢谢，医生。" }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "您好", "pos": "interj.", "cefr_level": "A1", "example": "Bonjour, comment ça va ?", "pronunciation": "bɔ̃ʁʁo" },
+        { "word": "docteur", "meaning": "医生", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais voir le docteur.", "pronunciation": "dɔktyʁ" },
+        { "word": "mal", "meaning": "痛", "pos": "adj.", "cefr_level": "A1", "example": "J'ai mal à la main.", "pronunciation": "mal" },
+        { "word": "tête", "meaning": "头", "pos": "n.f.", "cefr_level": "A1", "example": "J'ai mal à la tête.", "pronunciation": "te" },
+        { "word": "fièvre", "meaning": "发烧", "pos": "n.f.", "cefr_level": "A1", "example": "Il a de la fièvre.", "pronunciation": "fɛʁvɛʁ" },
+        { "word": "Merci", "meaning": "谢谢", "pos": "interj.", "cefr_level": "A1", "example": "Merci beaucoup.", "pronunciation": "mɛʁsi" }
+      ]
+    },
+    {
+      "id": "gen_a1_004",
+      "title": "邻里寒暄",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Bonjour voisin.\nJe viens vous dire bonjour.\nJ'espère que vous allez bien.\nBon appétit.",
+      "body_cn": "你好邻居。\n我来向你问好。\n我希望你一切都好。\n祝你用餐愉快。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour voisin.", "cn": "你好邻居。" },
+        { "seq": 2, "speaker": null, "fr": "Je viens vous dire bonjour.", "cn": "我来向你问好。" },
+        { "seq": 3, "speaker": null, "fr": "J'espère que vous allez bien.", "cn": "我希望你一切都好。" },
+        { "seq": 4, "speaker": null, "fr": "Bon appétit.", "cn": "祝你用餐愉快。" }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "interj.", "cefr_level": "A1", "example": "Bonjour tout le monde.", "pronunciation": "bɔ̃ʁʒu" },
+        { "word": "voisin", "meaning": "邻居", "pos": "n.m.", "cefr_level": "A1", "example": "Mon voisin est sympa.", "pronunciation": "vwa.sɛ̃" },
+        { "word": "dire", "meaning": "说，告诉", "pos": "v.", "cefr_level": "A1", "example": "Je vous dis que c'est bon.", "pronunciation": "dɛʁ" },
+        { "word": "bonjour", "meaning": "你好", "pos": "interj.", "cefr_level": "A1", "example": "Bonjour à toi.", "pronunciation": "bɔ̃ʁʒu" },
+        { "word": "allez", "meaning": "去，走，好，行", "pos": "v.", "cefr_level": "A1", "example": "Allez-y, c'est bon.", "pronunciation": "a.lɛ" },
+        { "word": "bien", "meaning": "好，好地", "pos": "adj.", "cefr_level": "A1", "example": "Je vais bien.", "pronunciation": "bɛ̃" },
+        { "word": "bon appétit", "meaning": "祝你用餐愉快", "pos": "interj.", "cefr_level": "A1", "example": "Bon appétit !", "pronunciation": "bɔ̃ ɑ̃.pɛ.ti" }
+      ]
+    },
+    {
+      "id": "gen_a1_009",
+      "title": "问路",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Bonjour, madame !\nOù est la gare ?\nJe vais prendre le train.\nMerci !",
+      "body_cn": "你好，女士！\n火车站在哪里？\n我要坐火车。\n谢谢！",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, madame !", "cn": "你好，女士！", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Où est la gare ?", "cn": "火车站在哪里？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je vais prendre le train.", "cn": "我要坐火车。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Merci !", "cn": "谢谢！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour !", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "madame", "meaning": "女士", "pos": "n.f.", "cefr_level": "A1", "example": "Bonjour, madame !", "pronunciation": "madm" },
+        { "word": "Où", "meaning": "在哪里", "pos": "adv.", "cefr_level": "A1", "example": "Où est la gare ?", "pronunciation": "ø" },
+        { "word": "la gare", "meaning": "火车站", "pos": "n.f.", "cefr_level": "A1", "example": "Où est la gare ?", "pronunciation": "lɛ ɡaʁ" },
+        { "word": "Je vais", "meaning": "我要", "pos": "v.", "cefr_level": "A1", "example": "Je vais prendre le train.", "pronunciation": "ʒə va" }
+      ]
+    },
+    {
+      "id": "gen_a1_014",
+      "title": "租车出行",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Je veux louer une voiture pour visiter la ville.\nJe vais à l'agence de location.\nJe parle avec le responsable.\nIl me donne les clés.\nJe monte dans la voiture et je démarre.",
+      "body_cn": "我想租车去参观这个城市。\n我去租车行。\n我和负责人交谈。\n他给了我钥匙。\n我上车并启动了引擎。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je veux louer une voiture pour visiter la ville.", "cn": "我想租车去参观这个城市。" },
+        { "seq": 2, "speaker": null, "fr": "Je vais à l'agence de location.", "cn": "我去租车行。" },
+        { "seq": 3, "speaker": null, "fr": "Je parle avec le responsable.", "cn": "我和负责人交谈。" },
+        { "seq": 4, "speaker": null, "fr": "Il me donne les clés.", "cn": "他给了我钥匙。" },
+        { "seq": 5, "speaker": null, "fr": "Je monte dans la voiture et je démarre.", "cn": "我上车并启动了引擎。" }
+      ],
+      "words": [
+        { "word": "louer", "meaning": "租用", "pos": "v.", "cefr_level": "A1", "example": "Je veux louer une voiture.", "pronunciation": "ludʁ" },
+        { "word": "voiture", "meaning": "车", "pos": "n.f.", "cefr_level": "A1", "example": "Je veux louer une voiture.", "pronunciation": "vɔtʁ" },
+        { "word": "visiter", "meaning": "参观", "pos": "v.", "cefr_level": "A1", "example": "Je veux visiter la ville.", "pronunciation": "vistɛʁ" },
+        { "word": "agence", "meaning": "代理，行", "pos": "n.f.", "cefr_level": "A1", "example": "Je vais à l'agence de location.", "pronunciation": "aʒɑ̃s" },
+        { "word": "location", "meaning": "租赁", "pos": "n.f.", "cefr_level": "A1", "example": "Je vais à l'agence de location.", "pronunciation": "lɔkɑsjɔ̃" },
+        { "word": "responsable", "meaning": "负责人", "pos": "adj.", "cefr_level": "A1", "example": "Je parle avec le responsable.", "pronunciation": "ʁɔspɔ̃sabl" },
+        { "word": "clés", "meaning": "钥匙", "pos": "n.f.pl.", "cefr_level": "A1", "example": "Il me donne les clés.", "pronunciation": "kɛl" },
+        { "word": "monter", "meaning": "上车", "pos": "v.", "cefr_level": "A1", "example": "Je monte dans la voiture.", "pronunciation": "mɔ̃te" },
+        { "word": "démarrer", "meaning": "启动", "pos": "v.", "cefr_level": "A1", "example": "Je démarre.", "pronunciation": "demɛʁ" }
+      ]
+    },
+    {
+      "id": "gen_a1_021",
+      "title": "购物砍价",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Bonjour, madame !\nCet article coûte combien ?\nPeut-on faire un rabais ?",
+      "body_cn": "你好，女士！\n这件商品多少钱？\n能打折吗？",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, madame !", "cn": "你好，女士！", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Cet article coûte combien ?", "cn": "这件商品多少钱？", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Peut-on faire un rabais ?", "cn": "能打折吗？", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, madame !", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "madame", "meaning": "女士", "pos": "n.f.", "cefr_level": "A1", "example": "Bonjour, madame !", "pronunciation": "madm" },
+        { "word": "article", "meaning": "商品", "pos": "n.m.", "cefr_level": "A1", "example": "Cet article coûte combien ?", "pronunciation": "artikl" },
+        { "word": "coûte", "meaning": "花费", "pos": "v.", "cefr_level": "A1", "example": "Cet article coûte combien ?", "pronunciation": "ku" },
+        { "word": "rabais", "meaning": "折扣", "pos": "n.m.", "cefr_level": "A1", "example": "Peut-on faire un rabais ?", "pronunciation": "ʁəbɛ" }
+      ]
+    },
+    {
+      "id": "gen_a1_023",
+      "title": "购物付账方式",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Bonjour, madame.\nJe voudrais payer par carte.\nD'accord, je vais vous chercher le terminal.",
+      "body_cn": "你好，女士。\n我想用卡支付。\n好的，我去拿终端。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, madame.", "cn": "你好，女士。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Je voudrais payer par carte.", "cn": "我想用卡支付。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "D'accord, je vais vous chercher le terminal.", "cn": "好的，我去拿终端。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, madame.", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "madame", "meaning": "女士", "pos": "n.f.", "cefr_level": "A1", "example": "Bonjour, madame.", "pronunciation": "madm" },
+        { "word": "Je", "meaning": "我", "pos": "pron.", "cefr_level": "A1", "example": "Je voudrais payer par carte.", "pronunciation": "ʒe" },
+        { "word": "voudrais", "meaning": "想要", "pos": "v. ind. ", "cefr_level": "A1", "example": "Je voudrais payer par carte.", "pronunciation": "vudʁe" },
+        { "word": "payer", "meaning": "支付", "pos": "v. ", "cefr_level": "A1", "example": "Je voudrais payer par carte.", "pronunciation": "pe" },
+        { "word": "par", "meaning": "通过，用", "pos": "prep.", "cefr_level": "A1", "example": "Je voudrais payer par carte.", "pronunciation": "paʁ" },
+        { "word": "carte", "meaning": "卡", "pos": "n.f.", "cefr_level": "A1", "example": "Je voudrais payer par carte.", "pronunciation": "kaʁt" },
+        { "word": "D'accord", "meaning": "好的", "pos": "int.", "cefr_level": "A1", "example": "D'accord, je vais vous chercher le terminal.", "pronunciation": "dakɔ̃" },
+        { "word": "terminal", "meaning": "终端", "pos": "n.m.", "cefr_level": "A1", "example": "D'accord, je vais vous chercher le terminal.", "pronunciation": "tɛʁminal" }
+      ]
+    },
+    {
+      "id": "gen_a1_026",
+      "title": "药店买药",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Bonjour, madame.\nJe suis malade.\nJe voudrais un médicament pour la toux.\nMerci.",
+      "body_cn": "你好，女士。\n我生病了。\n我想买治疗咳嗽的药。\n谢谢。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, madame.", "cn": "你好，女士。" },
+        { "seq": 2, "speaker": null, "fr": "Je suis malade.", "cn": "我生病了。" },
+        { "seq": 3, "speaker": null, "fr": "Je voudrais un médicament pour la toux.", "cn": "我想买治疗咳嗽的药。" },
+        { "seq": 4, "speaker": null, "fr": "Merci.", "cn": "谢谢。" }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, madame.", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "madame", "meaning": "女士", "pos": "n.f.", "cefr_level": "A1", "example": "Bonjour, madame.", "pronunciation": "madm" },
+        { "word": "Je", "meaning": "我", "pos": "pron.", "cefr_level": "A1", "example": "Je suis malade.", "pronunciation": "ʒe" },
+        { "word": "suis", "meaning": "是", "pos": "v. être", "cefr_level": "A1", "example": "Je suis malade.", "pronunciation": "sju" },
+        { "word": "malade", "meaning": "生病的", "pos": "adj.", "cefr_level": "A1", "example": "Je suis malade.", "pronunciation": "malad" },
+        { "word": "voudrais", "meaning": "想要", "pos": "v. vouloir", "cefr_level": "A1", "example": "Je voudrais un médicament.", "pronunciation": "vudʁa" },
+        { "word": "médicament", "meaning": "药", "pos": "n.m.", "cefr_level": "A1", "example": "Je voudrais un médicament.", "pronunciation": "medikamɑ̃" },
+        { "word": "pour", "meaning": "为了", "pos": "prep.", "cefr_level": "A1", "example": "Je voudrais un médicament pour la toux.", "pronunciation": "puʁ" },
+        { "word": "la", "meaning": "咳嗽", "pos": "art. le/la", "cefr_level": "A1", "example": "Je voudrais un médicament pour la toux.", "pronunciation": "la" }
+      ]
+    },
+    {
+      "id": "gen_a1_027",
+      "title": "描述症状",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Je me sens mal.\nJe ai une douleur dans le ventre.\nJe suis fatigué.",
+      "body_cn": "我感觉不舒服。\n我肚子疼。\n我感到很累。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Je me sens mal.", "cn": "我感觉不舒服。", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Je ai une douleur dans le ventre.", "cn": "我肚子疼。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je suis fatigué.", "cn": "我感到很累。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Je", "meaning": "我", "pos": "pron.", "cefr_level": "A1", "example": "Je me sens mal.", "pronunciation": "ʒe" },
+        { "word": "me sens", "meaning": "我感觉", "pos": "v.", "cefr_level": "A1", "example": "Je me sens mal.", "pronunciation": "mə sɑ̃" },
+        { "word": "mal", "meaning": "不舒服", "pos": "adj.", "cefr_level": "A1", "example": "Je me sens mal.", "pronunciation": "mɑl" },
+        { "word": "ai", "meaning": "有", "pos": "v.", "cefr_level": "A1", "example": "Je ai une douleur dans le ventre.", "pronunciation": "a" },
+        { "word": "douleur", "meaning": "疼痛", "pos": "n.f.", "cefr_level": "A1", "example": "Je ai une douleur dans le ventre.", "pronunciation": "dɔylɛʁ" }
+      ]
+    },
+    {
+      "id": "gen_a1_028",
+      "title": "体检预约",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Bonjour, je vais prendre un rendez-vous pour une visite médicale.\nJe vais au cabinet du docteur Martin.\nIl est à 10h ce matin.\nJe dois préparer mon carnet de santé.",
+      "body_cn": "你好，我要预约一个体检。\n我要去马丁医生的诊所。\n他今天上午十点有空。\n我需要准备我的健康手册。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, je vais prendre un rendez-vous pour une visite médicale.", "cn": "你好，我要预约一个体检。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je vais au cabinet du docteur Martin.", "cn": "我要去马丁医生的诊所。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Il est à 10h ce matin.", "cn": "他今天上午十点有空。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Je dois préparer mon carnet de santé.", "cn": "我需要准备我的健康手册。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "rendez-vous", "meaning": "预约", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais prendre un rendez-vous.", "pronunciation": "ʁɛnde.vu" },
+        { "word": "visite médicale", "meaning": "体检", "pos": "n.f.", "cefr_level": "A1", "example": "Je vais faire une visite médicale.", "pronunciation": "vist mɛdikal" },
+        { "word": "cabinet", "meaning": "诊所", "pos": "n.m.", "cefr_level": "A1", "example": "Le cabinet du docteur Martin.", "pronunciation": "kabɛn" },
+        { "word": "docteur", "meaning": "医生", "pos": "n.m.", "cefr_level": "A1", "example": "Le docteur Martin.", "pronunciation": "dɔktyɛʁ" },
+        { "word": "carnet de santé", "meaning": "健康手册", "pos": "n.m.", "cefr_level": "A1", "example": "Je dois préparer mon carnet de santé.", "pronunciation": "kɛʁnɛ də sɑ̃t" }
+      ]
+    },
+    {
+      "id": "gen_a1_029",
+      "title": "健身房见面",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Bonjour !\nJe vais au gym aujourd'hui.\nTu viens aussi ?",
+      "body_cn": "你好！\n我今天要去健身房。\n你也来吗？",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour !", "cn": "你好！", "audio_url": null },
+        { "seq": 2, "speaker": "A", "fr": "Je vais au gym aujourd'hui.", "cn": "我今天要去健身房。", "audio_url": null },
+        { "seq": 3, "speaker": "B", "fr": "Tu viens aussi ?", "cn": "你也来吗？", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour !", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "Je", "meaning": "我", "pos": "pron.", "cefr_level": "A1", "example": "Je vais au gym aujourd'hui.", "pronunciation": "ʒe" },
+        { "word": "vais", "meaning": "去", "pos": "v.", "cefr_level": "A1", "example": "Je vais au gym aujourd'hui.", "pronunciation": "vɛ" },
+        { "word": "au", "meaning": "到，去", "pos": "prep.", "cefr_level": "A1", "example": "Je vais au gym aujourd'hui.", "pronunciation": "o" },
+        { "word": "gym", "meaning": "健身房", "pos": "n.m.", "cefr_level": "A1", "example": "Je vais au gym aujourd'hui.", "pronunciation": "ʒim" },
+        { "word": "aujourd'hui", "meaning": "今天", "pos": "adv.", "cefr_level": "A1", "example": "Je vais au gym aujourd'hui.", "pronunciation": "ɔ̃ʁdyuˈdɔi" },
+        { "word": "Tu", "meaning": "你", "pos": "pron.", "cefr_level": "A1", "example": "Tu viens aussi ?", "pronunciation": "ty" },
+        { "word": "viens", "meaning": "来", "pos": "v.", "cefr_level": "A1", "example": "Tu viens aussi ?", "pronunciation": "vɛ̃" },
+        { "word": "aussi", "meaning": "也", "pos": "adv.", "cefr_level": "A1", "example": "Tu viens aussi ?", "pronunciation": "oˈsjɛ" }
+      ]
+    },
+    {
+      "id": "gen_a1_030",
+      "title": "牙医就诊",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Bonjour, docteur.\nJe viens pour une consultation dentaire.\nComment ça va, votre bouche ?\nJ'ai une douleur dans une de mes dents.",
+      "body_cn": "你好，医生。\n我来进行牙科检查。\n你的嘴巴怎么样？\n我的一颗牙齿疼。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, docteur.", "cn": "你好，医生。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je viens pour une consultation dentaire.", "cn": "我来进行牙科检查。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Comment ça va, votre bouche ?", "cn": "你的嘴巴怎么样？", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "J'ai une douleur dans une de mes dents.", "cn": "我的一颗牙齿疼。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, docteur.", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "docteur", "meaning": "医生", "pos": "n.m.", "cefr_level": "A1", "example": "Bonjour, docteur.", "pronunciation": "dɔktyr" },
+        { "word": "viens", "meaning": "来", "pos": "v.", "cefr_level": "A1", "example": "Je viens pour une consultation dentaire.", "pronunciation": "vɛ̃" },
+        { "word": "consulation dentaire", "meaning": "牙科检查", "pos": "n.f.", "cefr_level": "A1", "example": "Je viens pour une consultation dentaire.", "pronunciation": "kɔ̃sultaʃjon dɑ̃tɛʁ" },
+        { "word": "Comment", "meaning": "怎样，如何", "pos": "adv.", "cefr_level": "A1", "example": "Comment ça va, votre bouche ?", "pronunciation": "kɔ̃ ʁə" },
+        { "word": "votre", "meaning": "你的", "pos": "pron.", "cefr_level": "A1", "example": "Comment ça va, votre bouche ?", "pronunciation": "vɔtʁ" },
+        { "word": "bouche", "meaning": "嘴巴", "pos": "n.f.", "cefr_level": "A1", "example": "Comment ça va, votre bouche ?", "pronunciation": "bɔʃ" },
+        { "word": "douleur", "meaning": "疼痛", "pos": "n.f.", "cefr_level": "A1", "example": "J'ai une douleur dans une de mes dents.", "pronunciation": "dəylɛʁ" },
+        { "word": "dent", "meaning": "牙齿", "pos": "n.f.", "cefr_level": "A1", "example": "J'ai une douleur dans une de mes dents.", "pronunciation": "dɑ̃" }
+      ]
+    },
+    {
+      "id": "gen_a1_032",
+      "title": "健康饮食的重要性",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "健康",
+      "body_fr": "Je mange beaucoup de fruits et de légumes.\nJe bois beaucoup d'eau.\nJe essaie de ne pas manger trop de sucre.",
+      "body_cn": "我吃很多水果和蔬菜。\n我喝很多水。\n我尽量不吃太多糖。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je mange beaucoup de fruits et de légumes.", "cn": "我吃很多水果和蔬菜。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je bois beaucoup d'eau.", "cn": "我喝很多水。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Je essaie de ne pas manger trop de sucre.", "cn": "我尽量不吃太多糖。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "fruits", "meaning": "水果", "pos": "n.m.", "cefr_level": "A1", "example": "Je mange beaucoup de fruits.", "pronunciation": "fʁw" },
+        { "word": "légumes", "meaning": "蔬菜", "pos": "n.m.", "cefr_level": "A1", "example": "Je mange beaucoup de légumes.", "pronunciation": "lɛɡum" },
+        { "word": "bois", "meaning": "喝", "pos": "v.", "cefr_level": "A1", "example": "Je bois un verre d'eau.", "pronunciation": "bwa" },
+        { "word": "eau", "meaning": "水", "pos": "n.f.", "cefr_level": "A1", "example": "Je bois beaucoup d'eau.", "pronunciation": "o" },
+        { "word": "essaie", "meaning": "尝试", "pos": "v.", "cefr_level": "A1", "example": "Je essaie de ne pas manger trop de sucre.", "pronunciation": "esaj" }
+      ]
+    },
+    {
+      "id": "gen_a1_033",
+      "title": "自我介绍工作情况",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "工作",
+      "body_fr": "Bonjour !\nJe m'appelle Zhang San.\nJe suis étudiant.\nJe vais commencer à travailler après mes études.",
+      "body_cn": "你好！\n我叫张三。\n我是学生。\n我毕业后会开始工作。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour !", "cn": "你好！", "audio_url": null },
+        { "seq": 2, "speaker": "B", "fr": "Je m'appelle Zhang San.", "cn": "我叫张三。", "audio_url": null },
+        { "seq": 3, "speaker": "A", "fr": "Je suis étudiant.", "cn": "我是学生。", "audio_url": null },
+        { "seq": 4, "speaker": "B", "fr": "Je vais commencer à travailler après mes études.", "cn": "我毕业后会开始工作。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour !", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "Je", "meaning": "我", "pos": "pron.", "cefr_level": "A1", "example": "Je m'appelle Zhang San.", "pronunciation": "ʒe" },
+        { "word": "m'appelle", "meaning": "名叫", "pos": "v.", "cefr_level": "A1", "example": "Je m'appelle Zhang San.", "pronunciation": "mɑ pɛl" },
+        { "word": "Zhang San", "meaning": "张三", "pos": "n.m.", "cefr_level": "A1", "example": "Je m'appelle Zhang San.", "pronunciation": "ʒɑŋ sɑ̃" },
+        { "word": "étudiant", "meaning": "学生", "pos": "n.m.", "cefr_level": "A1", "example": "Je suis étudiant.", "pronunciation": "ɛtyudjɑ̃" },
+        { "word": "vais", "meaning": "将，会", "pos": "v.", "cefr_level": "A1", "example": "Je vais commencer à travailler après mes études.", "pronunciation": "vɛ" },
+        { "word": "commencer", "meaning": "开始", "pos": "v.", "cefr_level": "A1", "example": "Je vais commencer à travailler après mes études.", "pronunciation": "kɔ̃.sɛ̃.dʁə" },
+        { "word": "travailler", "meaning": "工作", "pos": "v.", "cefr_level": "A1", "example": "Je vais commencer à travailler après mes études.", "pronunciation": "travajɛ" }
+      ]
+    },
+    {
+      "id": "gen_a1_034",
+      "title": "面试经历",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "工作",
+      "body_fr": "Bonjour, je m'appelle Liu.\nJe suis venu pour un entretien d'embauche.\nJe suis très excité de cette opportunité.\nJ'espère que je pourrai bien travailler avec votre équipe.",
+      "body_cn": "你好，我叫刘。\n我来参加面试。\n我对这个机会非常兴奋。\n我希望能够和你们团队一起工作。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Bonjour, je m'appelle Liu.", "cn": "你好，我叫刘。" },
+        { "seq": 2, "speaker": null, "fr": "Je suis venu pour un entretien d'embauche.", "cn": "我来参加面试。" },
+        { "seq": 3, "speaker": null, "fr": "Je suis très excité de cette opportunité.", "cn": "我对这个机会非常兴奋。" },
+        { "seq": 4, "speaker": null, "fr": "J'espère que je pourrai bien travailler avec votre équipe.", "cn": "我希望能够和你们团队一起工作。" }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour !", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "je m'appelle", "meaning": "我叫", "pos": "v.", "cefr_level": "A1", "example": "Je m'appelle Liu.", "pronunciation": "ʒe mɑ̃ pel" },
+        { "word": "entretien", "meaning": "面试", "pos": "n.m.", "cefr_level": "A1", "example": "un entretien d'embauche", "pronunciation": "ɑ̃.tʁe.nɛ" },
+        { "word": "excité", "meaning": "兴奋的", "pos": "adj.", "cefr_level": "A1", "example": "Je suis très excité.", "pronunciation": "ɛksitɛ" },
+        { "word": "opportunité", "meaning": "机会", "pos": "n.f.", "cefr_level": "A1", "example": "cette opportunité", "pronunciation": "ɔ.pɔʁ.tu.ni.te" },
+        { "word": "équipe", "meaning": "团队", "pos": "n.f.", "cefr_level": "A1", "example": "votre équipe", "pronunciation": "ɛ.kip" }
+      ]
+    },
+    {
+      "id": "gen_a1_035",
+      "title": "请假对话",
+      "format": "dialogue",
+      "cefr_level": "A1",
+      "topic": "工作",
+      "body_fr": "Bonjour, madame.\nJe voudrais prendre une journée de congé.\nEst-ce que c'est possible ?",
+      "body_cn": "你好，女士。\n我想请一天假。\n可以吗？",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": "A", "fr": "Bonjour, madame.", "cn": "你好，女士。", "audio_url": null },
+        { "seq": 2, "speaker": "A", "fr": "Je voudrais prendre une journée de congé.", "cn": "我想请一天假。", "audio_url": null },
+        { "seq": 3, "speaker": "B", "fr": "Est-ce que c'est possible ?", "cn": "可以吗？", "audio_url": null }
+      ],
+      "words": [
+        { "word": "Bonjour", "meaning": "你好", "pos": "int.", "cefr_level": "A1", "example": "Bonjour, madame.", "pronunciation": "bɔ̃ʁ ʒu" },
+        { "word": "madame", "meaning": "女士", "pos": "n.f.", "cefr_level": "A1", "example": "Bonjour, madame.", "pronunciation": "madm" },
+        { "word": "voudrais", "meaning": "想要", "pos": "v.", "cefr_level": "A1", "example": "Je voudrais prendre une journée de congé.", "pronunciation": "vudʁwa" },
+        { "word": "prendre", "meaning": "拿，取，请", "pos": "v.", "cefr_level": "A1", "example": "Je voudrais prendre une journée de congé.", "pronunciation": "pʁɛ̃dʁ" },
+        { "word": "journée", "meaning": "天", "pos": "n.f.", "cefr_level": "A1", "example": "Je voudrais prendre une journée de congé.", "pronunciation": "ʒurnɛ" },
+        { "word": "de", "meaning": "的", "pos": "prép.", "cefr_level": "A1", "example": "Je voudrais prendre une journée de congé.", "pronunciation": "də" },
+        { "word": "congé", "meaning": "假", "pos": "m.", "cefr_level": "A1", "example": "Je voudrais prendre une journée de congé.", "pronunciation": "kɔ̃ʒe" },
+        { "word": "Est-ce", "meaning": "这是", "pos": "pron.", "cefr_level": "A1", "example": "Est-ce que c'est possible ?", "pronunciation": "ɛst sɛ" },
+        { "word": "possible", "meaning": "可能的", "pos": "adj.", "cefr_level": "A1", "example": "Est-ce que c'est possible ?", "pronunciation": "pɔsibl" }
+      ]
+    },
+    {
+      "id": "gen_a1_006",
+      "title": "天气讨论",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "日常",
+      "body_fr": "Il fait beau aujourd'hui.\nJe vais sortir.\nJe suis content.",
+      "body_cn": "今天天气很好。\n我要出去。\n我很开心。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Il fait beau aujourd'hui.", "cn": "今天天气很好。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je vais sortir.", "cn": "我要出去。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Je suis content.", "cn": "我很开心。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "beau", "meaning": "好", "pos": "adj.", "cefr_level": "A1", "example": "Il fait beau.", "pronunciation": "bɔ" }
+      ]
+    },
+    {
+      "id": "gen_a1_012",
+      "title": "机场值机",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "出行",
+      "body_fr": "Je vais à l'aéroport demain.\nJe dois me présenter à la counters d'enregistrement.\nJe vais vérifier mes bagages et obtenir mon billet d'avion.",
+      "body_cn": "我明天要去机场。\n我必须去登记柜台报到。\n我要检查我的行李并获得我的机票。",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je vais à l'aéroport demain.", "cn": "我明天要去机场。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je dois me présenter à la counters d'enregistrement.", "cn": "我必须去登记柜台报到。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "Je vais vérifier mes bagages et obtenir mon billet d'avion.", "cn": "我要检查我的行李并获得我的机票。", "audio_url": null }
+      ],
+      "words": [
+        { "word": "vais", "meaning": "去", "pos": "v.", "cefr_level": "A1", "example": "Je vais à l'aéroport demain.", "pronunciation": "vɛ" }
+      ]
+    },
+    {
+      "id": "gen_a1_020",
+      "title": "书店购物",
+      "format": "monologue",
+      "cefr_level": "A1",
+      "topic": "购物",
+      "body_fr": "Je vais à la librairie pour acheter un livre.\nJe regarde les livres en français.\nJ'achète un livre que je trouve joli.\nJe paye avec ma carte bleue.\nMerci, monsieur!",
+      "body_cn": "我去书店买一本书。\n我看了一些法语书。\n我买了一本我觉得很漂亮的书。\n我用我的蓝卡付钱。\n谢谢，先生！",
+      "audio_url": null,
+      "sort_order": 0,
+      "lines": [
+        { "seq": 1, "speaker": null, "fr": "Je vais à la librairie pour acheter un livre.", "cn": "我去书店买一本书。", "audio_url": null },
+        { "seq": 2, "speaker": null, "fr": "Je regarde les livres en français.", "cn": "我看了一些法语书。", "audio_url": null },
+        { "seq": 3, "speaker": null, "fr": "J'achète un livre que je trouve joli.", "cn": "我买了一本我觉得很漂亮的书。", "audio_url": null },
+        { "seq": 4, "speaker": null, "fr": "Je paye avec ma carte bleue.", "cn": "我用我的蓝卡付钱。", "audio_url": null },
+        { "seq": 5, "speaker": null, "fr": "Merci, monsieur!", "cn": "谢谢，先生！", "audio_url": null }
+      ],
+      "words": [
+        { "word": "librairie", "meaning": "书店", "pos": "n.f.", "cefr_level": "A1", "example": "Je vais à la librairie.", "pronunciation": "libreʁi" },
+        { "word": "acheter", "meaning": "买", "pos": "v.t.", "cefr_level": "A1", "example": "Je vais acheter un livre.", "pronunciation": "a.ʃe" }
+      ]
     }
   ]
 }

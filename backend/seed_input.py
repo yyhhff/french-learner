@@ -22,8 +22,24 @@ logger = logging.getLogger("yaya.seed_input")
 INPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "input"
 INPUT_FILE = INPUT_DIR / "texts.json"
 
-VALID_LEVELS = {"A2", "B1", "B2"}
+# v2.3：语料量产覆盖 A1–B2 四档（A1 语料由内容工厂产出；定级逻辑属 v2.2 车道，与本加载器无关）
+VALID_LEVELS = {"A1", "A2", "B1", "B2"}
 VALID_FORMATS = {"dialogue", "monologue"}
+
+# v2.3 音频批量预生成的落盘目录（cache，不入 git）；存在则用本地取音端点填充 audio_url
+_AUDIO_CACHE = INPUT_DIR.parent / "cache" / "content_pipeline" / "audio"
+
+
+def _audio_url(text_id: str, seq: int | None = None) -> str | None:
+    """若批量音频已落盘，返回本地取音端点 URL；否则 None（前端回退在线 TTS）。"""
+    rel = f"/api/content/audio/{text_id}/{seq}" if seq is not None else None
+    if seq is not None:
+        p = _AUDIO_CACHE / str(text_id) / f"{seq}.mp3"
+        return rel if p.is_file() and p.stat().st_size > 0 else None
+    # 整篇 audio_url：任意一句有音频即指向第 1 句（前端逐句用 line.audio_url）
+    first = _AUDIO_CACHE / str(text_id) / "1.mp3"
+    return f"/api/content/audio/{text_id}/1" if first.is_file() and first.stat().st_size > 0 else None
+
 
 
 def _nonempty_str(value) -> bool:
@@ -66,6 +82,8 @@ def _upsert_one(conn, item: dict) -> None:
     if not _nonempty_str(audio_text):
         audio_text = body_fr
     audio_url = item.get("audio_url")
+    if not _nonempty_str(audio_url):
+        audio_url = _audio_url(text_id)  # v2.3：批量音频已落盘则自动填充
     sort_order = item.get("sort_order", 0)
     if not isinstance(sort_order, int) or isinstance(sort_order, bool):
         sort_order = 0
@@ -124,6 +142,8 @@ def _upsert_one(conn, item: dict) -> None:
         elif item["format"] == "monologue":
             speaker = None
         line_audio = line.get("audio_url")
+        if not _nonempty_str(line_audio):
+            line_audio = _audio_url(text_id, line["seq"])  # v2.3：逐句批量音频
         conn.execute(
             "INSERT INTO input_lines "
             "(text_id, seq, speaker, fr, cn, audio_url) VALUES (?, ?, ?, ?, ?, ?)",

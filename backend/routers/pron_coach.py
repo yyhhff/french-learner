@@ -10,6 +10,7 @@ import urllib.request
 from fastapi import APIRouter, Request
 
 import db
+import gamify
 import pron_coach
 from common import ApiError, _parse_multipart, ok
 
@@ -142,6 +143,9 @@ async def proncoach_evaluate(request: Request):
     )
     sentence_meta = {"cn": sentence_cn, "focus_word": focus_word} if sentence_id else None
     feedback = pron_coach.build_feedback(score, sentence_meta)
+
+    # TASK-0070 v3.0：跟读 +5xp（只记 band 不记文本/音频，隐私红线不变）
+    gamify.award("shadow", 5, detail=str(score.get("band", "")))
 
     return ok({
         "band": score["band"],

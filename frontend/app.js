@@ -126,6 +126,7 @@ const state = {
     loaded:false        // 阅读页是否已初始化加载过
   },
   skillProfile:null,    // TASK-0055 水平画像（GET /api/profile/skills，懒计算）
+  achievements:null,    // TASK-0058 成就（GET /api/achievements，懒计算 + 灰态）
   pron:{
     summaries:[],       // GET /rules 摘要四字段（小册子索引用）
     detailsLoaded:false,// 是否已并发拉全详情、建好索引
@@ -1189,6 +1190,8 @@ async function renderGrowth(){
     try { const p = await apiRequest('/api/profile'); if(p) state.profile = p; } catch(e){}
     // TASK-0055 水平画像（懒计算端点，读时重放 EWMA）；失败静默，画像是增益功能
     try { const sk = await apiRequest('/api/profile/skills'); if(sk) state.skillProfile = sk; } catch(e){}
+    // TASK-0058 成就（懒计算端点，读时判定 + 新解锁计 XP）；失败静默，成就是增益功能
+    try { const ach = await apiRequest('/api/achievements'); if(ach) state.achievements = ach; } catch(e){}
   }
   const s = (state.profile||FALLBACK_PROFILE).stats||{};
   const num = v => fmtNum(v||0);
@@ -1218,7 +1221,31 @@ async function renderGrowth(){
           : `<div class="g-note g-empty">读完第一篇短文，这里就会留下小脚印</div>`}
       </div>
     </div>
-    ${skillCardHTML()}`;
+    ${skillCardHTML()}
+    ${achievementCardHTML()}`;
+}
+
+/* TASK-0058 成就卡：解锁点亮 + 未解锁灰态给「下一个目标」牵引；
+   文案禁施压，不用"未达成/落后"，已解锁只显示名称与日期。 */
+function achievementCardHTML(){
+  const ach = state.achievements;
+  const rows = ach && Array.isArray(ach.items) ? ach.items : [];
+  const unlocked = (ach && typeof ach.unlocked_count==='number') ? ach.unlocked_count : 0;
+  const badges = rows.map(a => {
+    const on = !!a.unlocked;
+    const day = a.earned_at ? String(a.earned_at).slice(0,10) : '';
+    return `<span class="ach-badge ${on?'on':''}" title="${on?('解锁于 '+day):esc(a.desc_zh||'')}">
+      <span class="ach-ico">${on?'🏅':'·'}</span><span class="ach-name">${esc(a.name_zh||'')}</span></span>`;
+  }).join('');
+  const next = rows.find(a => !a.unlocked);
+  const note = next
+    ? `下一个小目标：${esc(next.desc_zh||'')}`
+    : (rows.length ? '所有小勋章都点亮啦，真为你开心 🌿' : '继续往前走，小勋章会慢慢出现');
+  return `<div class="skill-card ach-card">
+    <div class="sk-head"><span class="sk-title">🏅 小成就</span><span class="sk-sub">${unlocked} / ${rows.length} 点亮</span></div>
+    <div class="ach-grid">${badges}</div>
+    <div class="ach-note">${note}</div>
+  </div>`;
 }
 
 /* TASK-0055 五维画像卡：7 维采集 → 5 维展示（词汇=vocabulary+memory、口语=speaking+fluency 融合）。

@@ -222,6 +222,16 @@ CREATE TABLE IF NOT EXISTS skill_profile (
     updated_at     TEXT,
     PRIMARY KEY (user_id, skill)
 );
+
+-- ===== TASK-0058 成就 v1：判定源全为已落库真实事件，UNIQUE 保证幂等 =====
+CREATE TABLE IF NOT EXISTS achievements (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL,
+    code       TEXT    NOT NULL,
+    earned_at  TEXT    NOT NULL,
+    UNIQUE (user_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_achievements_user ON achievements (user_id, earned_at);
 """
 
 
@@ -1239,6 +1249,103 @@ def count_attempts(user_id: int, kind: str) -> int:
             "SELECT COUNT(*) AS n FROM attempts WHERE user_id = ? AND kind = ?",
             (user_id, kind),
         ).fetchone()["n"]
+    finally:
+        conn.close()
+
+
+# ================================================================ TASK-0058 成就 v1
+# 判定源全为已落库真实事件；阈值/文案放服务端常量，不下放前端（§5.3 防伪造）。
+# XP 分值【待冻结，以 PM 为准】，暂取温和值 20；改一处即可全局生效。
+XP_PER_ACHIEVEMENT = 20
+
+ACHIEVEMENT_DEFS = [
+    {"code": "first_chat",  "name_zh": "初次开口",   "desc_zh": "完成第一段对话",        "metric": "dialogue_count", "threshold": 1},
+    {"code": "chat_10",     "name_zh": "聊得投缘",   "desc_zh": "累计 10 轮对话",         "metric": "dialogue_count", "threshold": 10},
+    {"code": "first_card",  "name_zh": "收下第一个词", "desc_zh": "收藏第一张生词卡",      "metric": "total_cards",    "threshold": 1},
+    {"code": "cards_20",    "name_zh": "小词库",     "desc_zh": "累计收藏 20 张生词卡",    "metric": "total_cards",    "threshold": 20},
+    {"code": "mastered_5",  "name_zh": "牢牢记住",   "desc_zh": "掌握 5 个词",             "metric": "mastered_count", "threshold": 5},
+    {"code": "review_10",   "name_zh": "温故知新",   "desc_zh": "累计复习 10 次",          "metric": "review_count",   "threshold": 10},
+    {"code": "reader_3",    "name_zh": "读了几篇",   "desc_zh": "读完 3 篇短文",           "metric": "read_count",     "threshold": 3},
+    {"code": "streak_3",    "name_zh": "连续三天",   "desc_zh": "连续 3 天来走走",         "metric": "streak_days",    "threshold": 3},
+]
+
+
+def evaluate_achievements(user_id: int = DEFAULT_USER_ID) -> dict:
+    """读时全量判定成就（沿用 skill_profile 懒计算模式）。
+
+    - 满足阈值且未解锁 → INSERT OR IGNORE（UNIQUE 幂等），记入 new_codes
+    - 本次新解锁的成就在**同一事务**内累加 XP（纯 xp 更新，不碰 streak）
+    - 返回 {items, unlocked_count, new_codes}；items 含全部成就的灰态/解锁态
+    """
+    conn = get_conn()
+    try:
+        # 判定源全部来自已落库真实数据，口径与 get_profile().stats 一致
+        stats = {
+            "dialogue_count": conn.execute(
+                "SELECT COUNT(*) AS n FROM dialogue_turns "
+                "WHERE user_id = ? AND created_at IS NOT NULL", (user_id,)
+            ).fetchone()["n"],
+            "total_cards": conn.execute(
+                "SELECT COUNT(*) AS n FROM word_cards WHERE user_id = ?", (user_id,)
+            ).fetchone()["n"],
+            "mastered_count": conn.execute(
+                "SELECT COUNT(*) AS n FROM review_logs "
+                "WHERE user_id = ? AND repetitions >= 5", (user_id,)
+            ).fetchone()["n"],
+            "review_count": conn.execute(
+                "SELECT COALESCE(SUM(total_reviews),0) AS n FROM review_logs "
+                "WHERE user_id = ?", (user_id,)
+            ).fetchone()["n"],
+            "read_count": count_read_texts(user_id),
+        }
+        urow = conn.execute(
+            "SELECT streak_days FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        stats["streak_days"] = (urow["streak_days"] if urow else 0) or 0
+
+        earned = {
+            r["code"]: r["earned_at"]
+            for r in conn.execute(
+                "SELECT code, earned_at FROM achievements WHERE user_id = ?", (user_id,)
+            ).fetchall()
+        }
+        new_codes = []
+        for d in ACHIEVEMENT_DEFS:
+            if d["code"] in earned:
+                continue
+            if stats.get(d["metric"], 0) >= d["threshold"]:
+                cur = conn.execute(
+                    "INSERT OR IGNORE INTO achievements (user_id, code, earned_at) "
+                    "VALUES (?, ?, ?)", (user_id, d["code"], now_iso()),
+                )
+                if cur.rowcount > 0:
+                    new_codes.append(d["code"])
+                    earned[d["code"]] = conn.execute(
+                        "SELECT earned_at FROM achievements WHERE user_id=? AND code=?",
+                        (user_id, d["code"]),
+                    ).fetchone()["earned_at"]
+        if new_codes:
+            conn.execute(
+                "UPDATE users SET xp = xp + ? WHERE id = ?",
+                (XP_PER_ACHIEVEMENT * len(new_codes), user_id),
+            )
+        conn.commit()
+
+        items = [
+            {
+                "code": d["code"],
+                "name_zh": d["name_zh"],
+                "desc_zh": d["desc_zh"],
+                "earned_at": earned.get(d["code"]),
+                "unlocked": d["code"] in earned,
+            }
+            for d in ACHIEVEMENT_DEFS
+        ]
+        return {
+            "items": items,
+            "unlocked_count": sum(1 for i in items if i["unlocked"]),
+            "new_codes": new_codes,
+        }
     finally:
         conn.close()
 

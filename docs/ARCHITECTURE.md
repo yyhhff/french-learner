@@ -262,7 +262,8 @@ Base URL：`http://localhost:8000`。所有路径前缀 `/api`。
 | 5 | POST | `/api/cards/{id}/review` | 路径参数 `id:int`，Body `{rating}` | `ReviewResult` | 40001(400), 40401(404), 50001(500) |
 | 6 | GET | `/api/profile` | 无 | `UserProfile` | 50001(500) |
 | 7 | GET | `/api/review/due` | Query 可选 `limit:int`(1..100,默认20) `offset:int`(≥0,默认0) | `{items:DueCard[], total, today_count}` | 40001(400) |
-| 8 | GET | `/api/health` | 无 | `{status, version, time}` | 50001(500) |
+| 8 | GET | `/api/achievements` | 无 | `{items:Achievement[], unlocked_count, new_unlocked:string[]}` | 50001(500) |
+| 9 | GET | `/api/health` | 无 | `{status, version, time}` | 50001(500) |
 
 ### 5.2 逐端点详解
 
@@ -302,6 +303,11 @@ Base URL：`http://localhost:8000`。所有路径前缀 `/api`。
 - 响应 `data`：`{ "next_due":"2026-11-18T09:30:00Z", "interval_days":1 }`。
 - 逻辑：调用 `srs.schedule(rating, 当前review_logs状态)` → 更新该卡的 `review_logs`（`repetitions/ease_factor/interval_days/next_due/last_reviewed_at/total_reviews`）。
 - 错误：rating 非 1~4 或非整数 → 40001；卡片不存在 → 40401。
+
+#### 8) GET `/api/achievements` — 成就列表（TASK-0058）
+- 响应 `data`：`{ items: Achievement[], unlocked_count, new_unlocked }`。`Achievement` = `{code, name_zh, desc_zh, earned_at, unlocked}`；未解锁时 `earned_at=null, unlocked=false`（灰态）。
+- 判定源全为已落库真实事件（对话轮/生词卡/复习达标/attempts/streak），服务端常量不下放前端（防伪造）。读时懒判定：满足阈值且未解锁 → `INSERT OR IGNORE` 落库（UNIQUE user_id+code 幂等），本次新解锁在**同事务**内 +XP（当前 +20/个，待 PM 冻结）。`new_unlocked` 为本次新解锁 code 列表。
+- 不弹窗、不推送，仅进入成长页时拉取。
 
 #### 7) GET `/api/review/due` — 到期复习队列（TASK-0057）
 - Query：可选 `limit`（1..100，默认 20）、`offset`（≥0，默认 0）；越界/非整数 → 40001。

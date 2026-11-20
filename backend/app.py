@@ -332,6 +332,20 @@ async def profile_skills():
     })
 
 
+@app.get("/api/achievements")
+async def achievements():
+    """TASK-0058 成就 v1（懒计算）：读时从真实事件全量判定 + 幂等落库 + 新解锁计 XP。
+
+    §5.3：判定源全为已落库数据，服务端常量不下放；未解锁返回灰态给牵引感。
+    """
+    result = db.evaluate_achievements(db.DEFAULT_USER_ID)
+    return ok({
+        "items": result["items"],
+        "unlocked_count": result["unlocked_count"],
+        "new_unlocked": result["new_codes"],
+    })
+
+
 # ---------------------------------------------------------------- 本地 ASR 代理
 
 ASR_SERVICE_URL = os.environ.get(

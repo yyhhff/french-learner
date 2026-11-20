@@ -58,9 +58,9 @@ ROADMAP_DEFS = [
     # ---------------- TASK-0063 补强总纲 v2.2–v4.1（planned 灰态；详案与认领看板见 docs/MASTER_PLAN.md）
     {
         "version": "v2.2", "title": "第一级台阶", "theme": "零基础 A1 通路",
-        "status": "planned", "date": None,
+        "status": "done", "date": "2026-11-20",
         "desc": "从读音到第一句，零基础也有刚刚好的台阶。",
-        "features": ["A1 定级档与新手台阶路径", "高频 300 词 + 基础句型", "A1 分级语料与对话场景"],
+        "features": ["A1 定级档（四档 24 题）与新手台阶路径", "高频词 + 基础句型", "A1 分级语料 10 篇与对话场景"],
     },
     {
         "version": "v2.3", "title": "读不完的书", "theme": "内容量产管线",

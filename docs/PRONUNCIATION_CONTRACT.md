@@ -1,4 +1,4 @@
-# 呀呀法语 · 零基础读音规则学习 字段级冻结契约（PRONUNCIATION_CONTRACT v1.0）
+# 呀呀法语 · 零基础读音规则学习 字段级冻结契约（PRONUNCIATION_CONTRACT v1.1）
 
 > 本文是「零基础读音规则学习」功能的**后端 / 前端 / 内容 / 测试 / PM 唯一实现契约**。所有字段名、端点路径、JSON 结构、表结构必须逐字实现，不得自行改名、改值、增删字段。
 > **上游约束**：`docs/PRONUNCIATION_PLAN.md` v1.0（已确认：§10 四项全部按推荐，规则 JSON schema 已在 §6.4 锁定，进度表字段已在 §5.1 锁定）。本文**只做字段与实现级细化**，上游所有【锁定】项一律不重新定义、不改动。若本文与上游冲突，以上游为准。
@@ -135,6 +135,8 @@ CREATE INDEX IF NOT EXISTS idx_pron_progress_user_stage ON pronunciation_progres
 | `rules[].shadow_mode` | 是 | string，`syllable` / `word` / `phrase` | `"word"` | 跟读单元：单音→词→词组 |
 | `rules[].tier` | 是 | string，`starter` / `core` | `"starter"` | 难度层级；starter 19 + core 20 = 39 |
 | `rules[].tags` | 是 | string[] | `["D组","元音组合"]` | 标签；字母分档 A–H 放此处（如 `"D组"`） |
+| `rules[].patterns` | 否 | string[]，可为空数组；锚定语法见下 | `["ai","ay"]` | **v1.1 新增**：拼读匹配模式，前端据此把生词匹配到规则；缺省/空数组 = 该规则不参与词卡拼读匹配（例词精确索引不受影响） |
+| `rules[].focus` | 否 | string，非空 | `"ai / ay"` | **v1.1 新增**：按钮展示音节（给用户看的"学什么"），与 `patterns` 的匹配语义分离；缺省 = 按钮退化为裸「🎵 怎么读」 |
 
 **`group` 取值（8 个纯分组名，细化自 §6.1 表格的 A–H 组）**
 
@@ -158,6 +160,17 @@ CREATE INDEX IF NOT EXISTS idx_pron_progress_user_stage ON pronunciation_progres
 > ★总指挥终裁（2026-11-18）：A/H 两组段名锁定为 `alpha` / `except`，以**落盘 JSON 实测**为准（`alpha` 4 条 + `except` 3 条）。已逐条核对 `data/input/pronunciation_rules.json` 39 条 id 段名，8 组一一对应无串组、全库唯一、格式全合法。`<nn>` 为两位组内序号（如 `01`、`02`）。中途曾出现 `abc/special` 误写，已作废；此映射为唯一权威，禁止再改。
 
 **听/跟读分离（锁定）**：`audio_text` 只作示范（喂 `/api/tts`），**不作比对目标**；比对目标取 `shadow_text_fr`，比对单元由 `shadow_mode` 决定（PRONUNCIATION_PLAN §4.3 / §6.4）。
+
+**`patterns` 锚定语法（v1.1 新增，前端编译唯一约定）**
+
+| 写法 | 语义 | 示例 |
+|------|------|------|
+| `abc` | 普通子串：归一化（小写/去重音/œ→oe）后包含即命中 | `"ai"` 命中 maison |
+| `^abc` | 词首锚定 | `"^h"` 命中 homme |
+| `abc$` | 词尾锚定 | `"er$"` 命中 parler，不命中 avoir 前缀误报 |
+| `^abc$` | 全词锚定：仅整词相等 | `"^six$"` 只命中 six，不命中 sixième |
+
+> 匹配形态：先对 token 归一化（小写、NFD 去重音、`œ→oe`、去省文符）匹配；同一 pattern 再对**原始小写** token 匹配一遍（保证 `é`/`è`/`â`/`ô` 等带符号 pattern 可命中）。跨词现象（联诵/连音）不做词卡拼读匹配，`patterns` 置空数组、走小册子入口。
 
 **`/ɑ̃/` 与 `/ɑ/` 口径（锁定）**：`/ɑ̃/` 是全库统一写法（鼻化元音 an/en/am 等），**不是笔误、不进易混等价集**；`/ɑ/`（如 `pâte` 的 â）是另一个音位，两者不得混写（PRONUNCIATION_PLAN §6.4 注 / §9）。
 
@@ -227,7 +240,7 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 |------|------|:---:|--------|------|
 | `rule_id` | string | 是 | `ph_comb_02` | 规则 id，须存在于加载的规则集 |
 
-- **行为**：返回单条规则完整详情，字段集 = §2.2 全部字段（含 `examples`、`audio_text`、`shadow_text_fr`、`shadow_mode`）。
+- **行为**：返回单条规则完整详情，字段集 = §2.2 全部字段（含 `examples`、`audio_text`、`shadow_text_fr`、`shadow_mode`）；**v1.1 起含可选扩展字段 `patterns`/`focus`**（源文件该条含此键才下发，缺失不产出、不以 `null` 填充）。
 - **响应 `data`：`RuleDetail`**
 
 | 字段 | 类型 | 示例值 | 说明 |
@@ -242,6 +255,8 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | `shadow_mode` | string | `"word"` | `syllable`/`word`/`phrase` |
 | `tier` | string | `"starter"` | `starter`/`core` |
 | `tags` | string[] | `["D组","元音组合"]` | 标签 |
+| `patterns` | string[]（可选） | `["ai","ay"]` | **v1.1**：拼读匹配模式（锚定语法 §2.2）；源文件无此键则不产出 |
+| `focus` | string（可选） | `"ai / ay"` | **v1.1**：按钮展示音节；源文件无此键则不产出 |
 
 **`ExampleItem`（`examples[]` 元素，逐字段）**
 
@@ -400,11 +415,11 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | `pronunciation_progress`（表） | `user_id`, `rule_id`, `stage`, `practice_count`, `last_practiced_at`, `self_assessed` |
 | `RuleSummary` | `id`, `group`, `title`, `tier` |
 | `ExampleItem` | `word_fr`, `meaning_zh`, `note_zh`, `phonetic` |
-| `RuleDetail` | `id`, `group`, `title`, `description_zh`, `examples`, `audio_text`, `shadow_text_fr`, `shadow_mode`, `tier`, `tags` |
+| `RuleDetail` | `id`, `group`, `title`, `description_zh`, `examples`, `audio_text`, `shadow_text_fr`, `shadow_mode`, `tier`, `tags`（+ v1.1 可选：`patterns`, `focus`） |
 | `ProgressItem` | `rule_id`, `stage`, `practice_count`, `last_practiced_at`, `self_assessed` |
 | `ProgressView` | `user_id`, `total_rules`, `seen_count`, `learned_count`, `confident_count`, `learned_total`, `items` |
 | `ProgressUpdateBody` | `rule_id`, `stage`?, `self_assessed`?（★裁决④：不含 `practice_count`，客户端传值一律忽略） |
-| 规则单条（源文件 §6.4） | `id`, `group`, `title`, `description_zh`, `examples`(`word_fr`,`meaning_zh`,`note_zh`,`phonetic`), `audio_text`, `shadow_text_fr`, `shadow_mode`, `tier`, `tags` |
+| 规则单条（源文件 §6.4） | `id`, `group`, `title`, `description_zh`, `examples`(`word_fr`,`meaning_zh`,`note_zh`,`phonetic`), `audio_text`, `shadow_text_fr`, `shadow_mode`, `tier`, `tags`（+ v1.1 可选：`patterns`, `focus`） |
 
 **禁用旧字段别名**：`word`、`highlight`、`read_aloud`（以及 §6.4 未定义的任何别名）一律不得出现在 JSON、请求/响应、表结构中。
 
@@ -453,7 +468,11 @@ Base URL `http://localhost:8000`，前缀 `/api`，统一 `{code,data,message}` 
 | 10 | 零运行时 IO | 启动后重命名/删除 `pronunciation_rules.json`，4 端点仍从缓存正常返回（无 `open()` 请求路径） |
 | 11 | 评分在前端 | 服务端无评分端点；`/api/asr/transcribe` 仍只返回转写五字段，不返回 band/分数 |
 | 12 | 字段一致性 | §2 Schema ↔ §3 端点 ↔ §6 清单 ↔ 示例 JSON 逐字一致；禁用别名 `word/highlight/read_aloud` 命中=0 |
+| 13 | patterns/focus 下发（v1.1） | `GET /rules/{id}` 对源文件含 `patterns`/`focus` 的规则下发该两字段，缺失键不产出（非 null）；锚定 pattern（`^h`/`er$`/`^six$`）按 §2.2 语法在前端生效 |
+| 14 | 词卡覆盖率（v1.1） | 用新匹配器对 DB 生词 + 语料全词表实测覆盖率 ≥70-80% 硬指标（TASK-0027 验收口径） |
 
 ---
 
 > 任何契约变更必须**先改本文**、再同步后端/前端/内容/测试/PM，禁止口头约定；锁定项（PRONUNCIATION_PLAN §5.1 / §6.4 / §7 / §9 / §10）变更必须先报总指挥。本文只约束「零基础读音规则学习」增量，产品语义以 `PRONUNCIATION_PLAN.md` 为准。
+
+**v1.1 变更记录（2026-11-19，TASK-0027）**：①规则对象新增可选 `patterns`（拼读匹配，锚定语法 `^`/`$`）与 `focus`（按钮展示音节）两字段——修复内容层已产出 `patterns` 但被后端 10 字段严格投影剥离、前端拼读引擎空转导致词卡覆盖率仅 26% 的三方断链；②`GET /rules/{id}` 详情下发该两可选字段；③测试要点补 #13/#14。其余锁定项（39 条、4 例词、156 IPA、错误码、表结构、隐私红线）一律不变。

@@ -15,8 +15,8 @@ SEED_USER = {
     "username": "YU",
     "cefr_level": "A2",
     "target_level": "B2",
-    "xp": 1280,
-    "streak_days": 12,
+    "xp": 0,
+    "streak_days": 0,
 }
 
 # ---------------------------------------------------------------- 场景种子数据

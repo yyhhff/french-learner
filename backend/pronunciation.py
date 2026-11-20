@@ -1,8 +1,10 @@
 """零基础读音规则学习：规则 JSON 加载/校验/进程内缓存与查询。
 
-契约 PRONUNCIATION_CONTRACT.md v1.0（唯一技术输入）逐字实现；
+契约 PRONUNCIATION_CONTRACT.md v1.1（唯一技术输入）逐字实现；
 照 exam.py::load_papers() 模式：模块级缓存、幂等、单条非法跳过、文件缺失降级为空；
 零新增依赖；app.py 只做路由/校验，运行时零文件 IO。
+v1.1（TASK-0027）：详情透传可选扩展字段 patterns（拼读匹配）/ focus（按钮展示音节），
+源文件缺失该键则不产出（不填 null），修复词卡覆盖率断链。
 """
 from __future__ import annotations
 
@@ -30,11 +32,13 @@ GROUPS = (
 TIERS = ("starter", "core")
 SHADOW_MODES = ("syllable", "word", "phrase")
 
-# 契约 §6 出参字段集（逐字；详情 10 字段、摘要 4 字段、例词 4 字段）
+# 契约 §6 出参字段集（逐字；详情 10 字段 + v1.1 可选扩展、摘要 4 字段、例词 4 字段）
 RULE_FIELDS = (
     "id", "group", "title", "description_zh", "examples",
     "audio_text", "shadow_text_fr", "shadow_mode", "tier", "tags",
+    "focus", "patterns",  # v1.1 可选：源文件缺失该键则不产出
 )
+OPTIONAL_RULE_FIELDS = ("focus", "patterns")
 SUMMARY_FIELDS = ("id", "group", "title", "tier")
 EXAMPLE_FIELDS = ("word_fr", "meaning_zh", "note_zh", "phonetic")
 
@@ -76,6 +80,14 @@ def _validate_rule(rule, seen_ids: set) -> str | None:
     tags = rule.get("tags")
     if not isinstance(tags, list) or any(not _nonempty_str(tag) for tag in tags):
         return "tags 非法"
+    # v1.1 可选扩展字段（契约 §2.2）
+    focus = rule.get("focus")
+    if focus is not None and not _nonempty_str(focus):
+        return "focus 非法"
+    patterns = rule.get("patterns")
+    if patterns is not None:
+        if not isinstance(patterns, list) or any(not _nonempty_str(p) for p in patterns):
+            return "patterns 非法"
     return None
 
 
@@ -109,7 +121,7 @@ def load_rules() -> list:
                     logger.warning("跳过第 %d 条非法读音规则：%s", index + 1, reason)
                     continue
                 seen_ids.add(rule["id"])
-                # 严格投影：详情 10 字段（按契约 §6 顺序）、例词 4 字段，绝不多下发任何字段
+                # 严格投影：详情 10 字段 + v1.1 可选扩展（按契约 §6 顺序）、例词 4 字段，绝不多下发任何字段
                 detail = {}
                 for key in RULE_FIELDS:
                     if key == "examples":
@@ -117,6 +129,9 @@ def load_rules() -> list:
                             {field: ex[field] for field in EXAMPLE_FIELDS}
                             for ex in rule["examples"]
                         ]
+                    elif key in OPTIONAL_RULE_FIELDS:
+                        if key in rule:
+                            detail[key] = rule[key]
                     else:
                         detail[key] = rule[key]
                 rules.append(detail)

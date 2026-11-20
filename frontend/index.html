@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呀呀法语 YaYa French — 像婴儿一样，自然地学会法语</title>
-<link rel="stylesheet" href="styles.css?v=12">
+<link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
 <div class="wrap">
@@ -22,7 +22,6 @@
       <div class="level-pill">
         <span>当前 <b id="lvNow">A2</b> → 目标 <b id="lvTarget">B2</b></span>
         <div class="bar"><i id="lvBar"></i></div>
-        <span class="vocab-count">词汇 <b id="vocabCount">0</b> / 6,500</span>
       </div>
       <div class="streak-pill">🔥 连续 <b id="topStreak">0</b> 天</div>
       <div class="avatar" id="avatar">YU</div>
@@ -35,6 +34,7 @@
     <button class="view-tab" id="tabRead" onclick="switchView('read')">📖 分级阅读</button>
     <button class="view-tab" id="tabAssessment" onclick="switchView('assessment')">🎯 定级</button>
     <button class="view-tab" id="tabExam" onclick="switchView('exam')">🏆 考级冲刺</button>
+    <button class="view-tab" id="tabGrowth" onclick="switchView('growth')">🌱 我的成长</button>
     <span class="read-vocab-badge" id="readVocabBadge">词库 0 词</span>
   </div>
 
@@ -57,6 +57,7 @@
         <span class="flag" id="scnFlag">☕</span>
         <div><b id="scnTitle">加载中…</b><p id="scnDesc">—</p></div>
         <div class="live"><span class="dot"></span>AI 陪练在线</div>
+        <button class="chat-reset" onclick="resetChat()" title="清空本场景的对话记录（含持久化存储），重新开始">↺ 重置对话</button>
       </div>
 
       <div class="chat" id="chat"></div>
@@ -75,8 +76,15 @@
 
     <!-- right -->
     <aside>
-      <div class="card panel">
-        <div class="card-h"><h2 id="vocabTitle">本场景生词</h2><span id="vocabSub">自动收卡</span></div>
+      <!-- TASK-0049 方案E：账本压成吸顶条 + 生词满高（设计稿 docs/design/right-rail-layouts.html） -->
+      <div class="card panel vocab-panel">
+        <div class="panel-h"><h2 id="vocabTitle">本场景生词</h2><span id="vocabSub">自动收卡</span></div>
+        <div class="ledger-bar">
+          <div class="lb-chip lb-due"><b id="dueNum">0</b><span>今日想见你</span></div>
+          <div class="lb-chip"><b id="weekNew">+0</b><span>本周新词</span></div>
+          <span class="lb-streak" id="chatTotalBadge">💬 累计 0 轮对话</span>
+          <button class="mini-review" onclick="openReview()">📝 复习</button>
+        </div>
         <div class="body">
           <!-- 可发现性②：小册子入口常驻词卡侧栏，随时可见可进 -->
           <button class="pron-book-entry" id="pronBookEntry" onclick="openPronBook()">📖 读音小册子 · 已学 0/39</button>
@@ -86,17 +94,6 @@
             生词旁有个小喇叭，点一下能听标准读音、看看怎么读～
           </div>
           <div class="vocab" id="vocab"></div>
-        </div>
-      </div>
-      <div class="card panel">
-        <div class="card-h"><h2>记忆小账本</h2><span>SM-2 智能调度</span></div>
-        <div class="body">
-          <div class="ring"><div class="num" id="dueNum">0</div><div class="lab">今日待复习卡片</div>
-            <span class="badge" id="streakBadge">连续学习 0 天 🔥</span></div>
-          <div class="stat"><span>本周新词</span><b id="weekNew">+0</b></div>
-          <div class="stat"><span>已掌握</span><b class="up" id="mastered">0</b></div>
-          <div class="stat"><span>今日正确率</span><b id="accuracy">0%</b></div>
-          <button class="review-entry" onclick="openReview()">📝 复习今日卡片</button>
         </div>
       </div>
     </aside>
@@ -116,14 +113,19 @@
       <main class="card read-card">
         <div class="read-h">
           <div class="read-h-title"><span class="read-h-emoji" id="readFlag">📖</span>
-            <div><b id="readTitle">选一篇，开始慢慢读</b><p id="readMeta">—</p></div></div>
+            <div><b id="readTitle">选一篇，开始慢慢读</b><p id="readMeta"></p></div></div>
           <div class="read-actions">
             <button class="read-audio-btn" id="readAudioBtn" onclick="playCurrentAudio()" title="听整篇">🔊 听整篇</button>
             <button class="rec-btn" onclick="recommendNext()">✨ 推荐下一篇</button>
           </div>
         </div>
         <div class="read-body" id="readBody">
-          <div class="read-placeholder">从左侧选一篇。读不懂的地方，有中文小字陪着你 🌱</div>
+          <div class="read-placeholder">
+            <div class="rp-emoji">🌱</div>
+            <b>从左侧选一篇，开始慢慢读</b>
+            <p>读不懂的地方，有中文小字陪着你。<br>不确定选哪篇？让我来帮你挑～</p>
+            <button class="rec-btn" onclick="recommendNext()">✨ 帮我挑一篇</button>
+          </div>
         </div>
         <div class="read-note" id="readNote"></div>
       </main>
@@ -173,9 +175,13 @@
     </div>
   </div>
 
+  <div id="viewGrowth" class="view hidden">
+    <!-- TASK-0047 我的成长 v1：全部由 renderGrowth() 填充，数字只来自真实行为 -->
+    <div id="growthWrap" class="growth-wrap"></div>
+  </div>
+
   <div class="foot">
     呀呀法语 YaYa · 让每一次开口，都变成温柔的进步
-    <button class="reset" onclick="resetChat()">重置对话</button>
   </div>
 </div>
 
@@ -208,6 +214,6 @@
 <!-- 温和提示条 -->
 <div id="toast" class="toast"></div>
 
-<script src="app.js?v=13" defer></script>
+<script src="app.js?v=30" defer></script>
 </body>
 </html>

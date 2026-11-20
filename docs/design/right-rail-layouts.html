@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>呀呀法语 · 右栏布局设计方案对比（TASK-0049）</title>
+<style>
+  :root{
+    --bg:#F7F6F2; --surface:#FFFFFF; --ink:#26251F; --muted:#6E6C64;
+    --line:#E7E5DE; --brand:#E8794A; --brand-soft:#FBEDE5;
+    --teal:#1D9E75; --teal-soft:#E6F4EE; --blue:#3B7DD8; --blue-soft:#EAF1FB;
+    --amber:#C98A16; --amber-soft:#FBF1DC;
+    --shadow:0 8px 30px rgba(60,50,30,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;padding:32px 24px 80px}
+  .head{max-width:1280px;margin:0 auto 8px}
+  .head h1{font-size:22px;margin-bottom:4px}
+  .head p{font-size:13px;color:var(--muted)}
+  .intro{max-width:1280px;margin:14px auto 30px;font-size:13px;color:var(--muted);
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+  .intro b{color:var(--ink)}
+
+  .variants{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:26px}
+  .variant{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .v-tag{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .v-tag h2{font-size:15px}
+  .v-tag .rec{font-size:11px;padding:3px 10px;border-radius:99px;background:var(--teal-soft);color:var(--teal);font-weight:700}
+  .v-tag .rec.gray{background:var(--bg);color:var(--muted);font-weight:400}
+  .v-tag .rec.warn{background:var(--amber-soft);color:var(--amber);font-weight:700}
+
+  /* 仿应用 mock：左对话暗示 + 右栏 280px */
+  .stage{display:grid;grid-template-columns:70px 1fr 280px;gap:10px;padding:16px;background:var(--bg)}
+  .ghost{border:1.5px dashed var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;
+    color:#C9C6BC;font-size:11px;min-height:420px}
+  .ghost.tall{grid-row:span 2}
+  .rail{display:flex;flex-direction:column;gap:10px}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .panel-h{padding:9px 13px;font-size:12.5px;font-weight:700;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center}
+  .panel-h small{color:var(--muted);font-weight:400;font-size:10.5px}
+  .panel-b{padding:10px 13px}
+
+  /* 账本元素 */
+  .ring{text-align:center;padding:6px 0 2px}
+  .ring .num{font-size:30px;font-weight:700;color:var(--teal);line-height:1}
+  .ring .lab{font-size:11px;color:var(--muted);margin-top:3px}
+  .stat{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .stat:last-of-type{border-bottom:none}
+  .stat b{font-weight:700}
+  .review-entry{width:100%;margin-top:8px;background:var(--brand);color:#fff;border:none;border-radius:10px;
+    padding:8px 0;font-size:12px;font-weight:600;cursor:pointer}
+  .streak{font-size:10.5px;color:var(--amber);background:var(--amber-soft);border-radius:99px;padding:2px 9px;display:inline-block;margin-top:6px}
+
+  /* KPI 压缩条（方案 C/E） */
+  .strip{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{flex:1;min-width:56px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:6px 4px;text-align:center}
+  .chip b{display:block;font-size:15px;line-height:1.2;color:var(--ink)}
+  .chip.due b{color:var(--teal)}
+  .chip span{font-size:9.5px;color:var(--muted)}
+  .strip-row{display:flex;align-items:center;gap:8px}
+  .mini-btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:7px 12px;
+    font-size:11.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+  .ghost-btn{background:var(--brand-soft);color:var(--brand)}
+
+  /* 生词卡 */
+  .v-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .v-item:last-child{border-bottom:none}
+  .v-item .w{font-weight:700}
+  .v-item .m{color:var(--muted);font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .v-item .s{color:var(--blue);font-size:12px}
+  .fade{height:34px;background:linear-gradient(var(--surface),transparent);margin-top:-8px;position:relative}
+  .fade::after{content:'⋯ 还有很多';display:block;text-align:center;font-size:10px;color:#C9C6BC;position:relative;top:8px}
+
+  /* Tab 模式（方案 B） */
+  .tabbar{display:flex;gap:4px;padding:8px 10px 0}
+  .tabbar button{flex:1;border:none;background:var(--bg);border-radius:8px 8px 0 0;font-size:11.5px;
+    padding:6px 0;color:var(--muted);cursor:pointer}
+  .tabbar button.on{background:var(--brand-soft);color:var(--brand);font-weight:700}
+
+  /* 吸顶条（方案 E） */
+  .sticky-demo{position:relative}
+  .sticky-bar{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--line);
+    padding:8px 13px;z-index:2}
+  .scroller{max-height:150px;overflow-y:auto}
+
+  /* 顶栏融合（方案 D） */
+  .topline{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px dashed var(--line)}
+  .pill{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:6px 12px;font-size:11.5px}
+  .pill b{color:var(--teal)}
+  .pill.amber{color:var(--amber);background:var(--amber-soft);border-color:#EFD9A8}
+
+  .v-notes{padding:14px 18px;border-top:1px solid var(--line);font-size:12px}
+  .v-notes .good{color:var(--teal)}
+  .v-notes .bad{color:#B4552F}
+  .v-notes li{margin:3px 0 3px 16px}
+
+  /* 对比表 */
+  .cmp{max-width:1280px;margin:34px auto 0;background:var(--surface);border:1px solid var(--line);
+    border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .cmp h2{font-size:16px;padding:16px 20px 6px}
+  .cmp p.src{padding:0 20px 12px;font-size:12px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:10px 14px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:var(--bg);font-size:11.5px;color:var(--muted);font-weight:600}
+  td .yes{color:var(--teal);font-weight:700}
+  td .no{color:#B4552F}
+  tr.rec-row td{background:var(--teal-soft)}
+  .final{max-width:1280px;margin:18px auto 0;background:var(--brand-soft);border:1px solid #F3C9B4;
+    border-radius:14px;padding:14px 20px;font-size:13px}
+  .final b{color:var(--brand)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>右栏布局 · 5 版设计方案</h1>
+  <p>约束：右栏固定 280px；「记忆小账本」（紧凑，约 390px 高）与「本场景生词」（长列表）都要首屏可见、互不挤走。</p>
+</div>
+<div class="intro">
+  <b>参考来源（GitHub 成熟模式）</b>：GitHub/GitLab 详情页右栏的「紧凑元信息分区」、Tabler / shadcn/ui dashboard 的 KPI 压缩条（数字+小标签一行排开）、侧栏 Tab 复用空间模式（angular-ui-skills / absolute-ui 的 dashboard patterns 参考）。以下 mockup 全部使用应用现有设计变量，所见即所得。
+</div>
+
+<div class="variants">
+
+  <!-- 方案 A -->
+  <div class="variant">
+    <div class="v-tag"><h2>方案 A · 现状基准（账本在上）</h2><span class="rec warn">已被否 ✗</span></div>
+    <div class="stage">
+      <div class="ghost">左<br>场<br>景</div>
+      <div class="ghost">对 话 区</div>
+      <div class="rail">
+        <div class="panel">
+          <div class="panel-h">记忆小账本 <small>SM-2</small></div>
+          <div class="panel-b">
+            <div class="ring"><div class="num">46</div><div class="lab">今日待复习卡片</div><span class="streak">🔥 连续 1 天</span></div>
+            <div class="stat"><span>本周新词</span><b>+46</b></div>
+            <div class="stat"><span>已掌握</span><b>0</b></div>
+            <div class="stat"><span>累计对话</span><b>106</b></div>
+            <div class="stat"><span>今日正确率</span><b>—</b></div>
+            <button class="review-entry">📝 复习今日卡片</button>
+          </div>
+        </div>
+        <div class="panel" style="min-height:0">
+          <div class="panel-h">本场景生词 <small>自动收卡</small></div>
+          <div class="panel-b">
+            <div class="v-item"><span class="w">le thé</span><span class="m">茶</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">chercher</span><span class="m">寻找</span><span class="s">🔊</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="v-notes">
+      <ul>
+        <li class="good">账本完整、数字醒目（大圆环）</li>
+        <li class="bad">生词整卡被挤出首屏——正是当前问题</li>
+        <li class="bad">账本占高 ~390px，右栏被静态数字长期占据</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 方案 B -->
+  <div class="variant">
+    <div class="v-tag"><h2>方案 B · 同面板 Tab 切换</h2><span class="rec gray">备选</span></div>
+    <div class="stage">
+      <div class="ghost">左<br>场<br>景</div>
+      <div class="ghost">对 话 区</div>
+      <div class="rail">
+        <div class="panel">
+          <div class="tabbar">
+            <button class="on">📚 生词</button>
+            <button>📒 账本 · 46</button>
+          </div>
+          <div class="panel-b" style="border-top:1px solid var(--line)">
+            <div class="v-item"><span class="w">le thé</span><span class="m">茶</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">chercher</span><span class="m">寻找</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">un croissant</span><span class="m">可颂</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">la gare</span><span class="m">火车站</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">tout droit</span><span class="m">直走</span><span class="s">🔊</span></div>
+            <div class="fade"></div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-b" style="font-size:11px;color:var(--muted)">📖 读音小册子 · 已学 12/39</div></div>
+      </div>
+    </div>
+    <div class="v-notes">
+      <ul>
+        <li class="good">生词获得全部右栏高度；账本一个 Tab 随时可切</li>
+        <li class="good">Tab 上带待复习数徽标（46），数字仍有感知度</li>
+        <li class="bad">账本从「常驻可见」降级为「要点一下」——感知度变弱</li>
+        <li class="bad">复习入口藏进 Tab，打开多一步</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 方案 C -->
+  <div class="variant">
+    <div class="v-tag"><h2>方案 C · KPI 压缩条 + 生词满高</h2><span class="rec">推荐 ★</span></div>
+    <div class="stage">
+      <div class="ghost">左<br>场<br>景</div>
+      <div class="ghost">对 话 区</div>
+      <div class="rail">
+        <div class="panel">
+          <div class="panel-h">本场景生词 <small>自动收卡</small></div>
+          <div class="panel-b">
+            <div class="strip">
+              <div class="chip due"><b>46</b><span>今日想见你</span></div>
+              <div class="chip"><b>+46</b><span>本周新词</span></div>
+              <div class="chip"><b>106</b><span>累计对话</span></div>
+            </div>
+            <div class="strip-row" style="margin-top:8px">
+              <button class="mini-btn">📝 复习今日卡片</button>
+              <button class="mini-btn ghost-btn">📒 详情</button>
+            </div>
+            <div style="border-top:1px dashed var(--line);margin:10px 0 4px"></div>
+            <div class="v-item"><span class="w">le thé</span><span class="m">茶</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">chercher</span><span class="m">寻找</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">un croissant</span><span class="m">可颂</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">la gare</span><span class="m">火车站</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">tout droit</span><span class="m">直走</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">un peu</span><span class="m">一点儿</span><span class="s">🔊</span></div>
+            <div class="fade"></div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-b" style="font-size:11px;color:var(--muted)">📖 读音小册子 · 已学 12/39 &nbsp;·&nbsp; 🔥 连续 1 天</div></div>
+      </div>
+    </div>
+    <div class="v-notes">
+      <ul>
+        <li class="good">账本压成一行 3 枚 KPI chip（~64px），核心数字全部保留、一眼可扫</li>
+        <li class="good">生词列表拿到其余全部高度——两个诉求同时满足</li>
+        <li class="good">「详情」进「我的成长」页看完整账本（已掌握/正确率/连续天数），职责分离</li>
+        <li class="good">Tabler / shadcn 的 KPI strip 模式：数字大、标签小、静默色，不抢戏</li>
+        <li class="bad">已掌握/正确率/连续天数三个次级指标移出侧栏（成长页仍有）</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 方案 D -->
+  <div class="variant">
+    <div class="v-tag"><h2>方案 D · 账本融入顶栏</h2><span class="rec gray">备选</span></div>
+    <div class="stage" style="grid-template-columns:70px 1fr">
+      <div class="ghost tall">左<br>场<br>景</div>
+      <div class="rail" style="gap:10px">
+        <div class="topline" style="border:1px solid var(--line);border-radius:14px">
+          <span class="pill">A2 → B2 <b>词汇 46</b></span>
+          <span class="pill amber">🔥 连续 1 天</span>
+          <span class="pill">待复习 <b>46</b></span>
+          <button class="mini-btn" style="margin-left:auto">📝 复习</button>
+        </div>
+        <div class="ghost" style="min-height:330px">对 话 区</div>
+        <div class="panel">
+          <div class="panel-h">本场景生词 <small>自动收卡</small></div>
+          <div class="panel-b">
+            <div class="v-item"><span class="w">le thé</span><span class="m">茶</span><span class="s">🔊</span></div>
+            <div class="v-item"><span class="w">chercher</span><span class="m">寻找</span><span class="s">🔊</span></div>
+            <div class="fade"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="v-notes">
+      <ul>
+        <li class="good">右栏 100% 让给生词；账本随顶栏常驻任意视图</li>
+        <li class="good">阅读/考级页也能看到待复习数（全局感知）</li>
+        <li class="bad">顶栏已有 3 个 pill，再塞 2 个会拥挤、小屏折行</li>
+        <li class="bad">累计对话/正确率等完整账本仍要去成长页看</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 方案 E -->
+  <div class="variant">
+    <div class="v-tag"><h2>方案 E · 方案 C + 账本条吸顶</h2><span class="rec">推荐+ ★★</span></div>
+    <div class="stage">
+      <div class="ghost">左<br>场<br>景</div>
+      <div class="ghost">对 话 区</div>
+      <div class="rail">
+        <div class="panel sticky-demo">
+          <div class="panel-h">本场景生词 <small>自动收卡</small></div>
+          <div class="sticky-bar">
+            <div class="strip-row">
+              <span class="pill" style="padding:3px 10px">待复习 <b>46</b></span>
+              <span class="pill" style="padding:3px 10px">本周 +46</span>
+              <button class="mini-btn" style="padding:5px 10px;font-size:11px">📝 复习</button>
+            </div>
+          </div>
+          <div class="scroller">
+            <div class="panel-b" style="padding-top:6px">
+              <div class="v-item"><span class="w">le thé</span><span class="m">茶</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">chercher</span><span class="m">寻找</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">un croissant</span><span class="m">可颂</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">la gare</span><span class="m">火车站</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">tout droit</span><span class="m">直走</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">un peu</span><span class="m">一点儿</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">la boulangerie</span><span class="m">面包店</span><span class="s">🔊</span></div>
+              <div class="v-item"><span class="w">vouloir</span><span class="m">想要</span><span class="s">🔊</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-b" style="font-size:11px;color:var(--muted)">📖 读音小册子 · 已学 12/39 &nbsp;·&nbsp; 累计对话 106</div></div>
+      </div>
+    </div>
+    <div class="v-notes">
+      <ul>
+        <li class="good">方案 C 的全部优点 + 生词列表内部滚动时账本条吸顶常驻</li>
+        <li class="good">滚多远都能点「复习」，待复习数永远在视野里（GitHub 右栏 sticky 模式）</li>
+        <li class="bad">实现多一层 sticky 定位细节（面板内滚动容器），复杂度略高</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="cmp">
+  <h2>方案对比矩阵</h2>
+  <p class="src">评分口径：首屏双目标（账本可见 + 生词可见）、感知度、实现风险、小屏兼容。</p>
+  <table>
+    <tr><th>方案</th><th>账本首屏可见</th><th>生词首屏可见</th><th>感知度</th><th>实现量</th><th>主要风险</th></tr>
+    <tr><td>A 现状（账本在上）</td><td class="yes">✓</td><td class="no">✗ 生词被挤走</td><td>高但失衡</td><td>—</td><td>已确认不满足</td></tr>
+    <tr><td>B Tab 切换</td><td class="no">△ 要点一下</td><td class="yes">✓</td><td>中</td><td>小</td><td>账本感知度下降</td></tr>
+    <tr class="rec-row"><td><b>C KPI 压缩条</b></td><td class="yes">✓ 一行三数</td><td class="yes">✓ 满高</td><td>高（核心数常驻）</td><td>小（改一处面板 HTML+CSS）</td><td>次级指标移位到成长页</td></tr>
+    <tr><td>D 融入顶栏</td><td class="yes">✓ 全局</td><td class="yes">✓</td><td>高但拥挤</td><td>中（动顶栏）</td><td>顶栏折行、小屏挤</td></tr>
+    <tr class="rec-row"><td><b>E C+吸顶</b></td><td class="yes">✓ 滚动也常驻</td><td class="yes">✓</td><td>最高</td><td>中（+sticky 容器）</td><td>sticky 在部分面板布局需细调</td></tr>
+  </table>
+</div>
+
+<div class="final">
+  <b>推荐：方案 E（方案 C 基础 + 吸顶）</b>——账本压成一行「待复习 46 · 本周 +46 · 📝 复习」吸顶条常驻生词卡顶部，
+  生词列表拿到全部高度且内部滚动时账本条不动；完整账本（已掌握/正确率/连续/累计对话）职责归「🌱 我的成长」页。
+  若想最稳，退一档选纯方案 C（同布局、不吸顶）。
+</div>
+
+</body>
+</html>

@@ -5,13 +5,14 @@ title 呀呀法语 - 一键启动
 
 REM ============================================================
 REM 呀呀法语 一键启动脚本
-REM 功能：启动前自检 -> 拉起 语音服务(8010) + 后端(8000) -> 健康检查 -> 打开浏览器
+REM 功能：启动前自检 -> 拉起 语音服务(8010) + 后端(8000，被占自动回退) -> 健康检查 -> 打开浏览器
 REM 可选环境变量（不设则用默认值）：
 REM   YAYA_PYTHON       后端 Python 解释器全路径（默认自动探测：WorkBuddy 3.13 -> 系统 Python）
 REM   YAYA_ASR_MODEL    语音识别模型 tiny/small（默认 small，详见 asr_service\start_asr.bat）
 REM   YAYA_KEY_REG_PATH API key 注册表查询路径（默认 HKCU\Environment，仅测试用）
 REM   YAYA_DOTENV       .env 文件路径（默认 backend\.env，仅测试用）
 REM   YAYA_NO_BROWSER   设为 1 则启动完成后不自动打开浏览器
+REM   YAYA_BACKEND_PORT 后端端口（默认 8000；被其他程序占用时自动改用 8001-8019 空闲端口；手动指定则不回退）
 REM ============================================================
 
 set "FAILS=0"
@@ -99,10 +100,16 @@ if defined KEYSRC (
 )
 
 REM ---------- [4/5] 端口检查 ----------
-echo [4/5] 检查端口 8000 / 8010 ...
+echo [4/5] 检查后端端口 / 语音端口 8010 ...
 set "BACKEND_ACTION=launch"
 set "ASR_ACTION=launch"
-call :check_port 8000 "http://127.0.0.1:8000/api/health" BACKEND_ACTION
+if defined YAYA_BACKEND_PORT (
+  set "BACKEND_PORT=%YAYA_BACKEND_PORT%"
+  set "BACKEND_PORT_MANUAL=1"
+) else (
+  set "BACKEND_PORT=8000"
+)
+call :check_backend_port
 call :check_port 8010 "http://127.0.0.1:8010/health" ASR_ACTION
 
 REM ---------- [5/5] 文件齐全性 ----------
@@ -137,7 +144,7 @@ if not "%ASR_ACTION%"=="reuse" (
 )
 if not "%BACKEND_ACTION%"=="reuse" (
   echo 正在启动后端（窗口 YaYa-Backend）...
-  start "YaYa-Backend" /D "%~dp0backend" cmd /k ""%PY%" -m uvicorn app:app --host 0.0.0.0 --port 8000"
+  start "YaYa-Backend" /D "%~dp0backend" cmd /k ""%PY%" -m uvicorn app:app --host 0.0.0.0 --port !BACKEND_PORT!"
 )
 
 REM ---------- 健康检查 ----------
@@ -145,15 +152,15 @@ echo.
 echo 等待服务就绪（最多约 90 秒）...
 set "BACKEND_UP=0"
 set "ASR_UP=0"
-call :wait_http "后端 8000" "http://127.0.0.1:8000/api/health" 30 && set "BACKEND_UP=1"
+call :wait_http "后端 !BACKEND_PORT!" "http://127.0.0.1:!BACKEND_PORT!/api/health" 30 && set "BACKEND_UP=1"
 call :wait_http "语音 8010" "http://127.0.0.1:8010/health" 45 && set "ASR_UP=1"
 
-if "%BACKEND_UP%"=="1" if not defined YAYA_NO_BROWSER start "" http://localhost:8000/
+if "%BACKEND_UP%"=="1" if not defined YAYA_NO_BROWSER start "" http://localhost:!BACKEND_PORT!/
 
 echo.
 echo ============================================
 echo   启动完成
-echo   学习入口： http://localhost:8000/
+echo   学习入口： http://localhost:!BACKEND_PORT!/
 if defined KEYSRC (
   echo   AI 重述：智谱 GLM 模式
 ) else (
@@ -201,6 +208,58 @@ if "%CODE%"=="200" (
 )
 echo   [FAIL] 端口 %1 被其他程序占用，HTTP 状态 !CODE!
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr /r /c:":%1 .*LISTENING"') do echo        占用 PID：%%p，可用 taskkill /f /pid %%p 处理
+set /a FAILS+=1
+exit /b 0
+
+:check_backend_port
+REM 后端端口检查：被呀呀自身占用则询问 R/K/Q；被其他程序占用则自动回退（手动指定时不回退）
+netstat -ano | findstr /r /c:":!BACKEND_PORT! .*LISTENING" >nul 2>nul
+if errorlevel 1 (
+  echo   [OK] 后端端口 !BACKEND_PORT! 空闲
+  exit /b 0
+)
+set "CODE="
+for /f %%c in ('curl -s -o nul -w "%%{http_code}" --max-time 3 "http://127.0.0.1:!BACKEND_PORT!/api/health"') do set "CODE=%%c"
+if "%CODE%"=="200" (
+  echo   [WARN] 端口 !BACKEND_PORT! 已有呀呀法语后端在运行
+  choice /c RKQ /n /m "        [R]重启 [K]复用不再启动 [Q]退出脚本: "
+  if errorlevel 3 (
+    set "BACKEND_ACTION=quit"
+    exit /b 0
+  )
+  if errorlevel 2 (
+    set "BACKEND_ACTION=reuse"
+    exit /b 0
+  )
+  call :kill_port !BACKEND_PORT!
+  echo   [OK] 端口 !BACKEND_PORT! 旧进程已结束，稍后将重新启动
+  exit /b 0
+)
+echo   [WARN] 后端端口 !BACKEND_PORT! 被其他程序占用（HTTP 状态 !CODE!）
+if defined BACKEND_PORT_MANUAL (
+  echo   [FAIL] 已手动指定 YAYA_BACKEND_PORT=!BACKEND_PORT!，不做自动回退。
+  for /f "tokens=5" %%p in ('netstat -ano ^| findstr /r /c:":!BACKEND_PORT! .*LISTENING"') do echo        占用 PID：%%p，可改用其他端口或 taskkill /f /pid %%p 处理
+  set /a FAILS+=1
+  exit /b 0
+)
+call :pick_fallback_port
+exit /b 0
+
+:pick_fallback_port
+REM 从 8001-8019（跳过 8010 语音端口）找第一个空闲端口
+set "PICKED="
+for /l %%i in (8001,1,8019) do (
+  if not defined PICKED if not "%%i"=="8010" (
+    netstat -ano | findstr /r /c:":%%i .*LISTENING" >nul 2>nul
+    if errorlevel 1 set "PICKED=%%i"
+  )
+)
+if defined PICKED (
+  echo   [OK] 后端将改用空闲端口 !PICKED!（学习入口 http://localhost:!PICKED!/）
+  set "BACKEND_PORT=!PICKED!"
+  exit /b 0
+)
+echo   [FAIL] 8001-8019（除 8010）也全部被占用，找不到可用后端端口。
 set /a FAILS+=1
 exit /b 0
 

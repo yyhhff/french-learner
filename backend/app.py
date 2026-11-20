@@ -196,6 +196,27 @@ async def chat(request: Request):
     return ok(result.to_dict())
 
 
+@app.get("/api/chat/history")
+async def chat_history(scene_id: str | None = None, limit: str | None = None):
+    """TASK-0040：读回真实对话历史（排除种子预置行），供前端进入场景时恢复。"""
+    scene_id = (scene_id or "").strip() or None
+    if scene_id and db.get_scene(scene_id) is None:
+        raise ApiError(40401, 404, f"场景不存在：{scene_id}")
+    n = _parse_int_param(limit, "limit", 50, 1, 200)
+    items = db.list_dialogue_history(scene_id=scene_id, limit=n)
+    return ok({"items": items, "has_more": len(items) == n})
+
+
+@app.delete("/api/chat/history")
+async def chat_history_clear(scene_id: str | None = None):
+    """重置对话：清除该场景的持久化对话轮（保留种子开场白）。scene_id 缺省时清全部场景。"""
+    scene_id = (scene_id or "").strip() or None
+    if scene_id and db.get_scene(scene_id) is None:
+        raise ApiError(40401, 404, f"场景不存在：{scene_id}")
+    deleted = db.clear_dialogue_history(user_id=db.DEFAULT_USER_ID, scene_id=scene_id)
+    return ok({"deleted": deleted})
+
+
 @app.post("/api/translate")
 async def translate(request: Request):
     """批量法语→中文，给对话气泡配译文。失败不抛 500，对应位置返回 null。"""
@@ -789,6 +810,7 @@ db.init_db()
 if db.is_empty():
     logger.info("空库，灌入种子数据…")
     seed.seed_if_empty()
+db.ensure_profile_initialized()  # TASK-0040：演示假值清零迁移（幂等）
 seed_input.load_input_corpus()  # 新增：每次启动同步语料（幂等，文件缺失不阻断）
 try:  # 定级题库：幂等加载，文件缺失/异常不阻断启动（其余 15 端点正常）
     assessment.load_questions()
@@ -817,4 +839,4 @@ else:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("YAYA_BACKEND_PORT", "8000")))

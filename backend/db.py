@@ -352,6 +352,69 @@ def add_dialogue_turn(
 
 # ---------------------------------------------------------------- 用户
 
+def ensure_profile_initialized(user_id: int = DEFAULT_USER_ID) -> None:
+    """TASK-0040 假值清零迁移（幂等）：users 补 profile_initialized 列；未初始化行清零演示假值。"""
+    conn = get_conn()
+    try:
+        cols = {r["name"] for r in conn.execute("PRAGMA table_info(users)").fetchall()}
+        if "profile_initialized" not in cols:
+            conn.execute("ALTER TABLE users ADD COLUMN profile_initialized INTEGER DEFAULT 0")
+            conn.commit()
+        row = conn.execute(
+            "SELECT profile_initialized FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
+        if row is None or row["profile_initialized"]:
+            return
+        conn.execute(
+            "UPDATE users SET xp = 0, streak_days = 0, last_active_date = NULL, "
+            "profile_initialized = 1 WHERE id = ?",
+            (user_id,),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def list_dialogue_history(
+    user_id: int = DEFAULT_USER_ID,
+    scene_id: str | None = None,
+    limit: int = 50,
+) -> list:
+    """TASK-0040：读回真实对话（created_at IS NOT NULL 排除种子预置行），按 id 正序返回。"""
+    conn = get_conn()
+    try:
+        sql = "SELECT * FROM dialogue_turns WHERE user_id = ? AND created_at IS NOT NULL"
+        params: list = [user_id]
+        if scene_id:
+            sql += " AND scene_id = ?"
+            params.append(scene_id)
+        sql += " ORDER BY id DESC LIMIT ?"
+        params.append(limit)
+        rows = conn.execute(sql, params).fetchall()
+        return [row_to_dialogue_turn(r) for r in reversed(rows)]
+    finally:
+        conn.close()
+
+
+def clear_dialogue_history(
+    user_id: int = DEFAULT_USER_ID,
+    scene_id: str | None = None,
+) -> int:
+    """重置对话：删除真实对话轮（created_at IS NOT NULL），种子预置行保留。返回删除条数。"""
+    conn = get_conn()
+    try:
+        sql = "DELETE FROM dialogue_turns WHERE user_id = ? AND created_at IS NOT NULL"
+        params: list = [user_id]
+        if scene_id:
+            sql += " AND scene_id = ?"
+            params.append(scene_id)
+        cur = conn.execute(sql, params)
+        conn.commit()
+        return cur.rowcount
+    finally:
+        conn.close()
+
+
 def get_user(user_id: int = DEFAULT_USER_ID):
     conn = get_conn()
     try:
@@ -406,7 +469,8 @@ def get_profile(user_id: int = DEFAULT_USER_ID):
         week_ago = iso_days_from_now(-7)
 
         due = conn.execute(
-            "SELECT COUNT(*) AS n FROM review_logs WHERE next_due <= ?", (now,)
+            "SELECT COUNT(*) AS n FROM review_logs WHERE user_id = ? AND next_due <= ?",
+            (user_id, now),
         ).fetchone()["n"]
         new_week = conn.execute(
             "SELECT COUNT(*) AS n FROM word_cards WHERE user_id = ? AND created_at >= ?",
@@ -414,6 +478,15 @@ def get_profile(user_id: int = DEFAULT_USER_ID):
         ).fetchone()["n"]
         mastered = conn.execute(
             "SELECT COUNT(*) AS n FROM review_logs WHERE user_id = ? AND repetitions >= 5",
+            (user_id,),
+        ).fetchone()["n"]
+        total_cards = conn.execute(
+            "SELECT COUNT(*) AS n FROM word_cards WHERE user_id = ?",
+            (user_id,),
+        ).fetchone()["n"]
+        dialogue_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM dialogue_turns "
+            "WHERE user_id = ? AND created_at IS NOT NULL",
             (user_id,),
         ).fetchone()["n"]
         agg = conn.execute(
@@ -430,6 +503,9 @@ def get_profile(user_id: int = DEFAULT_USER_ID):
             "new_words_week": new_week,
             "mastered_count": mastered,
             "accuracy": accuracy,
+            "total_cards": total_cards,
+            "dialogue_count": dialogue_count,
+            "review_count": total,
         }
         return profile
     finally:

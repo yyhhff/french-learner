@@ -61,9 +61,11 @@ function buildFallbackCards(){
 }
 
 const FALLBACK_PROFILE = {
-  id:1, username:'YU', cefr_level:'A2', target_level:'B2', xp:1280,
-  streak_days:12, last_active_date:TODAY,
-  stats:{ due_cards_count:8, new_words_week:46, mastered_count:1024, accuracy:0.87 }
+  id:1, username:'YU', cefr_level:'A2', target_level:'B2', xp:0,
+  streak_days:0, last_active_date:TODAY,
+  // TASK-0047：离线兜底也必须全 0——宁可显示"刚开始"，不拿假数字冒充
+  stats:{ due_cards_count:0, new_words_week:0, mastered_count:0,
+    accuracy:0, total_cards:0, dialogue_count:0, review_count:0 }
 };
 
 // 试试点击的建议句（UI 提示，不来自 API）
@@ -199,7 +201,6 @@ function renderTop(){
   const p = state.profile||FALLBACK_PROFILE;
   document.getElementById('lvNow').textContent = p.cefr_level||'A2';
   document.getElementById('lvTarget').textContent = p.target_level||'B2';
-  document.getElementById('vocabCount').textContent = fmtNum(p.xp);
   document.getElementById('topStreak').textContent = p.streak_days||0;
   document.getElementById('avatar').textContent = p.username||'YU';
   const order = ['A1','A2','B1','B2','C1','C2'];
@@ -227,12 +228,20 @@ function renderHeader(){
   document.getElementById('scnDesc').textContent = s.description;
 }
 
+// TASK-0034：对话气泡的连读入口——只有检测到连读对的句子才显示按钮，避免每句都挂
+function chatLinkBtnHTML(sentence){
+  if(!state.pron.available) return '';
+  if(!detectLinkingPairs(sentence).length) return '';
+  return `<button class="v-mini-btn chat-lk-btn" onclick="toggleLinkingInline(this)" data-text="${esc(sentence)}" title="连读教学：整句示范 + 联诵/连音">🔗 连读</button>`;
+}
+
 function messageHTML(m){
   if(m.role==='user'){
     return `<div class="row user">
       <div class="who">我</div>
-      <div class="bubble"><span>${esc(m.fr)}</span>
+      <div class="bubble"><span>${sentenceTokensHTML(m.fr)}</span>
         <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听我的这句发音">🔊</button>
+        ${chatLinkBtnHTML(m.fr)}
         ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
         ${m.asr_raw?`<span class="asr-note">🎧 原声识别：${esc(m.asr_raw)} → 已按法语修正</span>`:''}
       </div>
@@ -243,8 +252,9 @@ function messageHTML(m){
     return `<div class="recast">
       <div class="recast-card">
         <div class="tag">🌱 呀呀的自然重述 <small>把你说的句子，用更自然的法语轻轻说回去</small></div>
-        <div class="say"><span>${esc(m.fr)}</span>
+        <div class="say"><span>${sentenceTokensHTML(m.fr)}</span>
           <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听呀呀的重述">🔊</button>
+          ${chatLinkBtnHTML(m.fr)}
         </div>
         ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
         <div class="why">${m.explanation?esc(m.explanation)+'<br>':''}你说的是：${esc(m.recast_of)}</div>
@@ -253,8 +263,9 @@ function messageHTML(m){
   }
   return `<div class="row assistant">
     <div class="who">呀</div>
-    <div class="bubble"><span>${esc(m.fr)}</span>
+    <div class="bubble"><span>${sentenceTokensHTML(m.fr)}</span>
       <button class="spk-btn" onclick="speak(this)" data-text="${esc(m.fr)}" title="听发音">🔊</button>
+      ${chatLinkBtnHTML(m.fr)}
       ${m.cn?`<span class="cn">${esc(m.cn)}</span>`:''}
     </div>
   </div>`;
@@ -274,8 +285,8 @@ function renderTries(){
 }
 
 function sceneCards(){
-  const filtered = state.cards.filter(c=>c.source_scene_id===state.currentSceneId);
-  return filtered.length ? filtered : state.cards;
+  // 只显示当前场景的词：自动收卡按 source_scene_id 归位，不再回退显示全部场景卡片
+  return state.cards.filter(c=>c.source_scene_id===state.currentSceneId);
 }
 function renderVocab(){
   const list = sceneCards();
@@ -284,38 +295,356 @@ function renderVocab(){
   document.getElementById('vocab').innerHTML = list.length
     ? list.map(c=>{
         const ids = findRulesForCard(c.word);
-        // 仅命中规则的词才显示"怎么读"按钮，显示规则 title 而非词名
+        // 仅命中规则的词才显示"怎么读"按钮：展示提取的音节（focus），规则全名放悬停提示（契约 v1.1）
+        // 首选有 focus 的规则（概念规则如"字母名≠读音"无 focus，让位给更具体的音节规则）
+        const r0 = ids.map(id=>state.pron.ruleById.get(id)).find(x=>x && pronFocusLabel(x))
+          || (ids.length ? state.pron.ruleById.get(ids[0]) : null);
+        const focus = r0 ? pronFocusLabel(r0) : '';
         const pronEntry = (state.pron.available && ids.length)
-          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openPronCardForWord(this)" title="看看 ${esc(c.word)} 怎么读">${pronRuleLabel(c.word)} 🎵 怎么读</button>`
+          ? `<button class="pron-word-entry" data-word="${esc(c.word)}" onclick="openWordPopover(this)" title="${r0 ? esc(r0.title) : ''}">${focus ? esc(focus)+' 🎵 怎么读' : '🎵 怎么读'}</button>`
           : '';
         return `<div class="v">
         <div class="v-top">
-          <span class="w">${esc(c.word)}</span>
+          <span class="w">${wordTokensHTML(c.word)}</span>
           ${c.pos?`<span class="v-pos">${esc(c.pos)}</span>`:''}
           ${c.cefr_level?`<span class="v-lv">${esc(c.cefr_level)}</span>`:''}
           <button class="spk" onclick="speak(this)" data-text="${esc(c.word)}" title="听发音">🔊</button>
         </div>
         <div class="mean">${esc(c.meaning||'')}</div>
-        ${c.example?`<div class="v-ex">例：${esc(c.example)}</div>`:''}
+        ${c.example?`<div class="v-ex">例：${sentenceTokensHTML(c.example)}</div>`:''}
         ${pronEntry}
       </div>`;
       }).join('')
-    : '<div class="vocab-empty">还没有生词，聊几句自动收卡～</div>';
+    : '<div class="vocab-empty">还没有本场景生词，聊几句自动收卡～</div>';
+}
+
+/* ---------- TASK-0029：逐词点击学发音 + 连读教学 ---------- */
+// 词形清理：只去首尾标点，保留词内省文符/连字符（aujourd'hui、rendez-vous）
+function cleanToken(raw){
+  return String(raw||'').replace(/^[^\p{L}\p{N}'’-]+|[^\p{L}\p{N}'’-]+$/gu, '');
+}
+// 主词逐词：每个单词可点开自己的读音规则卡
+function wordTokensHTML(word){
+  return String(word||'').trim().split(/\s+/).filter(Boolean).map(tok =>
+    `<span class="v-tok" data-word="${esc(tok)}" onclick="openWordPopover(this)" title="学 ${esc(tok)} 的发音">${esc(tok)}</span>`
+  ).join(' ');
+}
+// 例句逐词：展示保留原标点，点击学清理后的词；纯标点不包
+function sentenceTokensHTML(sentence){
+  return String(sentence||'').trim().split(/\s+/).filter(Boolean).map(raw => {
+    const tok = cleanToken(raw);
+    if(!tok || !/\p{L}/u.test(tok)) return esc(raw);
+    return `<span class="v-tok" data-word="${esc(tok)}" onclick="openWordPopover(this)" title="学 ${esc(tok)} 的发音">${esc(raw)}</span>`;
+  }).join(' ');
+}
+// 连读启发式（从宽提示、不判错）：前词末辅音字母 + 后词元音/哑音 h 开头
+const LIAISON_END_RE = /[stdxznpf]$/i;
+const ENCHAINEMENT_END_RE = /[rl]$/i;
+const VOWEL_START_RE = /^[aeiouàâæéèêëîïôöœùûüÿyh]/i;
+function detectLinkingPairs(sentence){
+  const raws = String(sentence||'').trim().split(/\s+/).filter(Boolean);
+  const out = [];
+  for(let i=0;i<raws.length-1;i++){
+    const a = cleanToken(raws[i]), b = cleanToken(raws[i+1]);
+    if(!a || !b || !/\p{L}/u.test(a) || !/\p{L}/u.test(b)) continue;
+    if(!VOWEL_START_RE.test(b)) continue;
+    if(LIAISON_END_RE.test(a)) out.push({i, a, b, type:'liaison'});
+    else if(ENCHAINEMENT_END_RE.test(a)) out.push({i, a, b, type:'enchainement'});
+  }
+  return out;
+}
+// TASK-0032：贴词气泡——学习动作原地发生，无导航无回退问题
+let pronPopEl = null;
+function closePronPopover(){
+  if(pronPopEl){ pronPopEl.remove(); pronPopEl = null; }
+  document.removeEventListener('click', pronPopOutside, true);
+}
+function pronPopOutside(e){
+  if(pronPopEl && !pronPopEl.contains(e.target)) closePronPopover();
+}
+function openWordPopover(tokEl){
+  if(pronPopEl && pronPopEl._anchor === tokEl){ closePronPopover(); return; } // 再点同一词 = 收起
+  closePronPopover();
+  const word = tokEl.getAttribute('data-word') || '';
+  const ids = findRulesForCard(word);
+  const r0 = ids.map(id=>state.pron.ruleById.get(id)).find(x=>x && pronFocusLabel(x))
+    || (ids.length ? state.pron.ruleById.get(ids[0]) : null);
+  const el = document.createElement('div');
+  el.className = 'pron-pop';
+  el._anchor = tokEl;
+  el.dataset.word = word;
+  el.dataset.ruleIds = JSON.stringify(ids);
+  el.dataset.ruleId = r0 ? r0.id : '';
+  const exHtml = (r0 && Array.isArray(r0.examples)) ? r0.examples.slice(0,2).map(e =>
+    `<span class="lk-mini-ex">${esc(e.word_fr)} <span class="lk-mini-ipa">${esc(e.phonetic||'')}</span></span>`).join('') : '';
+  el.innerHTML = `
+    <button class="pron-pop-close" onclick="event.stopPropagation();closePronPopover()" title="关闭">×</button>
+    <div class="pron-pop-word"><b>${esc(word)}</b>
+      <button class="v-mini-btn" onclick="event.stopPropagation();speak(this)" data-text="${esc(word)}">🔊 听发音</button>
+    </div>
+    ${r0 ? `
+      <div class="pron-pop-rule">${esc(r0.title)}</div>
+      <div class="pron-pop-desc">${esc(r0.description_zh||'')}</div>
+      ${exHtml?`<div class="pron-pop-exs">${exHtml}</div>`:''}
+      <button class="pron-pop-more" onclick="event.stopPropagation();openFullFromPop(this)">完整讲解 + 跟读 →</button>`
+    : `<div class="pron-pop-desc">这个词暂无规则讲解，先听标准发音吧～</div>`}`;
+  document.body.appendChild(el);
+  // 定位：贴 token 下沿，视口内钳制，放不下翻上方
+  const rect = tokEl.getBoundingClientRect();
+  el.style.visibility = 'hidden';
+  requestAnimationFrame(()=>{
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let x = rect.left + rect.width/2 - w/2;
+    x = Math.max(8, Math.min(x, window.innerWidth - w - 8));
+    let y = rect.bottom + 6;
+    if (y + h + 8 > window.innerHeight) y = Math.max(8, rect.top - h - 6);
+    el.style.left = x+'px'; el.style.top = y+'px';
+    el.style.visibility = '';
+  });
+  pronPopEl = el;
+  setTimeout(()=>document.addEventListener('click', pronPopOutside, true), 0);
+}
+function openFullFromPop(btn){
+  const pop = btn.closest('.pron-pop');
+  if(!pop) return;
+  let ids = [];
+  try{ ids = JSON.parse(pop.dataset.ruleIds || '[]'); }catch(e){ ids = []; }
+  const rid = pop.dataset.ruleId || (ids[0] || '');
+  const word = pop.dataset.word || '';
+  closePronPopover();
+  if(rid && state.pron.ruleById.get(rid)) openPronCard(rid, ids.length?ids:[rid], word);
+  else openPronCardForNoRule(word);
+}
+
+// TASK-0032：连读内嵌展开（手风琴）——取代模态连读卡，学习动作原地发生
+function toggleLinkingInline(btn){
+  // TASK-0034/0038：容器可为生词卡 .v、对话气泡 .bubble/重述卡 .say、阅读逐句 .rbubble、阅读整篇 .whole-fr
+  const v = btn.closest('.v') || btn.closest('.bubble') || btn.closest('.say') || btn.closest('.rbubble') || btn.closest('.whole-fr');
+  if(!v) return;
+  const existing = v.querySelector(':scope > .lk-inline');
+  if(existing){
+    existing.remove();
+    btn.textContent = btn.dataset.closedLabel || '🔗 连读';
+    return;
+  }
+  if(!state.pron.detailsLoaded) loadPronDetails();
+  const text = btn.dataset.text || '';
+  const pairs = detectLinkingPairs(text);
+  const pairsHTML = pairs.length
+    ? pairs.map(p => {
+        const label = p.type==='liaison' ? '联诵' : '连音';
+        return `<div class="lk-pair-row"><button class="lk-pair-say" onclick="speak(this)" data-text="${esc(p.a+' '+p.b)}" title="只听这一处：${esc(p.a+' '+p.b)}">🔊</button><span class="lk-pair-words">${esc(p.a)} + ${esc(p.b)}</span><span class="lk-pair-type ${p.type==='liaison'?'li':'en'}">${label}</span></div>`;
+      }).join('')
+    : '<div class="lk-pair-none">这句没检测到明显的连读位置，点外面句子的 🔊 听整句感受～</div>';
+  const ruleMini = rid => {
+    const r = state.pron.ruleById.get(rid);
+    if(!r) return '';
+    const ex = (Array.isArray(r.examples)?r.examples:[]).slice(0,2).map(e =>
+      `<div class="lk-mini-ex"><button class="lk-pair-say" onclick="speak(this)" data-text="${esc(e.word_fr)}" title="只听这个词：${esc(e.word_fr)}">🔊</button><span class="lk-mini-ex-body"><span class="lk-mini-ex-w">${esc(e.word_fr)}</span><span class="lk-mini-ipa">${esc(e.phonetic||'')}</span></span></div>`).join('');
+    return `<div class="lk-rule-mini"><div class="lk-mini-title">${esc(r.title)}</div><div class="lk-mini-desc">${esc(r.description_zh||'')}</div>${ex?`<div class="lk-mini-exs">${ex}</div>`:''}</div>`;
+  };
+  // TASK-0039：块内不再重复整句与整句示范——正文句本身可逐词点击、句旁已有 🔊
+  const block = document.createElement('div');
+  block.className = 'lk-inline';
+  block.innerHTML = `
+    <div class="lk-sub">连读位置提示（从宽，仅供留意）</div>
+    ${pairsHTML}
+    ${ruleMini('ph_final_03')}${ruleMini('ph_final_04')}`;
+  const row = btn.closest('.v-ex') || btn.parentElement;
+  if(row && row.parentNode === v) row.insertAdjacentElement('afterend', block);
+  else v.appendChild(block);
+  btn.dataset.closedLabel = btn.textContent;
+  btn.textContent = '🔗 收起连读';
+}
+/* ============================================================
+   P1 跟读闭环（TASK-0031）：🎙 独立录音 → ASR 近似比对 → 三档温和反馈
+   红线：从宽不判错；C 档永远温和；自评兜底；不显示/不存储转写文本
+   ============================================================ */
+const pronShadowRec = {rec:null, stream:null, chunks:[], recording:false, timer:null, startTs:0, rule:null};
+// 六档评分纯函数（契约口径按序短路）；ipaEq：易混音位记 0 距离
+const SHADOW_R_HIGH = 0.8;
+const IPA_CONFUSABLE_PAIRS = [['ɛ̃','œ̃'], ['j','i']];
+function ipaEq(x,y){ if(x===y) return true; return IPA_CONFUSABLE_PAIRS.some(g=>g.includes(x)&&g.includes(y)); }
+function levDistance(a,b,eq){
+  const m=a.length, n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev = Array.from({length:n+1}, (_,j)=>j);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++){
+      const cost = eq ? (eq(a[i-1],b[j-1])?0:1) : (a[i-1]===b[j-1]?0:1);
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost);
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function stringSim(a,b){ const L=Math.max(a.length,b.length)||1; return 1 - levDistance(a,b,null)/L; }
+function scoreShadow(target, asrText, info){
+  const t = pronKey(target).replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
+  const a = pronKey(asrText).replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
+  if(info && info.lowConfidence) return {band:'UNSURE', why:'lowconf'};
+  if(!a) return {band:'UNSURE', why:'empty'};
+  if(info && info.durationMs!=null && info.durationMs<2000) return {band:'UNSURE', why:'short'};
+  if(a===t) return {band:'EXACT'};
+  const sim = stringSim(a,t);
+  if(sim >= SHADOW_R_HIGH) return {band:'CLOSE', sim};
+  const map = (info && info.ipaMap) || new Map();
+  const ti = map.get(t);
+  if(ti){
+    let best = Infinity;
+    a.split(/\s+/).forEach(w=>{ const wi = map.get(w); if(wi){ const d = levDistance(ti, wi, ipaEq); if(d<best) best=d; } });
+    if(best!==Infinity){
+      if(best<=1) return {band:'CLOSE_SOUND', dist:best};
+      return {band:'RETRY', dist:best};
+    }
+  }
+  return {band:'UNSURE', why:'nodict', sim};
+}
+// 六档 → 用户可见三档话术（PM 口径，绝不判错）
+function shadowFeedback(band){
+  switch(band){
+    case 'EXACT':      return {cls:'ok',     msg:'听起来很接近啦，这个音你拿捏得不错～', self:false};
+    case 'CLOSE':      return {cls:'ok',     msg:'差不多啦，中间那个音可以再饱满一点，再听一遍示范就好～', self:false};
+    case 'CLOSE_SOUND':return {cls:'ok',     msg:'读得挺像的！再听一遍示范顺一顺就更棒啦～', self:false};
+    case 'RETRY':      return {cls:'retry',  msg:'想再听一遍示范吗？再试一次就好～', self:true};
+    default:           return {cls:'unsure', msg:'这次没太听清，可能是收音的小问题，我们再来一次～', self:true};
+  }
+}
+function pronShadowSection(r){
+  if(!r || r.shadow_mode==='syllable'){
+    return '<div class="pron-shadow-note">单音跟读只作口型练习：听示范，跟着模仿就好，不打分～</div>';
+  }
+  return `
+    <div class="pron-shadow-target">跟读目标：<b>${esc(r.shadow_text_fr||'')}</b></div>
+    <div class="pron-shadow-row">
+      <button id="pronShadowBtn" class="pron-shadow-btn" onclick="toggleShadowRecord()">🎙 开始跟读</button>
+      <div id="pronShadowStatus" class="pron-shadow-status">先听一遍示范，再开始跟读～</div>
+    </div>
+    <div id="pronShadowFeedback" class="pron-shadow-feedback"></div>
+    <div id="pronShadowActions" class="pron-shadow-actions"></div>`;
+}
+function pronShadowReset(){
+  if(pronShadowRec.recording && pronShadowRec.rec && pronShadowRec.rec.state!=='inactive'){
+    try{ pronShadowRec.rec.stop(); }catch(e){}
+  }
+  if(pronShadowRec.timer) clearTimeout(pronShadowRec.timer);
+  if(pronShadowRec.stream) pronShadowRec.stream.getTracks().forEach(t=>t.stop());
+  pronShadowRec.rec=null; pronShadowRec.stream=null; pronShadowRec.chunks=[];
+  pronShadowRec.recording=false; pronShadowRec.timer=null;
+}
+async function toggleShadowRecord(){
+  const btn = document.getElementById('pronShadowBtn');
+  if(pronShadowRec.recording){
+    if(pronShadowRec.rec && pronShadowRec.rec.state!=='inactive') pronShadowRec.rec.stop();
+    return;
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+    notify('这个浏览器不支持录音，多听几遍示范也一样在进步～');
+    return;
+  }
+  const rule = state.pron.ruleById.get(pronCurrentRuleId);
+  if(!rule) return;
+  if(!(await checkAsr())){
+    const fb = document.getElementById('pronShadowFeedback');
+    if(fb) fb.innerHTML = '<span class="pf-unsure">本地语音服务没就绪，跟读先跳过，多听几遍示范也一样棒～</span>';
+    return;
+  }
+  let stream;
+  try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ notify('没拿到麦克风权限，稍后再试也可以～'); return; }
+  try{
+    const mime = pickMimeType();
+    const rec = new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
+    pronShadowRec.rec = rec; pronShadowRec.stream = stream;
+    pronShadowRec.chunks = []; pronShadowRec.recording = true;
+    pronShadowRec.rule = rule; pronShadowRec.startTs = Date.now();
+    if(btn){ btn.classList.add('rec'); btn.textContent='⏹ 结束跟读'; }
+    const st = document.getElementById('pronShadowStatus');
+    if(st) st.textContent = '🎙 在听，跟着读吧…最长 10 秒';
+    rec.ondataavailable = (e)=>{ if(e.data && e.data.size) pronShadowRec.chunks.push(e.data); };
+    rec.onstop = async ()=>{
+      pronShadowRec.recording = false;
+      const dur = Date.now() - pronShadowRec.startTs;
+      if(btn){ btn.classList.remove('rec'); btn.textContent='🎙 再来一次'; }
+      stream.getTracks().forEach(t=>t.stop());
+      clearTimeout(pronShadowRec.timer);
+      const blob = new Blob(pronShadowRec.chunks, {type: rec.mimeType || 'audio/webm'});
+      if(!blob.size){
+        const s2 = document.getElementById('pronShadowStatus');
+        if(s2) s2.textContent = '没录到声音，再试一次～';
+        return;
+      }
+      await transcribeShadowAudio(blob, pronShadowRec.rule, dur);
+    };
+    rec.start();
+    pronShadowRec.timer = setTimeout(()=>{ if(pronShadowRec.recording && rec.state!=='inactive') rec.stop(); }, 10000);
+  }catch(e){
+    pronShadowReset();
+    notify('录音启动没成功，稍后再试也可以～');
+  }
+}
+async function transcribeShadowAudio(blob, rule, durMs){
+  const st = document.getElementById('pronShadowStatus');
+  if(st && pronCurrentRuleId===rule.id) st.textContent = '正在听你的发音…';
+  const ext = (blob.type.includes('mp4')?'.m4a':blob.type.includes('ogg')?'.ogg':'.webm');
+  let data = null;
+  try{
+    const fd = new FormData();
+    fd.append('file', blob, 'shadow'+ext);
+    fd.append('language', 'fr');
+    // 热词偏置：目标词 + 同规则例词（独立链路，绝不进聊天流）
+    const hints = [rule.shadow_text_fr].concat((rule.examples||[]).map(e=>e.word_fr)).join(' ');
+    fd.append('hints', hints.slice(0,200));
+    fd.append('context', '');
+    const resp = await fetch('/api/asr/transcribe', {method:'POST', body:fd});
+    data = await resp.json();
+  }catch(e){ data = null; }
+  // 练习计数：开了口就 +1（服务端累加，不改已学状态；失败不打断）
+  try{
+    const item = await apiRequest('/api/pronunciation/progress', {method:'POST', body:{rule_id: rule.id}});
+    if(item) applyPronProgressItem(item);
+  }catch(e){}
+  const fbEl = document.getElementById('pronShadowFeedback');
+  const actEl = document.getElementById('pronShadowActions');
+  if(pronCurrentRuleId!==rule.id) return; // 用户已切走：不写旧反馈
+  let band = 'UNSURE';
+  if(data && typeof data.code==='number' && data.code===0 && data.data && data.data.text){
+    const res = scoreShadow(rule.shadow_text_fr, String(data.data.text),
+      {lowConfidence: !!data.data.low_confidence, durationMs: durMs, ipaMap: state.pron.ipaMap});
+    band = res.band;
+  }
+  const fb = shadowFeedback(band);
+  if(fbEl) fbEl.innerHTML = `<span class="pf-${fb.cls}">${esc(fb.msg)}</span>`;
+  if(actEl) actEl.innerHTML = fb.self
+    ? '<button class="pron-shadow-self" onclick="shadowSelfAssess()">我觉得读对了</button>'
+    : '';
+}
+async function shadowSelfAssess(){
+  if(!pronCurrentRuleId) return;
+  const item = await apiRequest('/api/pronunciation/progress',
+    {method:'POST', body:{rule_id: pronCurrentRuleId, stage:'confident', self_assessed:true}});
+  if(item){ applyPronProgressItem(item); updatePronCardProgressUI(); }
+  notify('记下啦，这条你越来越熟了～');
+  const actEl = document.getElementById('pronShadowActions');
+  if(actEl) actEl.innerHTML = '';
 }
 
 function renderLedger(){
-  const s = (state.profile||FALLBACK_PROFILE).stats||{};
-  document.getElementById('dueNum').textContent = s.due_cards_count||0;
-  document.getElementById('weekNew').textContent = '+'+(s.new_words_week||0);
-  document.getElementById('mastered').textContent = fmtNum(s.mastered_count);
-  let acc = s.accuracy||0;
-  if(acc<=1) acc=acc*100;
-  document.getElementById('accuracy').textContent = Math.round(acc)+'%';
-  document.getElementById('streakBadge').textContent = '连续学习 '+(state.profile||FALLBACK_PROFILE).streak_days+' 天 🔥';
+  // TASK-0049 方案E：账本压成吸顶条，次级指标（已掌握/正确率）归「我的成长」页
+  // TASK-0051：连续天数只在顶栏展示，这里换成累计对话轮数，避免同一数据同屏两次
+  const p = state.profile||FALLBACK_PROFILE;
+  const s = p.stats||{};
+  const due = document.getElementById('dueNum');
+  if(due) due.textContent = s.due_cards_count||0;
+  const wn = document.getElementById('weekNew');
+  if(wn) wn.textContent = '+'+(s.new_words_week||0);
+  const ct = document.getElementById('chatTotalBadge');
+  if(ct) ct.textContent = '💬 累计 '+(s.dialogue_count||0)+' 轮对话';
 }
 
 /* ---------- 场景 / 对话动作 ---------- */
-async function selectScene(id){
+async function selectScene(id, opts){
   state.currentSceneId = id;
   renderScenes();
   renderHeader();
@@ -335,6 +664,15 @@ async function selectScene(id){
     detail = detailFromFallback(id);
   }
   state.chatLog = (detail.start_dialogue||[]).map(normalizeTurn);
+  // TASK-0040：在线模式恢复该场景真实历史（追加在种子开场之后；失败不阻断）
+  if(!(opts && opts.withHistory === false) && state.online && detail){
+    try{
+      const h = await apiRequest('/api/chat/history?scene_id='+encodeURIComponent(id)+'&limit=50');
+      if(h && Array.isArray(h.items) && h.items.length){
+        state.chatLog = state.chatLog.concat(h.items.map(normalizeTurn));
+      }
+    }catch(e){ /* 离线/失败时仅显示开场 */ }
+  }
   renderChat();
 }
 
@@ -345,16 +683,26 @@ function detailFromFallback(id){
   });
 }
 
-function resetChat(){
+async function resetChat(){
   const id = state.currentSceneId;
   const detail = state.online ? null : detailFromFallback(id);
   if(detail){
     state.chatLog = detail.start_dialogue.map(normalizeTurn);
     renderChat();
-  }else{
-    // 在线模式重载起始对话
-    selectScene(id);
+    return;
   }
+  // 在线模式：确认后先清持久化对话轮（保留种子开场白），再重开场景（不带历史）
+  if(!confirm('重置将清除本场景的对话记录（持久化存储同步清空），确定吗？')) return;
+  let cleared = true;
+  try{
+    const r = await apiRequest('/api/chat/history?scene_id='+encodeURIComponent(id), {method:'DELETE'});
+    if(r === null) cleared = false; // 服务端返回错误码时 apiRequest 已提示
+  }catch(e){
+    cleared = false;
+    notify('对话记录清理失败，稍后再试一下～');
+  }
+  if(!cleared) return;
+  selectScene(id, {withHistory:false});
 }
 
 function applyChatResult(data){
@@ -705,7 +1053,7 @@ function renderReviewCard(){
   const c = reviewQueue[reviewIdx];
   box.innerHTML = `
     <div class="rv-progress">${reviewIdx+1} / ${reviewQueue.length}</div>
-    <div class="rv-word">${esc(c.word)}</div>
+    <div class="rv-word">${esc(c.word)}<button class="spk" onclick="speak(this)" data-text="${esc(c.word)}" title="听发音">🔊</button></div>
     ${c.pos?`<span class="rv-pos">${esc(c.pos)}</span>`:''}
     <div class="rv-mean">${esc(c.meaning||'')}</div>
     <div class="rv-example">${c.example?esc(c.example):'（这张卡还没有例句，先记住词吧～）'}</div>
@@ -762,20 +1110,24 @@ function updateReadVocabBadge(){
 }
 
 function switchView(name){
-  // 四个视图：chat / read / assessment / exam；其他值一律按 chat 处理（保留原默认行为）
-  const view = (name==='read'||name==='assessment'||name==='exam') ? name : 'chat';
+  // 五个视图：chat / read / assessment / exam / growth；其他值一律按 chat 处理（保留原默认行为）
+  const view = (name==='read'||name==='assessment'||name==='exam'||name==='growth') ? name : 'chat';
   document.getElementById('viewChat').classList.toggle('hidden', view!=='chat');
   document.getElementById('viewRead').classList.toggle('hidden', view!=='read');
   const av = document.getElementById('viewAssessment');
   if(av) av.classList.toggle('hidden', view!=='assessment');
   const ev = document.getElementById('viewExam');
   if(ev) ev.classList.toggle('hidden', view!=='exam');
+  const gv = document.getElementById('viewGrowth');
+  if(gv) gv.classList.toggle('hidden', view!=='growth');
   document.getElementById('tabChat').classList.toggle('on', view==='chat');
   document.getElementById('tabRead').classList.toggle('on', view==='read');
   const at = document.getElementById('tabAssessment');
   if(at) at.classList.toggle('on', view==='assessment');
   const et = document.getElementById('tabExam');
   if(et) et.classList.toggle('on', view==='exam');
+  const gt = document.getElementById('tabGrowth');
+  if(gt) gt.classList.toggle('on', view==='growth');
   // 进入词卡（对话）视图时确保进度加载一次；init 已加载则不重复请求
   if(view==='chat' && !state.pron.progressFetched){
     loadPronProgress().then(updatePronBookEntry);
@@ -789,6 +1141,45 @@ function switchView(name){
   if(view==='assessment') initAssessment();
   // 切到考级视图：拉试卷列表
   if(view==='exam') initExam();
+  // 切到成长视图：每次进入都拉最新 profile（轻量端点），数字永远新鲜
+  if(view==='growth') renderGrowth();
+}
+
+/* ============================================================
+   TASK-0047 我的成长 v1：真实数据聚合，零假值、温和文案
+   ============================================================ */
+async function renderGrowth(){
+  const wrap = document.getElementById('growthWrap');
+  if(!wrap) return;
+  // 进入时静默刷新一次 profile，失败则用已有缓存（离线也不展示假值）
+  if(state.online){
+    try { const p = await apiRequest('/api/profile'); if(p) state.profile = p; } catch(e){}
+  }
+  const s = (state.profile||FALLBACK_PROFILE).stats||{};
+  const num = v => fmtNum(v||0);
+  const pct = a => (a>0 ? Math.round(a*100)+'%' : '—');
+  wrap.innerHTML = `
+    <div class="growth-hello">你走过的每一步都在这里～</div>
+    <div class="growth-cards">
+      <div class="growth-card">
+        <div class="g-title">📚 词汇</div>
+        <div class="g-nums"><span><b>${num(s.total_cards)}</b>累计收藏</span><span><b>+${num(s.new_words_week)}</b>本周新增</span><span><b>${num(s.mastered_count)}</b>已掌握</span></div>
+      </div>
+      <div class="growth-card">
+        <div class="g-title">💬 对话</div>
+        <div class="g-nums"><span><b>${num(s.dialogue_count)}</b>累计对话轮数</span></div>
+        <div class="g-note">${s.dialogue_count ? '每一轮开口都算数 🌱' : '从第一段对话开始，慢慢积累就好'}</div>
+      </div>
+      <div class="growth-card">
+        <div class="g-title">🔁 复习</div>
+        <div class="g-nums"><span><b>${num(s.due_cards_count)}</b>今日想见你</span><span><b>${num(s.review_count)}</b>累计复习</span><span><b>${pct(s.accuracy)}</b>保持率</span></div>
+        <div class="g-note">${s.due_cards_count ? '有 '+num(s.due_cards_count)+' 个词想再见你一面～' : '今天没有想见你的词，随时来逛逛'}</div>
+      </div>
+      <div class="growth-card">
+        <div class="g-title">📖 阅读</div>
+        <div class="g-note g-empty">读过的短文，以后会在这里留下小脚印（记录功能慢慢来）</div>
+      </div>
+    </div>`;
 }
 
 /* ============================================================
@@ -1094,12 +1485,12 @@ function renderReadLines(detail){
     html += `<div class="rline ${cls}">
       <div class="rspk">${who}</div>
       <div class="rbubble">
-        <span class="fr">${esc(l.fr)}<button class="rplay" onclick="speak(this)" data-text="${esc(l.fr)}" title="听这句">🔊</button></span>
+        <span class="fr">${sentenceTokensHTML(l.fr)}<button class="rplay" onclick="speak(this)" data-text="${esc(l.fr)}" title="听这句">🔊</button>${chatLinkBtnHTML(l.fr)}</span>
         ${l.cn?`<span class="cn">${esc(l.cn)}</span>`:''}
       </div>
     </div>`;
   });
-  html += `<div class="whole-fr"><h4>整篇法语原文</h4><p>${esc(detail.body_fr||'')}</p></div>`;
+  html += `<div class="whole-fr"><h4>整篇法语原文</h4><p>${sentenceTokensHTML(detail.body_fr||'')}${chatLinkBtnHTML(detail.body_fr||'')}</p></div>`;
   html += `<div class="whole-fr"><h4>整篇中文译文</h4><p class="cn">${esc(detail.body_cn||'')}</p></div>`;
   body.innerHTML = html;
   body.scrollTop = 0;
@@ -1121,7 +1512,7 @@ function renderReadWords(detail){
     const done = w.word_card_id!=null;
     return `<div class="rw">
       <div class="rw-top">
-        <span class="rw-word">${esc(w.word)}</span>
+        <span class="rw-word v-tok" data-word="${esc(w.word)}" onclick="openWordPopover(this)" title="学 ${esc(w.word)} 的发音">${esc(w.word)}</span>
         ${w.pos?`<span class="rw-pos">${esc(w.pos)}</span>`:''}
         ${w.cefr_level?`<span class="rw-lv">${esc(w.cefr_level)}</span>`:''}
       </div>
@@ -1683,11 +2074,16 @@ const PRON_TIP_KEY = 'pron_tip_shown'; // localStorage 仅存这个 UI 展示标
 // 词卡短语里常见的功能词/冠词，建映射时跳过，避免 "à"/"la" 之类误命中
 const PRON_SKIP_TOKENS = new Set(['le','la','les','un','une','des','du','de','d','l','s','a','y','et','ou','en','au','aux','ce','cet','cette','mon','ma','mes','ton','ta','tes','son','sa','ses','dans','sur','avec','pour','par']);
 
-// 归一化：小写 + 去重音 + 去省文符，让 maison / Maison 命中同一条规则
+// 归一化：小写 + œ→oe + 去重音 + 去省文符，让 maison / Maison / cœur 命中同一条规则
 function pronKey(s){
   return String(s==null?'':s).toLowerCase()
+    .replace(/œ/g,'oe')
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/['’`]/g,'').trim();
+}
+// P1 跟读：IPA 串归一化（去斜杠/音节点/长短符/重音符），只留音素序列
+function normIpa(p){
+  return String(p==null?'':p).replace(/[/.ˈˌː:]/g,'').trim();
 }
 
 // 用详情列表建三个进程内 Map：rule_id -> 详情；word_fr -> [rule_id]；pattern 正则索引
@@ -1695,41 +2091,56 @@ function buildPronIndex(details){
   const byId = new Map();
   const w2r = new Map();
   const patternRules = []; // [{pattern: RegExp, ruleId: string}]
+  const ipaMap = new Map(); // P1 跟读：word_fr -> 音素序列（去 /、音节点、长短符）
   (details||[]).forEach(r=>{
     if(!r || !r.id) return;
     byId.set(r.id, r);
-    // 例词精确索引
+    // 例词精确索引 + IPA 词典
     (Array.isArray(r.examples)?r.examples:[]).forEach(ex=>{
       const k = pronKey(ex && ex.word_fr);
+      const ipa = normIpa(ex && ex.phonetic);
+      if(k && ipa && !ipaMap.has(k)) ipaMap.set(k, ipa);
       if(!k) return;
       let arr = w2r.get(k);
       if(!arr){ arr = []; w2r.set(k, arr); }
       if(arr.indexOf(r.id)<0) arr.push(r.id);
     });
-    // pattern 正则索引：从 rules 的 patterns 字段编译
-    // patterns 格式如 ["ai","ay"] → 匹配词内包含该字母组合
+    // pattern 正则索引（契约 v1.1 锚定语法）：^词首 / $词尾 / ^..$全词 / 普通子串
     if(Array.isArray(r.patterns)){
       r.patterns.forEach(pat=>{
+        if(typeof pat!=='string' || !pat.trim()) return;
+        let p = pat.trim(), head = false, tail = false;
+        if(p.startsWith('^')){ head = true; p = p.slice(1); }
+        if(p.endsWith('$')){ tail = true; p = p.slice(0,-1); }
+        if(!p) return;
+        const body = p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
         try{
-          // 简单模式：字母组合直接子串匹配
-          patternRules.push({pattern: new RegExp(pat.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'i'), ruleId: r.id});
+          // spec：全词锚 3 > 部分锚 2 > 普通子串 1；同级 pattern 越长越具体
+          const spec = (head && tail) ? 3 : (head || tail) ? 2 : 1;
+          patternRules.push({pattern: new RegExp((head?'^':'')+body+(tail?'$':''), 'i'), ruleId: r.id, spec, len: p.length, order: patternRules.length});
         }catch(e){/* 编译失败忽略 */}
       });
     }
   });
   state.pron.ruleById = byId;
   state.pron.wordToRules = w2r;
+  // 匹配优先级：全词锚 > 部分锚 > 普通子串；同级越长的组合越具体、越先命中
+  patternRules.sort((a,b)=> (b.spec-a.spec) || (b.len-a.len) || (a.order-b.order));
   state.pron.patternRules = patternRules;
+  state.pron.ipaMap = ipaMap;
   state.pron.detailsLoaded = true;
 }
 
-// 取词对应的规则 label（优先显示规则 title，fallback 到词名）
-function pronRuleLabel(word){
-  const ids = findRulesForCard(word);
-  if(!ids.length) return esc(word);
-  // 取第一条规则（pattern 优先于例词，通常是最相关的）
-  const r = state.pron.ruleById.get(ids[0]);
-  return r ? esc(r.title) : esc(word);
+// 按钮展示音节（契约 v1.1）：focus 优先，兜底 patterns 去锚定符后连接；无则裸按钮
+function pronFocusLabel(r){
+  if(!r) return '';
+  if(typeof r.focus==='string' && r.focus.trim()) return r.focus.trim();
+  if(Array.isArray(r.patterns)){
+    const parts = r.patterns.filter(p=>typeof p==='string' && p.trim())
+      .map(p=>String(p).trim().replace(/^\^/,'').replace(/\$$/,''));
+    if(parts.length) return parts.join(' / ');
+  }
+  return '';
 }
 function findRulesForCard(word){
   if(!state.pron.detailsLoaded) return [];
@@ -1741,10 +2152,11 @@ function findRulesForCard(word){
     // ① 例词精确匹配（原有逻辑，优先）
     const arr = state.pron.wordToRules.get(k);
     if(arr) arr.forEach(id=>{ if(ids.indexOf(id)<0) ids.push(id); });
-    // ② pattern 子串匹配：遍历所有 pattern 正则
+    // ② pattern 匹配（契约 v1.1）：归一化 + 原始小写双形态，带重音 pattern（é/â/ô）也可命中
     if(state.pron.patternRules && state.pron.patternRules.length){
+      const kr = String(tok||'').toLowerCase();
       state.pron.patternRules.forEach(pr=>{
-        if(pr.pattern.test(k) && ids.indexOf(pr.ruleId)<0) ids.push(pr.ruleId);
+        if((pr.pattern.test(k) || pr.pattern.test(kr)) && ids.indexOf(pr.ruleId)<0) ids.push(pr.ruleId);
       });
     }
   });
@@ -1863,16 +2275,6 @@ function openPronCard(ruleId, hitIds, hitWord){
   }
   unlockAudio();
 }
-function openPronCardForWord(btn){
-  const word = btn.getAttribute('data-word') || '';
-  const ids = findRulesForCard(word);
-  if(ids.length){
-    openPronCard(ids[0], ids, word);
-    return;
-  }
-  // 未命中规则：显示最小卡片，听发音 + 提示
-  openPronCardForNoRule(word);
-}
 function openPronCardForNoRule(word){
   pronCurrentRuleId = null;
   pronHitWord = word;
@@ -1917,6 +2319,7 @@ function pronProgressHTML(ruleId){
     </div>`;
 }
 function renderPronCard(){
+  pronShadowReset();
   const box = document.getElementById('pronCardContent');
   const r = state.pron.ruleById.get(pronCurrentRuleId);
   if(!box || !r) return;
@@ -1951,6 +2354,8 @@ function renderPronCard(){
         <button class="pron-listen-btn" onclick="speak(this)" data-text="${esc(audio)}" title="听标准示范">🔊 这条规则是～先听一遍</button>
         <button class="pron-replay" onclick="speak(this)" data-text="${esc(audio)}" title="再听一次">↻ 再听一次也可以</button>
       </div>
+      <div class="pron-sub-title">🎙 跟读试试</div>
+      ${pronShadowSection(r)}
       <div class="pron-sub-title">看看这些词</div>
       <div class="pron-examples">${examples || '<div class="pron-muted">这条规则暂时没有例词，先听一遍示范吧～</div>'}</div>
       <div class="pron-progress-sec">${pronProgressHTML(pronCurrentRuleId)}</div>

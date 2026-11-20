@@ -1796,6 +1796,11 @@ function closeOnboarding(){
   try{ localStorage.setItem(ONBOARDING_KEY,'1'); }catch(e){}
 }
 
+// TASK-0054：手动重温引导（页脚入口）——直接从第 1 步重新走；关闭时会重新标记 seen，与自动弹出逻辑互不影响
+function reopenOnboarding(){
+  showOnboardingStep(1);
+}
+
 function goOnboardingTarget(view){
   // 去定级即视为走完引导；定级页随时可以切到其他入口
   try{ localStorage.setItem(ONBOARDING_KEY,'1'); }catch(e){}

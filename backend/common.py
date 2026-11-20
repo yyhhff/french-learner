@@ -88,7 +88,7 @@ ROADMAP_DEFS = [
     },
     {
         "version": "v3.3", "title": "语法的针脚", "theme": "显性语法微卡",
-        "status": "planned", "date": None,
+        "status": "done", "date": "2026-11-21",
         "desc": "遇到时轻轻点一下，语法就缝进了句子里。",
         "features": ["40+ 语法微卡", "阅读情境嵌入", "按重述错误推荐"],
     },

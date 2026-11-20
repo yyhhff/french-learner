@@ -15,6 +15,7 @@ import ai
 import assessment
 import db
 import exam
+import grammar
 import pronunciation
 import srs
 
@@ -109,7 +110,14 @@ async def chat(request: Request):
         ("grammar", 65 if not is_correction else 45, "chat", scene_id),
     ])
 
-    return ok(result.to_dict())
+    # TASK-0078 v3.3：recast 纠错轮落语法错误画像；同类第 3 次 → 响应附 grammar_card
+    # （on_recast 内部吞异常永不抛，画像失败不影响对话主流程）
+    payload = result.to_dict()
+    grammar_card = grammar.on_recast(user_id, scene_id, user_text, result)
+    if grammar_card:
+        payload["grammar_card"] = grammar_card
+
+    return ok(payload)
 
 
 @router.get("/api/chat/history")

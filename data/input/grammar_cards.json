@@ -1,0 +1,506 @@
+{
+  "version": "v3.3.1",
+  "description": "呀呀法语语法微卡库 v3.3（TASK-0078）：50 卡手写原创，10 类错误标签。patterns 按『空格包裹词/短语』书写，配合 normalize_for_scan（小写 + 标点转空格 + 首尾补空格）使用，避免 \\b 在 JS 中对带重音字符失效。改动需重启服务同步。",
+  "cards": [
+    {
+      "id": "gc_001", "tag": "article", "level": "A1",
+      "title": "du / de la / des：『一些』的贴身说法",
+      "summary": "吃一点、喝一点这种说不清数量的时候，法语用 du（阳性）、de la（阴性）、des（复数）来带出名词。它不是『这个』，是『一些』。",
+      "examples": [
+        {"fr": "Je bois du thé.", "cn": "我在喝茶（一些茶）。"},
+        {"fr": "Elle mange de la salade.", "cn": "她在吃沙拉。"}
+      ],
+      "patterns": [" du ", " de la ", " de l'"]
+    },
+    {
+      "id": "gc_002", "tag": "article", "level": "A1",
+      "title": "à + le 要缩成 au",
+      "summary": "介词 à 和 de 撞上 le / les 时必须缩合：à + le = au，à + les = aux。缩合不是可选项，是法语的习惯动作。",
+      "examples": [
+        {"fr": "Je vais au cinéma.", "cn": "我去电影院。"},
+        {"fr": "Il parle aux enfants.", "cn": "他在跟孩子们说话。"}
+      ],
+      "patterns": [" au ", " aux "]
+    },
+    {
+      "id": "gc_003", "tag": "article", "level": "A2",
+      "title": "缩合家族：du = de + le，des = de + les",
+      "summary": "du、des 不是独立的词，它们是 de 和冠词挤在一起的样子。看到 du / des，脑子里要还原成 de + le / de + les。",
+      "examples": [
+        {"fr": "C'est le livre du professeur.", "cn": "这是老师的那本书。"},
+        {"fr": "La porte de l'hôtel est grande.", "cn": "旅馆的门很大。"}
+      ],
+      "patterns": [" du ", " des ", " de l'"]
+    },
+    {
+      "id": "gc_004", "tag": "negation", "level": "A1",
+      "title": "ne ... pas：把动词轻轻包起来",
+      "summary": "法语的否定是三明治：ne 放动词前，pas 放动词后。两个都要在，少一个句子就『散了』。",
+      "examples": [
+        {"fr": "Je ne sais pas.", "cn": "我不知道。"},
+        {"fr": "Il ne parle pas anglais.", "cn": "他不说英语。"}
+      ],
+      "patterns": [" ne .{1,25} pas "]
+    },
+    {
+      "id": "gc_005", "tag": "negation", "level": "A1",
+      "title": "否定句里 un / une / du 要变成 de",
+      "summary": "否定之后，『一个』『一些』都会退场：Je vais prendre un café → Je ne vais pas prendre de café。记住：pas 后面接 de。",
+      "examples": [
+        {"fr": "Je n'ai pas de frère.", "cn": "我没有兄弟。"},
+        {"fr": "Elle ne boit pas de café.", "cn": "她不喝咖啡。"}
+      ],
+      "patterns": [" pas de ", " n'ai pas ", " n'as pas "]
+    },
+    {
+      "id": "gc_006", "tag": "negation", "level": "A2",
+      "title": "ne ... jamais：从来没有",
+      "summary": "jamais 顶替 pas 的位置，语气更彻底：从不、从来没有。结构一样是 ne + 动词 + jamais。",
+      "examples": [
+        {"fr": "Je ne bois jamais de café le soir.", "cn": "我晚上从不喝咖啡。"},
+        {"fr": "Il n'est jamais en retard.", "cn": "他从不迟到。"}
+      ],
+      "patterns": [" ne .{1,25} jamais ", " n'est jamais ", " n'ai jamais "]
+    },
+    {
+      "id": "gc_007", "tag": "negation", "level": "A2",
+      "title": "ne ... plus：不再",
+      "summary": "以前做、现在停下来的事，用 ne ... plus。plus 在这里读成 /ply/（s 不发音），意思是『不再』。",
+      "examples": [
+        {"fr": "Je ne fume plus.", "cn": "我不抽烟了。"},
+        {"fr": "Elle ne travaille plus ici.", "cn": "她不在这里工作了。"}
+      ],
+      "patterns": [" ne .{1,25} plus ", " ne fume plus ", " n'est plus ", " n'ai plus "]
+    },
+    {
+      "id": "gc_008", "tag": "negation", "level": "B1",
+      "title": "ne ... rien / ne ... personne",
+      "summary": "什么都没有是 ne ... rien，谁都没有是 ne ... personne。当它们当主语时，ne 反过来放在它们后面：Rien ne se passe。",
+      "examples": [
+        {"fr": "Je ne vois rien.", "cn": "我什么也看不见。"},
+        {"fr": "Personne ne m'a appelé.", "cn": "没有人给我打电话。"}
+      ],
+      "patterns": [" ne .{1,20} rien ", " ne .{1,20} personne ", " rien ne ", " personne ne "]
+    },
+    {
+      "id": "gc_009", "tag": "negation", "level": "B2",
+      "title": "书面否定：ne ... guère / nulle part",
+      "summary": "guère 是『几乎不』，nulle part 是『哪里都不』。这两个更常出现在书面语里，口语里它们会让你听起来更讲究。",
+      "examples": [
+        {"fr": "Il ne dort guère la nuit.", "cn": "他晚上几乎不睡觉。"},
+        {"fr": "Je ne le trouve nulle part.", "cn": "我哪儿都找不到它。"}
+      ],
+      "patterns": [" ne .{1,20} guère ", " ne .{1,20} nulle part ", " nulle part "]
+    },
+    {
+      "id": "gc_010", "tag": "conjugation", "level": "A1",
+      "title": "être：我是 je suis",
+      "summary": "être（是）是最不规则的动词，但也是最先要背下来的：suis / es / est / sommes / êtes / sont。它是法语的骨架。",
+      "examples": [
+        {"fr": "Je suis étudiant.", "cn": "我是学生。"},
+        {"fr": "Nous sommes en retard.", "cn": "我们迟到了。"}
+      ],
+      "patterns": [" suis ", " es ", " est ", " sommes ", " êtes ", " sont "]
+    },
+    {
+      "id": "gc_011", "tag": "conjugation", "level": "A1",
+      "title": "avoir：j'ai / tu as",
+      "summary": "avoir（有）也完全不按套路：j'ai / tu as / il a / nous avons / vous avez / ils ont。法语的『有』还能搭出年龄和感觉：J'ai 20 ans（我 20 岁）。",
+      "examples": [
+        {"fr": "J'ai un frère.", "cn": "我有一个兄弟。"},
+        {"fr": "Nous avons le temps.", "cn": "我们有时间。"}
+      ],
+      "patterns": [" j'ai ", " tu as ", " avons ", " avez ", " ont "]
+    },
+    {
+      "id": "gc_012", "tag": "conjugation", "level": "A1",
+      "title": "-er 动词现在时：ons / ez / ent 的合唱",
+      "summary": "九成法语动词以 -er 结尾，现在时词尾是 e / es / e / ons / ez / ent。词尾发音大多相同，但写出来不能偷懒。",
+      "examples": [
+        {"fr": "Nous parlons français.", "cn": "我们说法语。"},
+        {"fr": "Ils habitent à Paris.", "cn": "他们住在巴黎。"}
+      ],
+      "patterns": [" ons ", " ez ", " ent "]
+    },
+    {
+      "id": "gc_013", "tag": "conjugation", "level": "A1",
+      "title": "aller：je vais / tu vas",
+      "summary": "aller（去）长得完全不像 -er 家族，得单独记：vais / vas / va / allons / allez / vont。日常问好就靠它：Ça va ?",
+      "examples": [
+        {"fr": "Je vais bien, merci.", "cn": "我很好，谢谢。"},
+        {"fr": "Vous allez où ?", "cn": "你们去哪儿？"}
+      ],
+      "patterns": [" vais ", " vas ", " allons ", " allez ", " vont "]
+    },
+    {
+      "id": "gc_014", "tag": "conjugation", "level": "A2",
+      "title": "vouloir / pouvoir：想要与能够",
+      "summary": "两个高频『怪脾气』动词：je veux（我想）、je peux（我能）。礼貌点单请用条件式 je voudrais，比 je veux 温柔得多。",
+      "examples": [
+        {"fr": "Je voudrais un café, s'il vous plaît.", "cn": "我想要一杯咖啡，麻烦了。"},
+        {"fr": "Tu peux venir avec nous.", "cn": "你可以跟我们来。"}
+      ],
+      "patterns": [" veux ", " veut ", " voudrais ", " peux ", " peut ", " pouvons ", " pouvez "]
+    },
+    {
+      "id": "gc_015", "tag": "conjugation", "level": "A2",
+      "title": "faire：做，也是天气",
+      "summary": "faire 除了『做』，还负责天气：Il fait chaud（天热）。变位：fais / fais / fait / faisons / faites / font——faites 是唯一的『刺头』。",
+      "examples": [
+        {"fr": "Il fait beau aujourd'hui.", "cn": "今天天气好。"},
+        {"fr": "Que faites-vous ?", "cn": "您在做什么？"}
+      ],
+      "patterns": [" fais ", " fait ", " faisons ", " faites ", " font "]
+    },
+    {
+      "id": "gc_016", "tag": "conjugation", "level": "A2",
+      "title": "自反动词：me / te / se 一样在动词前",
+      "summary": "se lever（起床）、s'appeler（叫作）这类动词，每句都要带上小镜子 me / te / se……它们站在动词前面，位置和 ne 一样。",
+      "examples": [
+        {"fr": "Je me lève à sept heures.", "cn": "我七点起床。"},
+        {"fr": "Comment tu t'appelles ?", "cn": "你叫什么名字？"}
+      ],
+      "patterns": [" je me ", " tu te ", " il se ", " elle se ", " nous nous ", " vous vous ", " ils se ", " elles se ", " t'appelles ", " m'appelle "]
+    },
+    {
+      "id": "gc_017", "tag": "conjugation", "level": "B1",
+      "title": "devoir：必须，也是应该",
+      "summary": "Je dois partir（我得走了）。加条件式 je devrais（我应该）语气立刻变软，给建议时比 je dois 委婉。",
+      "examples": [
+        {"fr": "Je dois finir ce rapport aujourd'hui.", "cn": "我今天得完成这份报告。"},
+        {"fr": "Tu devrais dormir un peu plus.", "cn": "你应该多睡一点。"}
+      ],
+      "patterns": [" dois ", " doit ", " devons ", " devez ", " doivent ", " devrais ", " devrait ", " devraient "]
+    },
+    {
+      "id": "gc_018", "tag": "conjugation", "level": "B2",
+      "title": "虚拟式的门槛：il faut que / bien que",
+      "summary": "il faut que、bien que、pour que 这类『必须有人subjunctive』的连词后面，动词要换虚拟式脸孔：Il faut que tu viennes。听到 que 就要留个心眼。",
+      "examples": [
+        {"fr": "Il faut que tu viennes demain.", "cn": "你得明天来。"},
+        {"fr": "Je viens bien qu'il pleuve.", "cn": "虽然下雨我还是来。"}
+      ],
+      "patterns": [" il faut que ", " bien que ", " pour que ", " avant que ", " jusqu'à ce que "]
+    },
+    {
+      "id": "gc_019", "tag": "tense", "level": "A2",
+      "title": "passé composé：avoir + 过去分词",
+      "summary": "讲『做过了』的事，用 avoir 的现在时 + 过去分词：J'ai mangé（我吃了）。分词是动词的『过去面孔』，多半以 é / i / u 结尾。",
+      "examples": [
+        {"fr": "J'ai fini le travail.", "cn": "我做完了工作。"},
+        {"fr": "Nous avons regardé un film.", "cn": "我们看了一部电影。"}
+      ],
+      "patterns": [" (ai|as|a|avons|avez|ont) (parlé|mangé|fini|fait|dit|vu|pris|mis|compris|appris|attendu|trouvé|donné|aimé|travaillé|joué|regardé|écouté|acheté|préparé) "]
+    },
+    {
+      "id": "gc_020", "tag": "tense", "level": "A2",
+      "title": "futur proche：aller + 动词原形",
+      "summary": "马上要做的事，法语用『去 + 原形』：Je vais partir（我要走了）。这是口语里最常用的将来时，比正经将来时还勤快。",
+      "examples": [
+        {"fr": "Je vais partir dans cinq minutes.", "cn": "我五分钟后走。"},
+        {"fr": "On va manger dehors ?", "cn": "我们去外面吃？"}
+      ],
+      "patterns": [" (vais|vas|va|allons|allez|vont) (parler|manger|finir|faire|partir|venir|voir|donner|étudier|acheter|rester|travailler|appeler|commencer) "]
+    },
+    {
+      "id": "gc_021", "tag": "tense", "level": "A2",
+      "title": "imparfait 的门牌号：-ais / -ait / -ions / -iez / -aient",
+      "summary": "过去常常做、背景描述，用 imparfait：词尾 ais / ait / ions / iez / aient 很好认。Quand j'étais petit...（我小时候……）就是它的开场白。",
+      "examples": [
+        {"fr": "Quand j'étais petit, j'habitais à Lyon.", "cn": "我小时候住在里昂。"},
+        {"fr": "Il pleuvait tous les jours.", "cn": "那时候天天下雨。"}
+      ],
+      "patterns": [" ais ", " ait ", " ions ", " iez ", " aient "]
+    },
+    {
+      "id": "gc_022", "tag": "tense", "level": "B1",
+      "title": "imparfait vs passé composé：背景与事件",
+      "summary": "讲故事的双引擎：imparfait 画背景（天气、状态、习惯），passé composé 推情节（一次性动作）。两者常在同一段里轮流出场。",
+      "examples": [
+        {"fr": "Il pleuvait quand je suis sortie.", "cn": "我出门的时候正下着雨。"},
+        {"fr": "J'étais fatigué, alors j'ai fini tôt.", "cn": "我很累，所以早早结束了。"}
+      ],
+      "patterns": [" (étais|avais|faisais|allais|voulais|pouvais|pleuvait|habitais) ", " (ai|a|avons|ont) (fait|dit|vu|pris|fini|sorti|parti) "]
+    },
+    {
+      "id": "gc_023", "tag": "tense", "level": "B1",
+      "title": "plus-que-parfait：过去的过去",
+      "summary": "要说『在那件事之前就已经……』，用 avait / était + 过去分词：Il avait déjà parti quand je suis arrivé。",
+      "examples": [
+        {"fr": "Il avait déjà mangé quand je suis arrivé.", "cn": "我到的时候他已经吃过了。"},
+        {"fr": "Elle était partie avant moi.", "cn": "她比我先走了。"}
+      ],
+      "patterns": [" (avais|avait|avions|aviez|avaient|étais|était|étions|étaient) (parlé|mangé|fini|fait|dit|vu|pris|allé|parti|arrivé|sorti|trouvé|donné) "]
+    },
+    {
+      "id": "gc_024", "tag": "tense", "level": "B2",
+      "title": "conditionnel passé：本来会 / 本来想",
+      "summary": "aurait / serait + 过去分词，说的是『如果当初……本来会……』。表达遗憾和假设收尾，B2 讨论就靠这一手。",
+      "examples": [
+        {"fr": "J'aurais dit oui si j'avais su.", "cn": "早知道我就答应了。"},
+        {"fr": "Il serait venu, mais il était malade.", "cn": "他本来会来，但生病了。"}
+      ],
+      "patterns": [" (aurais|aurait|aurions|auriez|auraient|serais|serait|serions|seriez|seraient) (fait|dit|vu|été|allé|aimé|voulu|pu|dû|pris|fini|parti|venu) "]
+    },
+    {
+      "id": "gc_025", "tag": "preposition", "level": "A1",
+      "title": "chez：在『谁』那儿",
+      "summary": "chez 不去哪个地方，而是去哪个人那里：chez Marie（在玛丽家）、chez le médecin（在医生那儿）。中文没有一一对应的词，靠场景记。",
+      "examples": [
+        {"fr": "Je vais chez Marie ce soir.", "cn": "我今晚去玛丽家。"},
+        {"fr": "Il travaille chez Renault.", "cn": "他在雷诺工作。"}
+      ],
+      "patterns": [" chez "]
+    },
+    {
+      "id": "gc_026", "tag": "preposition", "level": "A2",
+      "title": "城市用 à，国家分 en / au",
+      "summary": "à + 城市（à Paris）。国家要分性别：阴性国家用 en（en France），阳性国家用 au（au Japon），复数用 aux（aux États-Unis）。",
+      "examples": [
+        {"fr": "J'habite en France depuis deux ans.", "cn": "我在法国住了两年。"},
+        {"fr": "Elle voyage au Japon.", "cn": "她在日本旅行。"}
+      ],
+      "patterns": [" en (france|chine|espagne|italie|allemagne|angleterre|belgique|suisse|amérique|corée|grèce) ", " au (japon|portugal|canada|maroc|mexique|brésil|portugal|royaume-uni) ", " aux (états-unis|etats-unis) "]
+    },
+    {
+      "id": "gc_027", "tag": "preposition", "level": "B1",
+      "title": "venir de 刚刚 / depuis 自从",
+      "summary": "venir de + 原形 = 刚刚做过（Je viens de manger）；depuis + 时间点 = 从那时一直到现在（depuis 2019 / depuis trois ans）。",
+      "examples": [
+        {"fr": "Je viens de finir mon café.", "cn": "我刚喝完咖啡。"},
+        {"fr": "J'étudie le français depuis un an.", "cn": "我学法语一年了（而且还在学）。"}
+      ],
+      "patterns": [" viens de ", " vient de ", " venons de ", " venez de ", " viennent de ", " depuis "]
+    },
+    {
+      "id": "gc_028", "tag": "preposition", "level": "B2",
+      "title": "动词的固定介词：decider de / réussir à",
+      "summary": "很多动词后面跟哪个介词是配好的：décider de、essayer de、réussir à、penser à。介词跟错词不扣命，但地道感立刻掉一半。",
+      "examples": [
+        {"fr": "J'essaie de comprendre cette règle.", "cn": "我在试着理解这条规则。"},
+        {"fr": "Elle a réussi à obtenir le poste.", "cn": "她成功拿到了那个职位。"}
+      ],
+      "patterns": [" merci de ", " penser à ", " décider de ", " essayer de ", " réussi à ", " réussir à ", " hésiter à ", " commencer à "]
+    },
+    {
+      "id": "gc_029", "tag": "pronoun", "level": "A2",
+      "title": "直接宾语代词 le / la / les：站在动词前",
+      "summary": "把重复的宾语换成 le / la / les（他/她/它们），位置放动词前面：Tu aimes ce film ? — Oui, je le regarde ce soir。",
+      "examples": [
+        {"fr": "Tu aimes ce film ? Je le regarde ce soir.", "cn": "你喜欢这部电影？我今晚看它。"},
+        {"fr": "Ces pommes ? Je les prends.", "cn": "这些苹果？我把它们拿走。"}
+      ],
+      "patterns": [" (je|tu|il|elle|on|nous|vous|ils|elles) (le|la|les) ", " l' (ai|as|a|aime|adore) "]
+    },
+    {
+      "id": "gc_030", "tag": "pronoun", "level": "A2",
+      "title": "lui / leur：跟他、跟他们说",
+      "summary": "给人东西、说话的对象用 lui（他/她）和 leur（他们/她们），一样站在动词前：Je lui parle（我跟他说话）。",
+      "examples": [
+        {"fr": "Je lui téléphone ce soir.", "cn": "我今晚给他打电话。"},
+        {"fr": "Nous leur écrivons un message.", "cn": "我们给他们写消息。"}
+      ],
+      "patterns": [" lui ", " leur "]
+    },
+    {
+      "id": "gc_031", "tag": "pronoun", "level": "A2",
+      "title": "重读代词：moi / toi / eux",
+      "summary": "强调、单独出现、介词后面的时候，换重读代词出场：Moi aussi（我也是）、avec lui（跟他一起）、C'est moi（是我）。",
+      "examples": [
+        {"fr": "Moi aussi, je veux venir.", "cn": "我也想去。"},
+        {"fr": "C'est pour toi.", "cn": "这是给你的。"}
+      ],
+      "patterns": [" moi ", " toi ", " eux ", " soi "]
+    },
+    {
+      "id": "gc_032", "tag": "pronoun", "level": "B1",
+      "title": "y 与 en：小词大用",
+      "summary": "y 代替『在那里』（J'y vais），en 代替『de + 名词』或部分数量（J'en veux deux）。两个小词让口语立刻轻快起来。",
+      "examples": [
+        {"fr": "Tu vas au bureau ? Oui, j'y vais.", "cn": "你去办公室？对，我去那儿。"},
+        {"fr": "Des croissants ? J'en prends deux.", "cn": "羊角面包？我拿两个。"}
+      ],
+      "patterns": [" j'y ", " tu y ", " on y ", " il y va ", " j'en ", " tu en ", " on en ", " m'en ", " t'en ", " s'en ", " n'en "]
+    },
+    {
+      "id": "gc_033", "tag": "pronoun", "level": "B2",
+      "title": "代词排队：me te nous vous 先走",
+      "summary": "两个代词同台时排队有讲究：me / te / nous / vous 站在 le / la / les 前面（Il me le donne），le / la / les 又站在 lui / leur 前面（Je le lui ai dit）。",
+      "examples": [
+        {"fr": "Il me le donne demain.", "cn": "他明天把它给我。"},
+        {"fr": "Je le lui ai déjà dit.", "cn": "这件事我已经跟他说过了。"}
+      ],
+      "patterns": [" me le ", " me la ", " me les ", " te le ", " te la ", " te les ", " nous le ", " vous le ", " le lui ", " la lui ", " les lui ", " le leur ", " la leur ", " les leur "]
+    },
+    {
+      "id": "gc_034", "tag": "question", "level": "A1",
+      "title": "est-ce que：最省力的提问",
+      "summary": "陈述句前面加 Est-ce que，一句话就变成问句，语序完全不用动。口语最常用，写正式问句时再学倒装。",
+      "examples": [
+        {"fr": "Est-ce que tu parles français ?", "cn": "你说法语吗？"},
+        {"fr": "Qu'est-ce que c'est ?", "cn": "这是什么？"}
+      ],
+      "patterns": [" est-ce que ", " qu'est-ce que ", " est-ce qu'"]
+    },
+    {
+      "id": "gc_035", "tag": "question", "level": "A1",
+      "title": "疑问词五姐妹：où / quand / comment / pourquoi / combien",
+      "summary": "问地点、时间、方式、原因、数量，开头放对应疑问词就行：Où vas-tu ?（你去哪？）先记住词，语序慢慢调。",
+      "examples": [
+        {"fr": "Où est la gare ?", "cn": "车站在哪里？"},
+        {"fr": "Combien ça coûte ?", "cn": "这个多少钱？"}
+      ],
+      "patterns": [" où ", " quand ", " comment ", " pourquoi ", " combien "]
+    },
+    {
+      "id": "gc_036", "tag": "question", "level": "A2",
+      "title": "倒装提问：Parlez-vous français ?",
+      "summary": "动词和主语互换位置就是正式问句：Parlez-vous français ?（您说法语吗？）写信用它显礼貌，日常口语用 est-ce que 更自然。",
+      "examples": [
+        {"fr": "Parlez-vous français ?", "cn": "您说法语吗？"},
+        {"fr": "Où habitez-vous ?", "cn": "您住在哪里？"}
+      ],
+      "patterns": [" (parlez|êtes|allez|avez|faites|pouvez|voulez|savez|dites|sortez)-vous ", " (parle|aime|habite|travailles|comprends)-tu "]
+    },
+    {
+      "id": "gc_037", "tag": "question", "level": "B1",
+      "title": "间接问句：Je ne sais pas où il est",
+      "summary": "把问句塞进大句子里时，要恢复陈述语序，疑问词提前引导：Je ne sais pas où il est（不是 où est-il）。这是 B1 最常被扣分的小地方。",
+      "examples": [
+        {"fr": "Je ne sais pas où il est.", "cn": "我不知道他在哪儿。"},
+        {"fr": "Dis-moi quand tu arrives.", "cn": "告诉我你什么时候到。"}
+      ],
+      "patterns": [" ne sais pas (où|quand|comment|pourquoi|si) ", " sais pas (où|quand|comment|si) ", " demande (si|où|quand|comment|pourquoi) ", " je me demande (si|où|quand|comment) "]
+    },
+    {
+      "id": "gc_038", "tag": "question", "level": "B2",
+      "title": "qu'est-ce qui / qu'est-ce que 的分工",
+      "summary": "问『什么』要看它在句子里是主语还是宾语：Qu'est-ce qui se passe ?（什么在发生，主语用 qui 形态）；Qu'est-ce que tu fais ?（你在做什么，宾语）。",
+      "examples": [
+        {"fr": "Qu'est-ce qui se passe ici ?", "cn": "这儿发生什么了？"},
+        {"fr": "Qu'est-ce que tu fais ce soir ?", "cn": "你今晚做什么？"}
+      ],
+      "patterns": [" qu'est-ce qui ", " qu'est-ce que "]
+    },
+    {
+      "id": "gc_039", "tag": "agreement", "level": "A1",
+      "title": "beau / bel / belle：跟着名词变脸",
+      "summary": "形容词要和名词性别配合：beau（阳性）、belle（阴性）、bel（元音前的阳性，如 un bel hôtel）。漂亮这件事，法语里得先过配合关。",
+      "examples": [
+        {"fr": "C'est un bel hôtel.", "cn": "这是一家漂亮的旅馆。"},
+        {"fr": "Une belle ville, non ?", "cn": "一座美丽的城市，对吧？"}
+      ],
+      "patterns": [" beau ", " bel ", " belle ", " beaux ", " belles "]
+    },
+    {
+      "id": "gc_040", "tag": "agreement", "level": "A1",
+      "title": "复数的小尾巴：加 -s，不发音",
+      "summary": "复数大多在词尾加 -s，冠词也跟着换 les / des。尾巴不发音，但写和读（les = /le/）都要到位。",
+      "examples": [
+        {"fr": "Les enfants jouent dans le parc.", "cn": "孩子们在公园里玩。"},
+        {"fr": "J'ai des questions.", "cn": "我有一些问题。"}
+      ],
+      "patterns": [" les ", " des "]
+    },
+    {
+      "id": "gc_041", "tag": "agreement", "level": "A2",
+      "title": "阴性再 +e，复数再 +s：形容词两步走",
+      "summary": "多数形容词的阴性 = +e，复数 = +s：petit → petite → petites。先把性别对上，再补复数，两步都不跳。",
+      "examples": [
+        {"fr": "C'est une voiture française.", "cn": "这是一辆法国车。"},
+        {"fr": "Elles sont très contentes.", "cn": "她们很高兴。"}
+      ],
+      "patterns": [" (petite|grande|bonne|jolie|belle|française|chinoise|contente|fatiguée|intéressante) ", " (contentes|fatiguées|petites|grandes) "]
+    },
+    {
+      "id": "gc_042", "tag": "agreement", "level": "B1",
+      "title": "être 后的过去分词要配合",
+      "summary": "passé composé 用 être 时，分词要跟着主语变：Elle est allée，Ils sont allés。用 avoir 时则不配合（除非宾语提前），这是高级感所在。",
+      "examples": [
+        {"fr": "Elle est allée au marché.", "cn": "她去了市场。"},
+        {"fr": "Ils sont partis très tôt.", "cn": "他们很早就出发了。"}
+      ],
+      "patterns": [" (suis|est|sommes|êtes|sont) (allé|resté|parti|arrivé|venu|né|monté|descendu|devenu|sorti)(e|es|s)? "]
+    },
+    {
+      "id": "gc_043", "tag": "agreement", "level": "B1",
+      "title": "tout / toute / tous / toutes",
+      "summary": "『所有』也有四张脸：tout（阳性单数）、toute（阴性）、tous（阳性复数）、toutes（阴性复数）。tous 的 s 要发音，是判别复数的暗号。",
+      "examples": [
+        {"fr": "Tous les enfants aiment ce jeu.", "cn": "所有孩子都喜欢这个游戏。"},
+        {"fr": "Je connais toutes les rues ici.", "cn": "这里的每条街我都认识。"}
+      ],
+      "patterns": [" tout ", " toute ", " tous ", " toutes "]
+    },
+    {
+      "id": "gc_044", "tag": "agreement", "level": "B2",
+      "title": "元音前的变形金刚：bel / nouvel / vieil",
+      "summary": "beau、nouveau、vieux 遇上元音开头的阳性名词要换短形态：un bel ami、un nouvel an、un vieil homme。阴性和复数没有这个变形。",
+      "examples": [
+        {"fr": "C'est un vieil ami de la famille.", "cn": "这是家里的老朋友。"},
+        {"fr": "Je te souhaite un nouvel an plein de joie.", "cn": "祝你新的一年充满喜悦。"}
+      ],
+      "patterns": [" bel ", " nouvel ", " vieil "]
+    },
+    {
+      "id": "gc_045", "tag": "word_order", "level": "A1",
+      "title": "形容词跟在名词后面",
+      "summary": "和中文相反，多数法语形容词放在名词后面：une voiture rouge（一辆红色的车）。先把『名词 + 颜色/形状』的顺序练熟。",
+      "examples": [
+        {"fr": "J'ai une voiture rouge.", "cn": "我有一辆红色的车。"},
+        {"fr": "C'est un café froid.", "cn": "这是一杯凉的咖啡。"}
+      ],
+      "patterns": [" (un|une|le|la|mon|ma|ton|ta|son|sa|du|de la) (petit|petite|grand|grande|bon|bonne|beau|belle|joli|jolie|rouge|bleu|noir|noire|froid|chaud) "]
+    },
+    {
+      "id": "gc_046", "tag": "word_order", "level": "A2",
+      "title": "C'est / Il est 的分工",
+      "summary": "指认『这是什么东西/什么人』用 C'est + 名词；描述『他怎么样』用 Il est + 形容词。两个都要会，别让它们串门。",
+      "examples": [
+        {"fr": "C'est mon frère. Il est très gentil.", "cn": "这是我哥哥。他人很好。"},
+        {"fr": "C'est une bonne idée.", "cn": "这是个好主意。"}
+      ],
+      "patterns": [" c'est ", " il est ", " elle est "]
+    },
+    {
+      "id": "gc_047", "tag": "word_order", "level": "B2",
+      "title": "关系从句：qui / que / dont 各管一段",
+      "summary": "qui 当从句主语，que 当从句宾语，dont 代替 de + 名词（我谈到的那个）。从句里语序恢复陈述顺序，别把问句的姿势带进来。",
+      "examples": [
+        {"fr": "La femme qui parle est ma prof.", "cn": "正在说话的女士是我的老师。"},
+        {"fr": "Le livre dont je parle est en français.", "cn": "我谈到的这本书是法语书。"}
+      ],
+      "patterns": [" dont ", " qui ", " (chose|moment|endroit|personne|homme|femme|livre|film|idée|question) (qui|que) "]
+    },
+    {
+      "id": "gc_048", "tag": "lexical", "level": "A1",
+      "title": "il y a：这里有 / 有",
+      "summary": "说『有』不用 avoir 打头阵，法语习惯用 il y a：Il y a un café là-bas（那边有家咖啡馆）。否定是 il n'y a pas de...",
+      "examples": [
+        {"fr": "Il y a un café là-bas.", "cn": "那边有一家咖啡馆。"},
+        {"fr": "Il n'y a pas de problème.", "cn": "没有问题。"}
+      ],
+      "patterns": [" il y a ", " il n'y a ", " y a-t-il "]
+    },
+    {
+      "id": "gc_049", "tag": "lexical", "level": "B1",
+      "title": "on = 我们：口语里的 nous 替身",
+      "summary": "法国人聊天里，nous 大半时间让位给 on（+ 三单动词）：On va ?（走吗？）。书面和正式场合再用 nous 撑场面。",
+      "examples": [
+        {"fr": "On va au cinéma ce soir ?", "cn": "我们今晚去看电影？"},
+        {"fr": "On y va ensemble.", "cn": "我们一起去。"}
+      ],
+      "patterns": [" on va ", " on est ", " on fait ", " on dit ", " on peut ", " on part ", " on y ", " on a "]
+    },
+    {
+      "id": "gc_050", "tag": "lexical", "level": "B2",
+      "title": "il s'agit de：关键在于 / 涉及",
+      "summary": "书面讨论的常客：Il s'agit de...（这涉及 / 重点是……）。汇报和议论文里用它开场，马上有了法语的『论述味』。",
+      "examples": [
+        {"fr": "Il s'agit d'une question de temps.", "cn": "这是一个时间问题。"},
+        {"fr": "De quoi s'agit-il ?", "cn": "这是关于什么的？"}
+      ],
+      "patterns": [" il s'agit ", " s'agit-il ", " il est question de "]
+    }
+  ]
+}

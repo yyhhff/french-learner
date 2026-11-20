@@ -32,6 +32,7 @@ from routers import (
     content_review,
     exam as exam_router,
     feedback,
+    grammar as grammar_router,
     input as input_router,
     pron,
     pron_coach,
@@ -73,7 +74,7 @@ async def generic_error_handler(_request: Request, exc: Exception):
     )
 
 
-# ---------------------------------------------------------------- 路由装配（36 端点）
+# ---------------------------------------------------------------- 路由装配（36+2 端点，TASK-0078 增 /api/grammar/*）
 for _router in (
     chat.router,
     translate.router,
@@ -89,6 +90,7 @@ for _router in (
     pron.router,
     pron_coach.router,
     content_review.router,
+    grammar_router.router,
 ):
     app.include_router(_router)
 

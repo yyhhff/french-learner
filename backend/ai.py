@@ -69,11 +69,12 @@ SYSTEM_PROMPT = """你是「呀呀（YaYa）」，一位温柔、耐心的法语
 
 输出要求（最重要，必须严格遵守）：
 - 只输出一个 JSON 对象，不要输出任何解释文字，不要使用 markdown 代码围栏。
-- JSON 必须且只能包含以下四个键：
+- JSON 必须且只能包含以下五个键：
   {
     "ai_text": "string，你用法语说的回应；若发生纠错，正确说法要自然嵌在这里",
     "recast_of": "string 或 null，被纠错的『用户原句』；未纠错时必须为 null",
     "explanation": "string 或 null，面向中文用户的温和一句讲解；必须是简体中文一句话；未纠错时必须为 null",
+    "error_tag": "string 或 null，错误类型标签：仅当发生纠错（recast_of 非 null）时必填，从固定标签集中选最贴切的一个——agreement=性数配合, conjugation=动词变位, tense=时态, article=冠词缩合, preposition=介词, negation=否定, pronoun=代词, question=疑问句, word_order=语序, lexical=用词搭配；未纠错或选不出时必须为 null",
     "new_words": "array，你在回应中用到的、用户可能不认识的法语词，0~5 个"
   }
 - new_words 数组每个元素形如：
@@ -98,11 +99,16 @@ TRANSLATE_SYSTEM_PROMPT = """你是「呀呀法语」的翻译小助手，把法
 
 @dataclass
 class ChatResult:
-    """契约 4.4 / v2 §3.8：仅 4 字段进 JSON；llm_new_words 为内部字段。"""
+    """契约 4.4 / v2 §3.8：仅 4 字段进 JSON；llm_new_words / error_tag 为内部字段。
+
+    error_tag（TASK-0078 v3.3 扩展）：GLM 对纠错轮的错误分类，取值见 grammar.ERROR_TAGS；
+    解析侧只做 [a-z_] 软校验，语义合法性由 grammar.on_recast 兜底。不进 to_dict。
+    """
 
     ai_text: str
     recast_of: Optional[str] = None
     explanation: Optional[str] = None
+    error_tag: Optional[str] = None
     new_words: list = field(default_factory=list)
     llm_new_words: list = field(default_factory=list)  # 内部：LLM 建议候选词，不进 to_dict
 
@@ -227,6 +233,14 @@ def _parse_llm_content(content: str) -> ChatResult:
         else None
     )
 
+    # error_tag：可选字段，缺失/非法一律 None（不判失败，沿 §3.4 步骤 5 惯例）。
+    # 只做形态软校验，语义合法性由 grammar.on_recast 对照 ERROR_TAGS 兜底。
+    error_tag = obj.get("error_tag")
+    if isinstance(error_tag, str) and re.fullmatch(r"[a-z_]{2,20}", error_tag.strip()):
+        error_tag = error_tag.strip()
+    else:
+        error_tag = None
+
     # 仅保留含非空字符串 word 的 dict 元素；字段缺失/非 list → []（§3.4 步骤 5）。
     llm_new_words: list = []
     raw_words = obj.get("new_words")
@@ -250,6 +264,7 @@ def _parse_llm_content(content: str) -> ChatResult:
         ai_text=ai_text.strip(),
         recast_of=recast_of,
         explanation=explanation,
+        error_tag=error_tag,
         llm_new_words=llm_new_words,
     )
 
@@ -593,6 +608,7 @@ def _validate_recast_relevance(result: ChatResult) -> None:
                 return  # 有锚：视为真重述，放行
         result.recast_of = None
         result.explanation = None
+        result.error_tag = None  # 伪重述降级连带清标签（TASK-0078：不留无凭错误画像）
         logger.warning("伪重述已降级为普通回应：ai_text 与 recast_of 无词汇锚")
     except Exception as exc:  # 防御性：校验只做增益，绝不影响主链路
         logger.warning("伪重述校验异常，保持原样：%s", exc)

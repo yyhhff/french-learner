@@ -70,7 +70,7 @@ ROADMAP_DEFS = [
     },
     {
         "version": "v3.0", "title": "每天十五分钟", "theme": "每日路径与游戏化",
-        "status": "planned", "date": None,
+        "status": "active", "date": None,
         "desc": "打开就知道今天学什么，一点小积累看得见。",
         "features": ["今日任务视图", "经验与等级", "连续天数（温和记录不惩罚）", "呀呀陪伴成长"],
     },

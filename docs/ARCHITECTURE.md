@@ -26,7 +26,7 @@
 
 ```
 ┌────────────────────────── 浏览器前端（frontend/）──────────────────────────┐
-│  index.html / styles.css / app.js                                          │
+│  index.html / styles.css / js/main.js（Wave 0 拆 ES modules，见下）          │
 │  - 场景 / 对话 / 生词卡 / 记忆账本 UI                                       │
 │  - Web Speech API(ASR, fr-FR)  +  SpeechSynthesis(TTS, fr-FR)              │
 │  - 通过 fetch 调用 /api/*，不直接碰数据库                                  │
@@ -368,10 +368,20 @@ french-learner/
 │   ├── requirements.txt   # 仅 fastapi、uvicorn 两行
 │   └── data/              # 运行时生成，放 yaya.db（加入 .gitignore）
 └── frontend/
-    ├── index.html         # 页面结构，由 demo.html 迁移
-    ├── styles.css         # 样式，由 demo.html 的 <style> 抽出
-    └── app.js             # 交互逻辑：fetch 调 /api/* + Web Speech ASR/TTS，由 demo.html 的 <script> 改造
+    ├── index.html         # 页面结构（<script type="module" src="js/main.js">）
+    ├── styles.css         # 样式
+    ├── app.js             # [Wave 0 起为空壳] 历史指针；逻辑已迁到 js/
+    └── js/                # Wave 0 ES modules（零构建，原生 import/export）
+        ├── main.js        # 入口：装配 + 函数发布到 window（保 inline onclick）+ init()
+        ├── store.js       # 共享 state / 常量 / 纯工具
+        ├── api.js         # apiRequest 封装
+        └── views/*.js     # chat / reading / pron / exam / assessment /
+                           # growth / review / feedback / audio /
+                           # word-popover / shadow / onboarding
 ```
+
+> Wave 0（TASK-0064）后端拆 `backend/routers/<域>.py` + `common.py`（`app.py` 只留装配），
+> 前端拆 `frontend/js/` ES modules；36 端点 A/B 响应 0 差异，前端六 Tab 真机冒烟通过。
 
 ### 6.1 静态托管路径映射
 
@@ -379,7 +389,8 @@ french-learner/
 |------|------|
 | `GET /` | `frontend/index.html` |
 | `GET /styles.css` | `frontend/styles.css` |
-| `GET /app.js` | `frontend/app.js` |
+| `GET /app.js` | `frontend/app.js`（Wave 0 起为迁移标记空壳，无逻辑） |
+| `GET /js/*.js` | `frontend/js/` 下 ES modules（Wave 0） |
 | `GET /api/*` | FastAPI JSON 路由（**先声明 API 路由，再挂载静态目录**，确保 `/api` 不被静态接管） |
 | 其他静态资源 | `frontend/` 下同名文件 |
 
